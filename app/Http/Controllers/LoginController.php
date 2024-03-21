@@ -13,9 +13,9 @@ class LoginController extends Controller
     {
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
-            return redirect('/dashboard');
+            return view('main');
         }
-        return redirect('/dashboard');
+        return redirect('/');
     }
 
     public function register(Request $request)
