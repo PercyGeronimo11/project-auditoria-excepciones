@@ -15,7 +15,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             return redirect('/dashboard');
         }
-        return redirect('/');
+        return redirect('/dashboard');
     }
 
     public function register(Request $request)
