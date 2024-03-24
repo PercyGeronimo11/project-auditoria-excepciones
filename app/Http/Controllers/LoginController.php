@@ -7,13 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+
 class LoginController extends Controller
 {
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
-            return redirect('/dashboard');
+            return view('conexion.connection_form');
         }
         return redirect('/');
     }
