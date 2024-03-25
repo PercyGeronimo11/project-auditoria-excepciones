@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\TareaCampoController;
+
 use App\Http\Controllers\DatabaseController;
 
 use Illuminate\Support\Facades\Route;
@@ -28,3 +30,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/showSQL/{tableName}', [DatabaseController::class, 'showTableSQL'])->name('show.tableSQL');
 
 });
+Route::resource('tareacampo',TareaCampoController::class);

@@ -26,10 +26,10 @@
                  Execpciones
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">No se ponlo tu xd</a></li>
-                  <li><a class="dropdown-item" href="#">No se ponlo tu xd</a></li>
+                  <li><a class="dropdown-item" href="#">Integridad de campos</a></li>
+                  <li><a class="dropdown-item" href="#">Integridad de tablas</a></li>
                   <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="#">No se ponlo tu xd</a></li>
+                  <li><a class="dropdown-item" href="#">Secuencialidad</a></li>
                 </ul>
               </li>
               <li class="nav-item">

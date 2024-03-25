@@ -124,6 +124,8 @@ class DatabaseController extends Controller
                 'data' => $tableData
             ];
         }
+        session()->put('driverBD', $driver);
+        session()->put('tablesName', $tablesData);
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
@@ -134,6 +136,11 @@ class DatabaseController extends Controller
         $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
         $tableData = DB::connection('dynamic')->table($tableName)->get();
 
+        // $columns = DB::connection('dynamic')
+        //     ->table('INFORMATION_SCHEMA.COLUMNS')
+        //     ->select('TABLE_NAME', 'COLUMN_NAME', 'DATA_TYPE')
+        //     ->get();
+        // return  $columns ;
         return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData', 'driver'));
     }
 

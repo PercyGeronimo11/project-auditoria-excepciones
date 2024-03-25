@@ -11,14 +11,17 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ $tableName }}</h5>
                     <form action="
-                    @if($driver == 'mysql')
-                        {{ route('show.tableMysql', ['tableName' => $tableName]) }}
-                    @elseif($driver == 'sqlsrv')
-                        {{ route('show.tableSQL', ['tableName' => $tableName]) }}
-                    @endif
-                    " method="GET">
-                    <button type="submit" class="btn btn-primary">Ver</button>
-                </form>
+                        @if($driver == 'mysql')
+                            {{ route('show.tableMysql', ['tableName' => $tableName]) }}
+                        @elseif($driver == 'sqlsrv')
+                            {{ route('show.tableSQL', ['tableName' => $tableName]) }}
+                        @endif
+                        " method="GET">
+                        
+                        <button type="submit" class="btn btn-primary">Ver</button>
+                    </form>
+                    {{-- <a href="{{ route('tareacampo.index') }}">dsadasd</a> --}}
+                    
                 </div>
             </div>
         </div>
