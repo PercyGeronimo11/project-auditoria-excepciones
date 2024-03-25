@@ -33,7 +33,7 @@ class LoginController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect('/dashboard');
+        return redirect('/');
     }
 
     public function logout(Request $request)
