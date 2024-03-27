@@ -74,7 +74,7 @@ class TareaCampoController extends Controller
 
     public function store(Request $request)
     {
-        return $request->all();
+        // return $request->all();
         $tableNames = array_keys(session()->get('tablesName'));
 
         $contenido=session()->get('tablesName');
@@ -109,7 +109,7 @@ class TareaCampoController extends Controller
         foreach ($contenido[$request->tabla]["data"] as $key) {
             // return $request->condicion;
             // return strpos($key->$campo, $request->condicion_text);
-            
+            //no se pq cambie orden de int y nulll (primero debe comprobar si es numero o no)creoi que encontre error
             if($request->condicion=="int" && !(is_numeric($key->$campo))){
                 $columnas[] =  $key;
             }
@@ -119,15 +119,26 @@ class TareaCampoController extends Controller
                 $columnas[] =  $key;
                 
             }
-            else if($request->condicion=="in" && $key->$campo!=$request->condicion_text){
-                $columnas[] =  $key;
+            else if($request->condicion=="in" ){
+                $condicional=false;
+                foreach ($request->condicion_text as $key1 ) {
+                    if($key->$campo==$key1){
+                        $condicional=true;
+                    }
+                }
+                if(!$condicional){
+                    $columnas[] =  $key;
+                }
+                
             }
             else if($request->condicion=="null" && $key->$campo==""){
                 // $columnas[$i] = "Null->" . $key;
                 $columnas[] =  $key;
             }
-            else if (($request->condicion==">" || $request->condicion=="<") && is_numeric($request->condicion_text)){
-                $condicion = $key->$campo . $request->condicion . $request->condicion_text;
+            else if (($request->condicion==">" || $request->condicion=="<") && is_numeric($request->condicion_text[0])){
+                
+                // return "aca";
+                $condicion = $key->$campo . $request->condicion . $request->condicion_text[0];
                 if (!eval("return $condicion;") ) {
                     $columnas[] =  $key;
                 } 
