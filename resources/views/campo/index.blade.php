@@ -13,8 +13,10 @@
         
                     {{-- <h5 class="card-title">{{ $tableName }}</h5> --}}
                     <form action="
-                            {{-- {{ route('')}}" method="GET"> --}}
-                            " method="GET">
+                            {{ route('tareacampo.store')}}" method="POST" enctype="multipart/form-data">
+                         
+                              @csrf
+                            {{-- " method="GET"> --}}
                             {{-- <div class="mb-3 row">
                                 <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
                                 <div class="col-sm-10">
@@ -23,7 +25,7 @@
                             </div> --}}
                             <div class="mb-3 row">
                                 <label for="inputPassword" class="col-sm-2 col-form-label">Tabla</label>
-                                <select class="form-select" aria-label="Default select example" id="firstSelect"> 
+                                <select class="form-select" aria-label="Default select example" id="firstSelect" name="tabla"> 
                                     <option selected disabled>Open this select menu</option>
                                     @foreach ($tableNames as $item)
                                         <option value="{{$item}}">{{$item}}</option>
@@ -32,7 +34,7 @@
                             </div>
                             <div class="mb-3 row">
                                 <label for="inputPassword" class="col-sm-2 col-form-label">Campo</label>
-                                <select class="form-select" aria-label="Default select example" id="secondSelect">
+                                <select class="form-select" aria-label="Default select example" id="secondSelect" name="campo">
                                     <option selected disabled>Open this select menu</option>
                                     @foreach ($columnas[$tableNames[0]] as $item)
                                         <option value="1">{{$item}}</option>
@@ -41,7 +43,7 @@
                             </div>
                             <div class="mb-3 row">
                               <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
-                              <select class="form-select" aria-label="Default select example" id="thirdSelect">
+                              <select class="form-select" aria-label="Default select example" id="thirdSelect" name="tipo">
                                   <option selected disabled>Open this select menu</option>
                                   @foreach ($tipos[$tableNames[0]] as $item)
                                       <option value="1">{{$item}}</option>
@@ -50,7 +52,7 @@
                             </div>
                             <div class="mb-3 row">
                               <label for="inputPassword" class="col-sm-2 col-form-label">Tipo(Validar)</label>
-                              <select class="form-select" aria-label="Default select example" id="thirdSelect">
+                              <select class="form-select" aria-label="Default select example" id="thirdSelect" >
                                 <option value="">Selecciona un tipo de dato...</option>
                               
                                 <optgroup label="Numéricos">
@@ -95,7 +97,7 @@
                             <div class="mb-3 row">
                               <label for="inputPassword" class="col-sm-2 col-form-label">Condición</label>
                               <div class="input-group mb-3">
-                                <select class="form-select" aria-label="Default select example" id="thirdSelect">
+                                <select class="form-select" aria-label="Default select example" id="thirdSelect" name="condicion">
                                   <option value="">Selecciona una condicion..</option>
                                 
                                   <optgroup label="Numéricos">
@@ -121,7 +123,7 @@
                                   </optgroup>
   
                                 </select>
-                                <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                                <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text">
                               </div>
                             
                             </div>
@@ -135,7 +137,7 @@
                                 </div>
                             </div> --}}
                            
-                        <button type="submit" class="btn btn-primary">Ver</button>
+                        <button type="submit" class="btn btn-primary">analizar</button>
                     </form>
     </div>
 </div>

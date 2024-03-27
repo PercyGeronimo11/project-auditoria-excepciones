@@ -19,36 +19,51 @@ class TareaCampoController extends Controller
         // ->paginate($this::PAGINATION);
         // return session()->get('driverBD');
         $tableNames = array_keys(session()->get('tablesName'));
+
         $contenido=session()->get('tablesName');
         // return  $contenido;
         $columnas = [];
+        $columnas1 = [];
         $tipos = [];
+        // return $contenido;
         // return $columns;
         // Recorrer cada tabla en el objeto
         foreach($contenido as $tableName => $tableData) {
             // Crear un array para almacenar los nombres de los campos de esta tabla
             $fields = [];
+            $fields1 = [];
             $types=[];
             // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
             foreach($tableData["columns"] as $column) {
                 $fields[] = $column->Field;
+
                 $types[]= $column->Type;
             }
-        
+            foreach($tableData["data"] as $column2) {
+                // return $column2->idActa;
+                if (is_object($column2) && isset($column2->idActa)) {
+                    $fields1[] = $column2->idActa;
+                  }
+
+            }
+
+
             // Agregar este array al array de resultados con el nombre de la tabla como clave
             $columnas[$tableName] = $fields;
+            $columnas1[$tableName] = $fields1;
             $tipos[$tableName] = $types;
         }
-
+        // return $columnas1;
         // return  $tipos;
         // return  array_column(session()->get('tablesName')[$tableNames[0]]["columns"], 'Field');
-   
+
         // @foreach($tablesData as $tableName => $table)
         return view('campo.index',compact('tableNames','contenido','columnas','tipos'));
     }
 
     public function create()
     {
+
         if (Auth::user()->rol=='Administrativo'){   //boteon registrar
 
             return view('TareaCampo.create');
@@ -59,17 +74,173 @@ class TareaCampoController extends Controller
 
     public function store(Request $request)
     {
-            $data=request()->validate([
-                    ]);
-                    $TareaCampo=new TareaCampo();
-                    $TareaCampo->dni=$request->dni;
-                    $TareaCampo->apellido_paterno=$request->Apellido1;
-                    $TareaCampo->apellido_materno=$request->Apellido2;
-                    $TareaCampo->nombres=$request->nombres;
-                    $TareaCampo->sexo=$request->sexo;
-                    $TareaCampo->estado='1';
-                    $TareaCampo->save();
-                    return redirect()->route('TareaCampo.index')->with('datos','Registrados exitosamente...');
+        $tableNames = array_keys(session()->get('tablesName'));
+
+        $contenido=session()->get('tablesName');
+        // return  $contenido;
+
+        $columnas1 = [];
+        $columnas = [];
+        foreach($contenido as $tableName => $tableData) {
+            // Crear un array para almacenar los nombres de los campos de esta tabla
+
+            $fields1 = [];
+            $campo=$request->campo;
+            // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
+
+            foreach($tableData["data"] as $column2) {
+                // return $column2->idActa;
+                if (is_object($column2) && isset($column2->$campo)) {
+
+                    $fields1[] = $column2->$campo;
+                  }
+            }
+
+
+
+            $columnas1[$tableName] = $fields1;
+
+        }
+        $i = 0;
+        return $contenido["data"];
+        foreach ($columnas1[$request->tabla] as $key) {
+            
+            // $condicion2 = $key . $request->condicion . $request->condicion_text;
+            // Evaluar la condición de manera segura
+            if($request->condicion=="null" && $request->condicion_text==""){
+                    // $columnas[$i] = "Null->" . $key;
+                    $columnas[] =  $i;
+             
+            }
+            
+            else if($request->condicion=="like" && strpos($key, $request->condicion_text) == false){
+                
+                $columnas[] =  $i;
+                
+            }
+            else if($request->condicion=="in" && strpos($key, $request->condicion_text) == false){
+                $columnas[] =  $i;
+            }
+            else if($request->condicion=="int" && !(is_numeric($key))){
+                $columnas[] =  $i;
+            }
+            else if (is_numeric($request->condicion_text)){
+                $condicion = $key . $request->condicion . $request->condicion_text;
+                if (!eval("return $condicion;") ) {
+                    $columnas[] =  $i;
+                } 
+            }
+            $i++;
+        }
+
+            // else if (is_numeric($request->condicion_text)) {
+            //     if($request->condicion=="int"){
+            //         $columnas[$i] =  $key;
+            //     }
+            //     $condicion = $key . $request->condicion . $request->condicion_text;
+            //     if (eval("return $condicion;") ) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+
+            // }
+            // if($request->condicion=="int" && !(is_numeric($request->condicion_text))){
+            //     $columnas[$i] = $key;
+            // }
+            // else if (is_numeric($request->condicion_text))
+            //     $condicion = $key . $request->condicion . $request->condicion_text;
+            //     if (eval("return $condicion;") ) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+           
+
+
+            // if($request->condicion=="null"){
+            //     if ($request->condicion_text=="") {
+            //         $columnas[$i] = "paso" . $key;
+            //    }
+            //    else {
+            //        $columnas[$i] = "NO paso" . $key;
+            //    }
+            // }
+            // if($request->condicion=="int"){
+            //     if (is_numeric($request->condicion)) {
+            //          $columnas[$i] = "paso" . $key;
+            //     }
+            //     else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+            // if (is_numeric($request->condicion)) {
+            //     // if($request->condicion=="int"){
+            //     //     $columnas[$i] = "paso" . $key;
+            //     // }
+
+            //     // Crear la condición
+            //     $condicion = $key . $request->condicion . $request->condicion_text;
+            //     if (eval("return $condicion;") ) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+            // else if($request->condicion=="like"){
+            //     if (strpos($key, $request->condicion_text) !== false) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+            // else{
+            //     if ($key== $request->condicion_text) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+
+            // if($request->condicion == ">"||$request->condicion == "<"){
+            //     if (eval("return $condicion;") ) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+            // else{
+            //     if (strpos($key, $request->condicion_text) !== false) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+            // else{
+            //     if (is_numeric($key)) {
+            //         $columnas[$i] = "paso" . $key;
+            //     } else {
+            //         $columnas[$i] = "NO paso" . $key;
+            //     }
+            // }
+
+
+
+        
+
+        return   $columnas;
+            // $data=request()->validate([
+            //         ]);
+            //         $TareaCampo=new TareaCampo();
+            //         $TareaCampo->dni=$request->dni;
+            //         $TareaCampo->apellido_paterno=$request->Apellido1;
+            //         $TareaCampo->apellido_materno=$request->Apellido2;
+            //         $TareaCampo->nombres=$request->nombres;
+            //         $TareaCampo->sexo=$request->sexo;
+            //         $TareaCampo->estado='1';
+            //         $TareaCampo->save();
+            //         return redirect()->route('TareaCampo.index')->with('datos','Registrados exitosamente...');
     }
 
     public function edit($id)
