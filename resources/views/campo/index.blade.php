@@ -94,9 +94,12 @@
                             </div>
                  
                             
-                            <div class="mb-3 row">
+                            <div class=" row mb-3 condiciones d-flex">
+                              
+                              {{-- <label for="inputPassword" class="col-sm-2 col-form-label " id="condition-group">Condición</label> --}}
                               <label for="inputPassword" class="col-sm-2 col-form-label">Condición</label>
-                              <div class="input-group mb-3">
+                              <div class="input-group mb-3 " >
+                         
                                 <select class="form-select" aria-label="Default select example" id="thirdSelect" name="condicion">
                                   <option value="">Selecciona una condicion..</option>
                                 
@@ -123,11 +126,19 @@
                                   </optgroup>
   
                                 </select>
+                               
                                 <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text">
+                                <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text[0]">
+                                {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
+                                <button type="button" class="btn btn-primary add-condition-btn">+</button> <br>
                               </div>
-                            
+                             
+                              
+                              {{-- <input type="text" class="form-control align-self-end" style="float: right;width: 526px;"> --}}
                             </div>
-
+                            {{-- <div style="width:50%;float:right !important;">
+                              One of three columns
+                            </div> --}}
                             
         
                             {{-- <div class="mb-3 row">
@@ -139,12 +150,17 @@
                            
                         <button type="submit" class="btn btn-primary">analizar</button>
                     </form>
+                   
+                     
+                 
     </div>
 </div>
 
 <script>
     const columnas = <?php echo json_encode($columnas); ?>;
+    
     const tipos = <?php echo json_encode($tipos); ?>;
+  
     document.getElementById("firstSelect").addEventListener("change", function() {
   // Get the selected value from the first select
   const selectedValue = this.value;
@@ -171,40 +187,53 @@
     secondSelect.add(option);
   }
   console.log("caimos")
-});
+  });
 
-document.getElementById("secondSelect").addEventListener("change", function() {
-  // Get the selected value from the first select
-  const selectedIndex = this.selectedIndex;
-  const selectedValue = document.getElementById("firstSelect").value;
-  // Get a reference to the second select
-  const secondSelect = document.getElementById("thirdSelect");
+  document.getElementById("secondSelect").addEventListener("change", function() {
+    // Get the selected value from the first select
+    const selectedIndex = this.selectedIndex;
+    const selectedValue = document.getElementById("firstSelect").value;
+    // Get a reference to the second select
+    const secondSelect = document.getElementById("thirdSelect");
 
-  // Clear any existing options in the second select
-  secondSelect.innerHTML = "";
+    // Clear any existing options in the second select
+    secondSelect.innerHTML = "";
 
-  // Create new options based on the selected value
-  
-  const option = document.createElement("option");
-  option.value = tipos[selectedValue][selectedIndex]; // Assuming you want the item as the value
-  option.text = tipos[selectedValue][selectedIndex];
-  secondSelect.add(option);
+    // Create new options based on the selected value
+    
+    const option = document.createElement("option");
+    option.value = tipos[selectedValue][selectedIndex]; // Assuming you want the item as the value
+    option.text = tipos[selectedValue][selectedIndex];
+    secondSelect.add(option);
 
-  // if (selectedValue in tipos) {
-  //   for (const item of tipos[selectedValue]) {
-  //     const option = document.createElement("option");
-  //     option.value = item; // Assuming you want the item as the value
-  //     option.text = item;
-  //     secondSelect.add(option);
-  //   }
-  // } else {
-  //   // Handle the case where there are no options for the selected value
-  //   const option = document.createElement("option");
-  //   option.disabled = true;
-  //   option.text = "No options available";
-  //   secondSelect.add(option);
-  // }
-  console.log("caimos")
+    // if (selectedValue in tipos) {
+    //   for (const item of tipos[selectedValue]) {
+    //     const option = document.createElement("option");
+    //     option.value = item; // Assuming you want the item as the value
+    //     option.text = item;
+    //     secondSelect.add(option);
+    //   }
+    // } else {
+    //   // Handle the case where there are no options for the selected value
+    //   const option = document.createElement("option");
+    //   option.disabled = true;
+    //   option.text = "No options available";
+    //   secondSelect.add(option);
+    // }
+    console.log("caimos")
+  });
+  const addConditionButton = document.querySelector('.add-condition-btn');
+
+addConditionButton.addEventListener('click', function() {
+  const newConditionText = document.createElement('input'); // Create a new input element
+  newConditionText.setAttribute('type', 'text'); // Set the input type to "text"
+  newConditionText.setAttribute('class', 'form-control'); // Set the input class
+  newConditionText.setAttribute('aria-label', 'Text input with dropdown button'); // Set the aria-label
+  newConditionText.setAttribute('name', 'condicion_text[]'); // Set the input name
+
+  newConditionText.setAttribute('style', 'margin-left:50%; width:50%;'); // Set the input name
+  const conditionGroup = document.querySelector('.condiciones'); // Get the parent div
+conditionGroup.appendChild(newConditionText); // Append the clone to the parent div
 });
 </script>
 

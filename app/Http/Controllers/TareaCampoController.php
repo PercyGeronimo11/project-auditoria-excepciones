@@ -74,6 +74,7 @@ class TareaCampoController extends Controller
 
     public function store(Request $request)
     {
+        return $request->all();
         $tableNames = array_keys(session()->get('tablesName'));
 
         $contenido=session()->get('tablesName');
