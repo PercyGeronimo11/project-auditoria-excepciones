@@ -141,6 +141,7 @@ class DatabaseController extends Controller
         //     ->select('TABLE_NAME', 'COLUMN_NAME', 'DATA_TYPE')
         //     ->get();
         // return  $columns ;
+        // return $tableData;
         return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData', 'driver'));
     }
 

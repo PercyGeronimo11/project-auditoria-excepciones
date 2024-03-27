@@ -81,57 +81,100 @@ class TareaCampoController extends Controller
 
         $columnas1 = [];
         $columnas = [];
-        foreach($contenido as $tableName => $tableData) {
-            // Crear un array para almacenar los nombres de los campos de esta tabla
+        $campo=$request->campo;
+        // return $contenido[$request->tabla]["data"][0]->$campo;
+        // foreach($contenido as $tableName => $tableData) {
+        //     // Crear un array para almacenar los nombres de los campos de esta tabla
 
-            $fields1 = [];
-            $campo=$request->campo;
-            // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
+        //     $fields1 = [];
+        //     $campo=$request->campo;
+        //     // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
 
-            foreach($tableData["data"] as $column2) {
-                // return $column2->idActa;
-                if (is_object($column2) && isset($column2->$campo)) {
+        //     foreach($tableData["data"] as $column2) {
+        //         // return $column2->idActa;
+        //         if (is_object($column2) && isset($column2->$campo)) {
 
-                    $fields1[] = $column2->$campo;
-                  }
-            }
+        //             $fields1[] = $column2->$campo;
+        //           }
+        //     }
 
 
 
-            $columnas1[$tableName] = $fields1;
+        //     $columnas1[$tableName] = $fields1;
 
-        }
+        // }
         $i = 0;
-        return $contenido["data"];
-        foreach ($columnas1[$request->tabla] as $key) {
-            
-            // $condicion2 = $key . $request->condicion . $request->condicion_text;
-            // Evaluar la condición de manera segura
-            if($request->condicion=="null" && $request->condicion_text==""){
-                    // $columnas[$i] = "Null->" . $key;
-                    $columnas[] =  $i;
-             
+        // return $contenido["data"];
+        foreach ($contenido[$request->tabla]["data"] as $key) {
+            // return $request->condicion;
+            // return strpos($key->$campo, $request->condicion_text);
+            if($request->condicion=="null" && $key->$campo==""){
+                // $columnas[$i] = "Null->" . $key;
+                $columnas[] =  $key;
             }
-            
-            else if($request->condicion=="like" && strpos($key, $request->condicion_text) == false){
-                
-                $columnas[] =  $i;
+       
+            else if($request->condicion=="like"&& (strpos($key->$campo, $request->condicion_text)===false)){
+                    
+                $columnas[] =  $key;
                 
             }
-            else if($request->condicion=="in" && strpos($key, $request->condicion_text) == false){
-                $columnas[] =  $i;
+            else if($request->condicion=="in" && $key->$campo!=$request->condicion_text){
+                $columnas[] =  $key;
             }
-            else if($request->condicion=="int" && !(is_numeric($key))){
-                $columnas[] =  $i;
+            else if($request->condicion=="int" && !(is_numeric($key->$campo))){
+                $columnas[] =  $key;
             }
-            else if (is_numeric($request->condicion_text)){
-                $condicion = $key . $request->condicion . $request->condicion_text;
+            else if (($request->condicion==">" || $request->condicion=="<") && is_numeric($request->condicion_text)){
+                $condicion = $key->$campo . $request->condicion . $request->condicion_text;
                 if (!eval("return $condicion;") ) {
-                    $columnas[] =  $i;
+                    $columnas[] =  $key;
                 } 
             }
-            $i++;
-        }
+        }  
+
+        $tableData =$columnas;
+        $columns=$contenido[$request->tabla]["columns"];
+        // return $columns;
+        $tableName = $request->tabla;
+
+        // $columns = DB::connection('dynamic')
+        //     ->table('INFORMATION_SCHEMA.COLUMNS')
+        //     ->select('TABLE_NAME', 'COLUMN_NAME', 'DATA_TYPE')
+        //     ->get();
+        // return  $columns ;
+        return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData'));
+
+        // return $columnas;
+
+        // foreach ($columnas1[$request->tabla] as $key) {
+            
+        //     // $condicion2 = $key . $request->condicion . $request->condicion_text;
+        //     // Evaluar la condición de manera segura
+        //     if($request->condicion=="null" && $key==""){
+        //             // $columnas[$i] = "Null->" . $key;
+        //             $columnas[] =  $i;
+             
+        //     }
+            
+        //     else if($request->condicion=="like" && strpos($key, $request->condicion_text) == false){
+                
+        //         $columnas[] =  $i;
+                
+        //     }
+        //     else if($request->condicion=="in" && strpos($key, $request->condicion_text) == false){
+        //         $columnas[] =  $i;
+        //     }
+        //     else if($request->condicion=="int" && !(is_numeric($key))){
+        //         $columnas[] =  $i;
+        //     }
+        //     else if (is_numeric($request->condicion_text)){
+        //         $condicion = $key . $request->condicion . $request->condicion_text;
+        //         if (!eval("return $condicion;") ) {
+        //             $columnas[] =  $i;
+        //         } 
+        //     }
+        //     $i++;
+        // }
 
             // else if (is_numeric($request->condicion_text)) {
             //     if($request->condicion=="int"){
@@ -229,7 +272,7 @@ class TareaCampoController extends Controller
 
         
 
-        return   $columnas;
+        // return   $columnas;
             // $data=request()->validate([
             //         ]);
             //         $TareaCampo=new TareaCampo();
