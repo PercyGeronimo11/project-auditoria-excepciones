@@ -110,6 +110,7 @@ class TareaCampoController extends Controller
             // return $request->condicion;
             // return strpos($key->$campo, $request->condicion_text);
             //no se pq cambie orden de int y nulll (primero debe comprobar si es numero o no)creoi que encontre error
+            //error si pones numero y es un 
             if($request->condicion=="int" && !(is_numeric($key->$campo))){
                 $columnas[] =  $key;
             }
