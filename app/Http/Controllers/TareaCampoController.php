@@ -108,8 +108,8 @@ class TareaCampoController extends Controller
         foreach ($contenido[$request->tabla]["data"] as $key) {
             // return $request->condicion;
             // return strpos($key->$campo, $request->condicion_text);
-            if($request->condicion=="null" && $key->$campo==""){
-                // $columnas[$i] = "Null->" . $key;
+            
+            if($request->condicion=="int" && !(is_numeric($key->$campo))){
                 $columnas[] =  $key;
             }
        
@@ -121,7 +121,8 @@ class TareaCampoController extends Controller
             else if($request->condicion=="in" && $key->$campo!=$request->condicion_text){
                 $columnas[] =  $key;
             }
-            else if($request->condicion=="int" && !(is_numeric($key->$campo))){
+            else if($request->condicion=="null" && $key->$campo==""){
+                // $columnas[$i] = "Null->" . $key;
                 $columnas[] =  $key;
             }
             else if (($request->condicion==">" || $request->condicion=="<") && is_numeric($request->condicion_text)){
