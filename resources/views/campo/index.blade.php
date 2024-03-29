@@ -37,7 +37,7 @@
                                 <select class="form-select" aria-label="Default select example" id="secondSelect" name="campo">
                                     <option selected disabled>Open this select menu</option>
                                     @foreach ($columnas[$tableNames[0]] as $item)
-                                        <option value="1">{{$item}}</option>
+                                        <option value={{$item}}>{{$item}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -46,51 +46,61 @@
                               <select class="form-select" aria-label="Default select example" id="thirdSelect" name="tipo">
                                   <option selected disabled>Open this select menu</option>
                                   @foreach ($tipos[$tableNames[0]] as $item)
-                                      <option value="1">{{$item}}</option>
+                                      <option value={{$item}}>{{$item}}</option>
                                   @endforeach
                               </select>
                             </div>
                             <div class="mb-3 row">
-                              <label for="inputPassword" class="col-sm-2 col-form-label">Tipo(Validar)</label>
-                              <select class="form-select" aria-label="Default select example" id="thirdSelect" >
-                                <option value="">Selecciona un tipo de dato...</option>
+                              <label for="inputPassword" class="col-sm-2 col-form-label">Tipo(Validar)-Longitud</label>
                               
-                                <optgroup label="Numéricos">
-                                  <option value="int">INT (Entero)</option>
-                                  <option value="bigint">BIGINT (Entero grande)</option>
-                                  <option value="smallint">SMALLINT (Entero pequeño)</option>
-                                  <option value="tinyint">TINYINT (Entero muy pequeño)</option>
-                                  <option value="decimal">DECIMAL (Decimal)</option>
-                                  <option value="numeric">NUMERIC (Numérico)</option>
-                                </optgroup>
-                              
-                                <optgroup label="Cadenas de caracteres">
-                                  <option value="char">CHAR (Cadena fija)</option>
-                                  <option value="varchar">VARCHAR (Cadena variable)</option>
-                                  <option value="nchar">NCHAR (Cadena Unicode fija)</option>
-                                  <option value="nvarchar">NVARCHAR (Cadena Unicode variable)</option>
-                                </optgroup>
-                              
-                                <optgroup label="Cadenas binarias">
-                                  <option value="varbinary">VARBINARY (Binario variable)</option>
-                                  <option value="image">IMAGE (Imagen)</option>
-                                </optgroup>
-                              
-                                <optgroup label="Fecha y hora">
-                                  <option value="date">DATE (Fecha)</option>
-                                  <option value="time">TIME (Hora)</option>
-                                  <option value="datetime">DATETIME (Fecha y hora)</option>
-                                  <option value="datetime2">DATETIME2 (Fecha y hora con mayor precisión)</option>
-                                </optgroup>
-                              
-                                <optgroup label="Otros tipos de datos">
-                                  <option value="bit">BIT (Booleano)</option>
-                                  <option value="uniqueidentifier">UNIQUEIDENTIFIER (Identificador único global)</option>
-                                  <option value="money">MONEY (Moneda)</option>
-                                  <option value="xml">XML (Datos XML)</option>
-                                  <option value="table">TABLE (Tabla temporal)</option>
-                                </optgroup>
-                              </select>
+                              <div class="input-group mb-3 " >
+                                <select class="form-select" aria-label="Default select example" id="fourthSelect" name="tipoValidar">
+                                  <option value="">Selecciona un tipo de dato...</option>
+                                
+                                  <optgroup label="Numéricos">
+                                    <option value="int">INT (Entero)</option>
+                                    {{-- <option value="bigint">BIGINT (Entero grande)</option>
+                                    <option value="smallint">SMALLINT (Entero pequeño)</option>
+                                    <option value="tinyint">TINYINT (Entero muy pequeño)</option> --}}
+                                    <option value="decimal">DECIMAL (Decimal)</option>
+                                    {{-- <option value="numeric">NUMERIC (Numérico)</option> --}}
+                                  </optgroup>
+                                
+                                  <optgroup label="Cadenas de caracteres">
+                                    {{-- <option value="char">CHAR (Cadena fija)</option> --}}
+                                    <option value="varchar">VARCHAR (Cadena variable)</option>
+                                    {{-- <option value="nchar">NCHAR (Cadena Unicode fija)</option>
+                                    <option value="nvarchar">NVARCHAR (Cadena Unicode variable)</option> --}}
+                                  </optgroup>
+                                
+                                  {{-- <optgroup label="Cadenas binarias">
+                                    <option value="varbinary">VARBINARY (Binario variable)</option>
+                                    <option value="image">IMAGE (Imagen)</option>
+                                  </optgroup> --}}
+                                
+                                  <optgroup label="Fecha y hora">
+                                    <option value="date">DATE (Fecha)</option>
+                                    <option value="time">TIME (Hora)</option>
+                                    {{-- <option value="datetime">DATETIME (Fecha y hora)</option>
+                                    <option value="datetime2">DATETIME2 (Fecha y hora con mayor precisión)</option> --}}
+                                  </optgroup>
+                                
+                                  {{-- <optgroup label="Otros tipos de datos">
+                                    <option value="bit">BIT (Booleano)</option>
+                                    <option value="uniqueidentifier">UNIQUEIDENTIFIER (Identificador único global)</option>
+                                    <option value="money">MONEY (Moneda)</option>
+                                    <option value="xml">XML (Datos XML)</option>
+                                    <option value="table">TABLE (Tabla temporal)</option>
+                                  </optgroup> --}}
+                                </select>
+                                  {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
+                                  <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="longitud" id ="longitud">
+                                  {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
+                                  {{-- <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br> --}}
+                                 
+                              </div>
+                            
+                     
                             </div>
                  
                             
@@ -100,7 +110,7 @@
                               <label for="inputPassword" class="col-sm-2 col-form-label">Condición</label>
                               <div class="input-group mb-3 " >
                          
-                                <select class="form-select" aria-label="Default select example" id="thirdSelect" name="condicion">
+                                <select class="form-select" aria-label="Default select example" id="fiveselect" name="condicion">
                                   <option value="">Selecciona una condicion..</option>
                                 
                                   <optgroup label="Numéricos">
@@ -108,6 +118,7 @@
                                     {{-- <option value=">=">>=</option>
                                     <option value="<="><= </option> --}}
                                     <option value="<"><</option>
+                                    <option value="between">entre</option>
                                     {{-- <option value="==">=</option>
                                     <option value="<>"><>(diferente)</option> --}}
                                   </optgroup>
@@ -121,16 +132,19 @@
                                     <option value="date">DATE (Fecha)</option>
                                     <option value="time">TIME (Hora)</option>
                                   </optgroup> --}}
-                                  <optgroup label="Otro">
+
+
+
+                                  {{-- <optgroup label="Otro">
                                     <option value="other">Avanzado(SQL)</option>
-                                  </optgroup>
+                                  </optgroup> --}}
   
                                 </select>
                                
-                                <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text">
+                                {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
                                 <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text[0]">
                                 {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
-                                <button type="button" class="btn btn-primary add-condition-btn">+</button> <br>
+                                <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br>
                               </div>
                              
                               
@@ -147,7 +161,13 @@
                                   <input type="password" class="form-control" id="inputPassword">
                                 </div>
                             </div> --}}
-                           
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="NONULL" id="flexCheckDefault" name="null">
+                              <label class="form-check-label" for="flexCheckDefault"  >
+                                No nulo
+                              </label>
+                            </div>
+                            <br>
                         <button type="submit" class="btn btn-primary">analizar</button>
                     </form>
                    
@@ -157,11 +177,54 @@
 </div>
 
 <script>
+
+document.getElementById("fiveselect").addEventListener("change", function(){
+  const valor = this.value;
+  console.log("gola");
+  const boton = document.getElementById("boton-ad");
+  if(valor=="between"){
+    boton.click();
+  }
+  else if(valor=="in"){
+    boton.style.display="block";
+  }
+  else{
+    var elements = document.getElementsByName("condicion_text[]");
+    for (var i = elements.length - 1; i >= 0; i--) {
+      elements[i].parentNode.removeChild(elements[i]);
+    }
+    boton.style.display="none";
+  }
+});
+
+
+
+  
+
+  document.getElementById("fourthSelect").addEventListener("change", function(){
+  const valor = this.value;
+  console.log("ddd");
+  longitud = document.getElementById("longitud")
+  // const boton = document.getElementById("boton-ad");
+ if(valor=="date"|| valor=="time"){
+  longitud.style.display="none";
+  }
+  else{
+    // var elements = document.getElementsByName("condicion_text[]");
+    // for (var i = elements.length - 1; i >= 0; i--) {
+    //   elements[i].parentNode.removeChild(elements[i]);
+    // }
+    longitud.style.display="block";
+  }
+  });
+
+
+
     const columnas = <?php echo json_encode($columnas); ?>;
     
     const tipos = <?php echo json_encode($tipos); ?>;
   
-    document.getElementById("firstSelect").addEventListener("change", function() {
+  document.getElementById("firstSelect").addEventListener("change", function() {
   // Get the selected value from the first select
   const selectedValue = this.value;
 
@@ -186,25 +249,75 @@
     option.text = "No options available";
     secondSelect.add(option);
   }
+  secondSelect.dispatchEvent(new Event('change'));
+  // secondSelect.options[0].selected = true;
   console.log("caimos")
   });
 
   document.getElementById("secondSelect").addEventListener("change", function() {
-    // Get the selected value from the first select
+    // Obtener el valor seleccionado del primer select
     const selectedIndex = this.selectedIndex;
     const selectedValue = document.getElementById("firstSelect").value;
-    // Get a reference to the second select
+    // Obtener una referencia al segundo select
     const secondSelect = document.getElementById("thirdSelect");
 
-    // Clear any existing options in the second select
+    // Limpiar cualquier opción existente en el segundo select
     secondSelect.innerHTML = "";
 
-    // Create new options based on the selected value
-    
+    // Crear nuevas opciones basadas en el valor seleccionado
     const option = document.createElement("option");
-    option.value = tipos[selectedValue][selectedIndex]; // Assuming you want the item as the value
+    option.value = tipos[selectedValue][selectedIndex]; // Suponiendo que deseas el elemento como el valor
     option.text = tipos[selectedValue][selectedIndex];
+    option.selected = true;
     secondSelect.add(option);
+    console.log("caimossssssss");
+    secondSelect.dispatchEvent(new Event('change'));
+    // Seleccionar la primera opción en el segundo select
+    // secondSelect.options[0].selected = true;
+});
+
+document.getElementById("thirdSelect").addEventListener("change", function(){
+    const valor = this.value;
+
+    var resultado = valor.split('(')[0];
+    if(resultado=="float"||resultado=="double"){
+      resultado="decimal";
+    }
+    if (resultado.includes("int")) {
+      resultado="int";
+    }
+    if (resultado.includes("char")) {
+      resultado="varchar";
+    }
+
+    selectElement = document.getElementById("fourthSelect")
+
+    if(resultado=="varchar"){
+    var options = selectElement.getElementsByTagName("option");
+    for(var i = 0; i < options.length; i++) {
+      options[i].disabled = false;
+    }
+    }
+    else{
+      for (let i = 0; i < selectElement.options.length; i++) {
+      const option = selectElement.options[i];
+        console.log()
+      // Verificar si el valor de la opción coincide con el valor deseado
+        if (option.value !== resultado) {
+          // Deshabilitar la opción
+          option.disabled = true;
+          // option.style.display = "none";
+        }
+        else{
+          option.disabled = false;
+          // option.style.display = "block";
+        }
+      }
+    }
+    // selectElement.dispatchEvent(new Event('change'));
+  });
+
+
 
     // if (selectedValue in tipos) {
     //   for (const item of tipos[selectedValue]) {
@@ -220,8 +333,8 @@
     //   option.text = "No options available";
     //   secondSelect.add(option);
     // }
-    console.log("caimos")
-  });
+   
+
   const addConditionButton = document.querySelector('.add-condition-btn');
 
 addConditionButton.addEventListener('click', function() {
@@ -235,6 +348,10 @@ addConditionButton.addEventListener('click', function() {
   const conditionGroup = document.querySelector('.condiciones'); // Get the parent div
 conditionGroup.appendChild(newConditionText); // Append the clone to the parent div
 });
+
+
+
+
 </script>
 
 @endsection

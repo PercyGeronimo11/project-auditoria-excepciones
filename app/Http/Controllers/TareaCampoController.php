@@ -74,6 +74,8 @@ class TareaCampoController extends Controller
 
     public function store(Request $request)
     {
+        // return  $request;
+        
         // return $request->all();
         $tableNames = array_keys(session()->get('tablesName'));
 
@@ -111,11 +113,25 @@ class TareaCampoController extends Controller
             // return strpos($key->$campo, $request->condicion_text);
             //no se pq cambie orden de int y nulll (primero debe comprobar si es numero o no)creoi que encontre error
             //error si pones numero y es un 
-            if($request->condicion=="int" && !(is_numeric($key->$campo))){
+            if ($key->$campo=="" && $request->null=="NONULL") {
                 $columnas[] =  $key;
             }
+
+            else if ($request->tipoValidar == "int" && !is_int($key->$campo) && strlen($key->$campo)!=$request->longitud) {
+                $columnas[] = $key;
+            }
+            // Validar si el tipo es "decimal" y el valor es un número decimal
+            else if ($request->tipoValidar == "decimal" && !is_float($key->$campo)) {
+                $columnas[] = $key;
+            }
+            else if ($request->tipoValidar == "date" && !\Illuminate\Support\Facades\Validator::make([$campo => $key->$campo], ['campo' => 'date_format:Y-m-d'])->passes()) {
+                $columnas[] = $key;
+            }
+            else if ($request->tipoValidar == "time" && !\Illuminate\Support\Facades\Validator::make([$campo => $key->$campo], ['campo' => 'date_format:H:i:s'])->passes()) {
+                $columnas[] = $key;
+            }
        
-            else if($request->condicion=="like"&& (strpos($key->$campo, $request->condicion_text)===false)){
+            else if($request->condicion=="like"&& (strpos($key->$campo, $request->condicion_text[0])===false)){
                     
                 $columnas[] =  $key;
                 
