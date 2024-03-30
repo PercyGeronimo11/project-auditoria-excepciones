@@ -31,3 +31,4 @@ Route::middleware('auth')->group(function () {
 
 });
 Route::resource('tareacampo',TareaCampoController::class);
+Route::post('/tareacamposs', [TareaCampoController::class, 'analizar'])->name('analizar.campo');

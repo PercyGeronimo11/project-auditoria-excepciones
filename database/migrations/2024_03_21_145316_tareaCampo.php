@@ -18,6 +18,12 @@ return new class extends Migration
             $table->string('condicion');
             $table->date('fecha');
             $table->string('tabla');
+            $table->tinyInteger('estado');
+            $table->string('condicion_text');
+            $table->string('longitud');
+            $table->string('tipoValidar');
+         
+            $table->tinyInteger('null');
             $table->timestamps();
         });
     }

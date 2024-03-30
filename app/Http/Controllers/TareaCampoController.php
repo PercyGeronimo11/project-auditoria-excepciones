@@ -13,11 +13,63 @@ class TareaCampoController extends Controller
     const PAGINATION=7;
 
     public function index(Request $request){
-        // $busqueda=$request->get('buscarpor');
-        // $TareaCampos=TareaCampo::where('Apellido_Paterno','like','%'.$busqueda.'%')
-        // ->where('estado','=','1')
-        // ->paginate($this::PAGINATION);
-        // return session()->get('driverBD');
+        $busqueda=$request->get('buscarpor');
+        $TareaCampos=TareaCampo::where('id','like','%'.$busqueda.'%')
+        ->where('estado','=','1')
+        ->paginate($this::PAGINATION);
+        // return session()->get('TareaCampos');
+        return view('campo.index',compact('TareaCampos','busqueda'));
+        // $tableNames = array_keys(session()->get('tablesName'));
+
+        // $contenido=session()->get('tablesName');
+        // // return  $contenido;
+        // $columnas = [];
+        // $columnas1 = [];
+        // $tipos = [];
+        // // return $contenido;
+        // // return $columns;
+        // // Recorrer cada tabla en el objeto
+        // foreach($contenido as $tableName => $tableData) {
+        //     // Crear un array para almacenar los nombres de los campos de esta tabla
+        //     $fields = [];
+        //     $fields1 = [];
+        //     $types=[];
+        //     // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
+        //     foreach($tableData["columns"] as $column) {
+        //         if (isset($column->Field)) {
+        //             $fields[] = $column->Field;
+        //         } elseif (isset($column->COLUMN_NAME)) {
+        //             $fields[] = $column->COLUMN_NAME;
+        //         }
+
+        //         $types[]= $column->Type;
+        //     }
+        //     foreach($tableData["data"] as $column2) {
+        //         // return $column2->idActa;
+        //         if (is_object($column2) && isset($column2->idActa)) {
+        //             $fields1[] = $column2->idActa;
+        //           }
+
+        //     }
+
+
+        //     // Agregar este array al array de resultados con el nombre de la tabla como clave
+        //     $columnas[$tableName] = $fields;
+        //     $columnas1[$tableName] = $fields1;
+        //     $tipos[$tableName] = $types;
+        // }
+        // return $columnas1;
+        // return  $tipos;
+        // return  array_column(session()->get('tablesName')[$tableNames[0]]["columns"], 'Field');
+
+        // @foreach($tablesData as $tableName => $table)
+        return view('campo.create',compact('tableNames','contenido','columnas','tipos'));
+        
+    }
+
+    public function create()
+    {
+
         $tableNames = array_keys(session()->get('tablesName'));
 
         $contenido=session()->get('tablesName');
@@ -35,7 +87,11 @@ class TareaCampoController extends Controller
             $types=[];
             // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
             foreach($tableData["columns"] as $column) {
-                $fields[] = $column->Field;
+                if (isset($column->Field)) {
+                    $fields[] = $column->Field;
+                } elseif (isset($column->COLUMN_NAME)) {
+                    $fields[] = $column->COLUMN_NAME;
+                }
 
                 $types[]= $column->Type;
             }
@@ -58,21 +114,47 @@ class TareaCampoController extends Controller
         // return  array_column(session()->get('tablesName')[$tableNames[0]]["columns"], 'Field');
 
         // @foreach($tablesData as $tableName => $table)
-        return view('campo.index',compact('tableNames','contenido','columnas','tipos'));
+        return view('campo.create',compact('tableNames','contenido','columnas','tipos'));
+
+
+
+        // if (Auth::user()->rol=='Administrativo'){   //boteon registrar
+
+        //     return view('TareaCampo.create');
+        // } else{
+        //     return redirect()->route('TareaCampo.index')->with('datos','..::No tiene Acceso ..::');
+        // }
     }
-
-    public function create()
-    {
-
-        if (Auth::user()->rol=='Administrativo'){   //boteon registrar
-
-            return view('TareaCampo.create');
-        } else{
-            return redirect()->route('TareaCampo.index')->with('datos','..::No tiene Acceso ..::');
+    public function store(Request $request){
+        // return $request;
+        $data = $request->validate([
+            'campo' => 'required',
+            'condicion' => 'required',
+            'tabla' => 'required',
+            'tipoValidar' => 'required',
+            'longitud' => 'numeric', 
+            'condicion_text' => '', 
+            'null' => '', 
+        ]);
+        
+        $data["aux"] = "";
+        // return $data;
+        // Verifica si condicion_text es un array y no está vacío antes de intentar iterar sobre él
+        if (isset($data["condicion_text"]) && is_array($data["condicion_text"])) {
+            foreach ($data["condicion_text"] as $key ) {
+                $data["aux"] = $data["aux"] . $key . ",";
+            }
         }
+        
+        $data["condicion_text"] =  $data["aux"];
+        $data["estado"] = 1;
+        $data["fecha"] = date('Y-m-d H:i:s');
+        $TareaCampo = TareaCampo::create($data);
+        // return $data;
+        $TareaCampo->update(['estado' => 1]);
+        return redirect()->route('tareacampo.index');
     }
-
-    public function store(Request $request)
+    public function analizar(Request $request)
     {
         // return  $request;
         
@@ -113,7 +195,7 @@ class TareaCampoController extends Controller
             // return strpos($key->$campo, $request->condicion_text);
             //no se pq cambie orden de int y nulll (primero debe comprobar si es numero o no)creoi que encontre error
             //error si pones numero y es un 
-            if ($key->$campo=="" && $request->null=="NONULL") {
+            if ($key->$campo=="" && $request->null=="0") {
                 $columnas[] =  $key;
             }
 
@@ -318,12 +400,59 @@ class TareaCampoController extends Controller
 
     public function edit($id)
     {
-        if (Auth::user()->rol=='Administrativo'){ //boton editar
-            $TareaCampo=TareaCampo::findOrFail($id);
-            return view('TareaCampo.edit',compact('TareaCampo'));
-        }else{
-            return redirect()->route('TareaCampo.index')->with('datos','..::No tiene Acceso ..::');
+        $tableNames = array_keys(session()->get('tablesName'));
+
+        $contenido=session()->get('tablesName');
+        // return  $contenido;
+        $columnas = [];
+        $columnas1 = [];
+        $tipos = [];
+        // return $contenido;
+        // return $columns;
+        // Recorrer cada tabla en el objeto
+        foreach($contenido as $tableName => $tableData) {
+            // Crear un array para almacenar los nombres de los campos de esta tabla
+            $fields = [];
+            $fields1 = [];
+            $types=[];
+            // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
+            foreach($tableData["columns"] as $column) {
+                if (isset($column->Field)) {
+                    $fields[] = $column->Field;
+                } elseif (isset($column->COLUMN_NAME)) {
+                    $fields[] = $column->COLUMN_NAME;
+                }
+
+                $types[]= $column->Type;
+            }
+            foreach($tableData["data"] as $column2) {
+                // return $column2->idActa;
+                if (is_object($column2) && isset($column2->idActa)) {
+                    $fields1[] = $column2->idActa;
+                  }
+
+            }
+
+
+            // Agregar este array al array de resultados con el nombre de la tabla como clave
+            $columnas[$tableName] = $fields;
+            $columnas1[$tableName] = $fields1;
+            $tipos[$tableName] = $types;
         }
+
+        $TareaCampo=TareaCampo::findOrFail($id);
+        // return $TareaCampo;
+
+        return view('campo.edit',compact('tableNames','contenido','columnas','tipos','TareaCampo'));
+
+
+
+        // if (Auth::user()->rol=='Administrativo'){ //boton editar
+        //     $TareaCampo=TareaCampo::findOrFail($id);
+        //     return view('TareaCampo.edit',compact('TareaCampo'));
+        // }else{
+        //     return redirect()->route('tareacampo.index')->with('datos','..::No tiene Acceso ..::');
+        // }
     }
 
     public function update(Request $request, $id)
@@ -345,9 +474,7 @@ class TareaCampoController extends Controller
             $TareaCampo=TareaCampo::findOrFail($id);
             $TareaCampo->estado='0';
             $TareaCampo->save();
-            return redirect()->route('TareaCampo.index')->with('datos','Registro Eliminado..');
-
-
+            return redirect()->route('tareacampo.index')->with('datos','Registro Eliminado..');
     }
 
 
