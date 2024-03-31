@@ -31,4 +31,6 @@ Route::middleware('auth')->group(function () {
 
 });
 Route::resource('tareacampo',TareaCampoController::class);
-Route::post('/tareacamposs', [TareaCampoController::class, 'analizar'])->name('analizar.campo');
+Route::get('/tareacampos/{id}/{state}', [TareaCampoController::class, 'analizar'])->name('analizar.campo');
+
+Route::get('/tareacamposs/{id}', [TareaCampoController::class, 'pdf'])->name('campo.pdf');

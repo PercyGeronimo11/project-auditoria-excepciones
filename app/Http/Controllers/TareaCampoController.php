@@ -14,8 +14,8 @@ class TareaCampoController extends Controller
 
     public function index(Request $request){
         $busqueda=$request->get('buscarpor');
-        $TareaCampos=TareaCampo::where('id','like','%'.$busqueda.'%')
-        ->where('estado','=','1')
+        $TareaCampos=TareaCampo::where('tabla','like','%'.$busqueda.'%')
+        ->where('estado','<>','0')
         ->paginate($this::PAGINATION);
         // return session()->get('TareaCampos');
         return view('campo.index',compact('TareaCampos','busqueda'));
@@ -145,20 +145,23 @@ class TareaCampoController extends Controller
                 $data["aux"] = $data["aux"] . $key . ",";
             }
         }
-        
+        if(!isset($array['null'])){
+            $data["null"]= 1;
+        }
         $data["condicion_text"] =  $data["aux"];
         $data["estado"] = 1;
+        
         $data["fecha"] = date('Y-m-d H:i:s');
         $TareaCampo = TareaCampo::create($data);
         // return $data;
         $TareaCampo->update(['estado' => 1]);
         return redirect()->route('tareacampo.index');
     }
-    public function analizar(Request $request)
+    public function analizar($id,$state)
     {
-        // return  $request;
-        
-        // return $request->all();
+
+        $TareaCampo=TareaCampo::findOrFail($id);
+        $TareaCampo->update(['estado' => 2]);
         $tableNames = array_keys(session()->get('tablesName'));
 
         $contenido=session()->get('tablesName');
@@ -166,61 +169,41 @@ class TareaCampoController extends Controller
 
         $columnas1 = [];
         $columnas = [];
-        $campo=$request->campo;
-        // return $contenido[$request->tabla]["data"][0]->$campo;
-        // foreach($contenido as $tableName => $tableData) {
-        //     // Crear un array para almacenar los nombres de los campos de esta tabla
-
-        //     $fields1 = [];
-        //     $campo=$request->campo;
-        //     // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
-
-        //     foreach($tableData["data"] as $column2) {
-        //         // return $column2->idActa;
-        //         if (is_object($column2) && isset($column2->$campo)) {
-
-        //             $fields1[] = $column2->$campo;
-        //           }
-        //     }
-
-
-
-        //     $columnas1[$tableName] = $fields1;
-
-        // }
+        $campo=$TareaCampo->campo;
+        $condicion_text=[];
+        $condicion_text = explode(',', $TareaCampo->condicion_text);
+        $condicion_text = array_filter($condicion_text);
+      
         $i = 0;
-        // return $contenido["data"];
-        foreach ($contenido[$request->tabla]["data"] as $key) {
-            // return $request->condicion;
-            // return strpos($key->$campo, $request->condicion_text);
-            //no se pq cambie orden de int y nulll (primero debe comprobar si es numero o no)creoi que encontre error
-            //error si pones numero y es un 
-            if ($key->$campo=="" && $request->null=="0") {
+
+        foreach ($contenido[$TareaCampo->tabla]["data"] as $key) {
+
+            if ($key->$campo=="" && $TareaCampo->null=="0") {
                 $columnas[] =  $key;
             }
 
-            else if ($request->tipoValidar == "int" && !is_int($key->$campo) && strlen($key->$campo)!=$request->longitud) {
+            else if ($TareaCampo->tipoValidar == "int" && !is_int($key->$campo) && strlen($key->$campo)!=$TareaCampo->longitud) {
                 $columnas[] = $key;
             }
             // Validar si el tipo es "decimal" y el valor es un número decimal
-            else if ($request->tipoValidar == "decimal" && !is_float($key->$campo)) {
+            else if ($TareaCampo->tipoValidar == "decimal" && !is_float($key->$campo)) {
                 $columnas[] = $key;
             }
-            else if ($request->tipoValidar == "date" && !\Illuminate\Support\Facades\Validator::make([$campo => $key->$campo], ['campo' => 'date_format:Y-m-d'])->passes()) {
+            else if ($TareaCampo->tipoValidar == "date" && !\Illuminate\Support\Facades\Validator::make([$campo => $key->$campo], ['campo' => 'date_format:Y-m-d'])->passes()) {
                 $columnas[] = $key;
             }
-            else if ($request->tipoValidar == "time" && !\Illuminate\Support\Facades\Validator::make([$campo => $key->$campo], ['campo' => 'date_format:H:i:s'])->passes()) {
+            else if ($TareaCampo->tipoValidar == "time" && !\Illuminate\Support\Facades\Validator::make([$campo => $key->$campo], ['campo' => 'date_format:H:i:s'])->passes()) {
                 $columnas[] = $key;
             }
        
-            else if($request->condicion=="like"&& (strpos($key->$campo, $request->condicion_text[0])===false)){
+            else if($TareaCampo->condicion=="like"&& (strpos($key->$campo, $condicion_text[0])===false)){
                     
                 $columnas[] =  $key;
                 
             }
-            else if($request->condicion=="in" ){
+            else if($TareaCampo->condicion=="in" ){
                 $condicional=false;
-                foreach ($request->condicion_text as $key1 ) {
+                foreach ($condicion_text as $key1 ) {
                     if($key->$campo==$key1){
                         $condicional=true;
                     }
@@ -230,14 +213,14 @@ class TareaCampoController extends Controller
                 }
                 
             }
-            else if($request->condicion=="null" && $key->$campo==""){
+            else if($TareaCampo->condicion=="null" && $key->$campo==""){
                 // $columnas[$i] = "Null->" . $key;
                 $columnas[] =  $key;
             }
-            else if (($request->condicion==">" || $request->condicion=="<") && is_numeric($request->condicion_text[0])){
+            else if (($TareaCampo->condicion==">" || $TareaCampo->condicion=="<") && is_numeric($condicion_text[0])){
                 
                 // return "aca";
-                $condicion = $key->$campo . $request->condicion . $request->condicion_text[0];
+                $condicion = $key->$campo . $TareaCampo->condicion . $condicion_text[0];
                 if (!eval("return $condicion;") ) {
                     $columnas[] =  $key;
                 } 
@@ -245,157 +228,27 @@ class TareaCampoController extends Controller
         }  
 
         $tableData =$columnas;
-        $columns=$contenido[$request->tabla]["columns"];
-        // return $columns;
-        $tableName = $request->tabla;
+        $columns=$contenido[$TareaCampo->tabla]["columns"];
 
-        // $columns = DB::connection('dynamic')
-        //     ->table('INFORMATION_SCHEMA.COLUMNS')
-        //     ->select('TABLE_NAME', 'COLUMN_NAME', 'DATA_TYPE')
-        //     ->get();
-        // return  $columns ;
-        return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData'));
+        $tableName = $TareaCampo->tabla;
+        // return $tableData;
+        if($state==1){
+            return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData','TareaCampo'));
+        }
+        else {
+            return view('campo.reporte', compact('tableName', 'columns', 'tableData','TareaCampo'));
+        }
+       
+     
+        // // 
+    }
+    public function pdf($id){
+        // analizar($id,0);
+        // Assuming you want to pass 1 as the value for $state
+        return redirect()->route('analizar.campo', ['id' => $id, 'state' => 0]);
 
-        // return $columnas;
-
-        // foreach ($columnas1[$request->tabla] as $key) {
-            
-        //     // $condicion2 = $key . $request->condicion . $request->condicion_text;
-        //     // Evaluar la condición de manera segura
-        //     if($request->condicion=="null" && $key==""){
-        //             // $columnas[$i] = "Null->" . $key;
-        //             $columnas[] =  $i;
-             
-        //     }
-            
-        //     else if($request->condicion=="like" && strpos($key, $request->condicion_text) == false){
-                
-        //         $columnas[] =  $i;
-                
-        //     }
-        //     else if($request->condicion=="in" && strpos($key, $request->condicion_text) == false){
-        //         $columnas[] =  $i;
-        //     }
-        //     else if($request->condicion=="int" && !(is_numeric($key))){
-        //         $columnas[] =  $i;
-        //     }
-        //     else if (is_numeric($request->condicion_text)){
-        //         $condicion = $key . $request->condicion . $request->condicion_text;
-        //         if (!eval("return $condicion;") ) {
-        //             $columnas[] =  $i;
-        //         } 
-        //     }
-        //     $i++;
-        // }
-
-            // else if (is_numeric($request->condicion_text)) {
-            //     if($request->condicion=="int"){
-            //         $columnas[$i] =  $key;
-            //     }
-            //     $condicion = $key . $request->condicion . $request->condicion_text;
-            //     if (eval("return $condicion;") ) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-
-            // }
-            // if($request->condicion=="int" && !(is_numeric($request->condicion_text))){
-            //     $columnas[$i] = $key;
-            // }
-            // else if (is_numeric($request->condicion_text))
-            //     $condicion = $key . $request->condicion . $request->condicion_text;
-            //     if (eval("return $condicion;") ) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-           
-
-
-            // if($request->condicion=="null"){
-            //     if ($request->condicion_text=="") {
-            //         $columnas[$i] = "paso" . $key;
-            //    }
-            //    else {
-            //        $columnas[$i] = "NO paso" . $key;
-            //    }
-            // }
-            // if($request->condicion=="int"){
-            //     if (is_numeric($request->condicion)) {
-            //          $columnas[$i] = "paso" . $key;
-            //     }
-            //     else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-            // if (is_numeric($request->condicion)) {
-            //     // if($request->condicion=="int"){
-            //     //     $columnas[$i] = "paso" . $key;
-            //     // }
-
-            //     // Crear la condición
-            //     $condicion = $key . $request->condicion . $request->condicion_text;
-            //     if (eval("return $condicion;") ) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-            // else if($request->condicion=="like"){
-            //     if (strpos($key, $request->condicion_text) !== false) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-            // else{
-            //     if ($key== $request->condicion_text) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-
-            // if($request->condicion == ">"||$request->condicion == "<"){
-            //     if (eval("return $condicion;") ) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-            // else{
-            //     if (strpos($key, $request->condicion_text) !== false) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-            // else{
-            //     if (is_numeric($key)) {
-            //         $columnas[$i] = "paso" . $key;
-            //     } else {
-            //         $columnas[$i] = "NO paso" . $key;
-            //     }
-            // }
-
-
-
-        
-
-        // return   $columnas;
-            // $data=request()->validate([
-            //         ]);
-            //         $TareaCampo=new TareaCampo();
-            //         $TareaCampo->dni=$request->dni;
-            //         $TareaCampo->apellido_paterno=$request->Apellido1;
-            //         $TareaCampo->apellido_materno=$request->Apellido2;
-            //         $TareaCampo->nombres=$request->nombres;
-            //         $TareaCampo->sexo=$request->sexo;
-            //         $TareaCampo->estado='1';
-            //         $TareaCampo->save();
-            //         return redirect()->route('TareaCampo.index')->with('datos','Registrados exitosamente...');
+        // return redirect()->route('tareacampo.index');
+        // return view('campo.reporte', compact('tableName', 'columns', 'tableData','TareaCampo'));
     }
 
     public function edit($id)
@@ -441,9 +294,14 @@ class TareaCampoController extends Controller
         }
 
         $TareaCampo=TareaCampo::findOrFail($id);
+        $condicion_text=[];
+        $condicion_text = explode(',', $TareaCampo["condicion_text"]);
+        $condicion_text = array_filter($condicion_text);
+        // $condicion_text = $TareaCampo.split(',');
+// return  $condicion_text;
         // return $TareaCampo;
 
-        return view('campo.edit',compact('tableNames','contenido','columnas','tipos','TareaCampo'));
+        return view('campo.edit',compact('tableNames','contenido','columnas','tipos','TareaCampo','condicion_text'));
 
 
 

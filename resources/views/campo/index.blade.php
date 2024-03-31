@@ -21,7 +21,7 @@
                     <i class="fa fa-search search-icon"></i>
                 </button>
             </div>
-            <input type="text" placeholder="Buscar por descripcion" class="form-control" value="{{$busqueda}}" name="busqueda" >
+            <input type="text" placeholder="Buscar por tabla" class="form-control" value="{{$busqueda}}" name="buscarpor" >
         </div>
     </form>
 
@@ -55,11 +55,25 @@
                   <td>{{ $row->fecha}}</td>
                   <td>{{ $row->condicion." ".$row->condicion_text}}</td>
                   <td>
-                            <a href="{{ route('tareacampo.edit',$row->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
-                            {{-- <a href="{{ route('tareacampo.confirmar',$row->idCargo) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>Eliminar</a>  --}}
-                            <button   class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{$row->id}}">
-                                <i class="fas fa-trash"></i><i class="fa-solid fa-magnifying-glass-chart"></i>
-                              </button>
+                    @if ($row->estado == 1)
+                    <a href="{{ route('tareacampo.edit',$row->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
+                    {{-- <a href="{{ route('tareacampo.confirmar',$row->idCargo) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>Eliminar</a>  --}}
+                    <button   class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{$row->id}}">
+                        <i class="fas fa-trash"></i>
+                      </button>  
+                      
+                  
+                        
+                    @endif     
+                    <a href="{{ route('analizar.campo', ['state' => 1, 'id' => $row->id]) }}" class="btn btn-info btn-sm">
+                      <i class="fa-solid fa-magnifying-glass-chart"></i>
+                  </a>
+                  
+                  
+                    {{-- <a href="{{ route('analizar.campo',$row->id, 1) }}" class="btn btn-info btn-sm"><i class="fa-solid fa-magnifying-glass-chart"></i></a> --}}
+                    {{-- <a href="{{ route('analizar.campo',$row->id,1) }}" class="btn btn-info btn-sm"><i class="fa-solid fa-magnifying-glass-chart"></i></a> --}}
+                    <a href="{{ route('campo.pdf',$row->id) }}" class="btn btn-outline-secondary btn-sm"><i class="fa-regular fa-file-pdf"></i></a>
+                    
                       
                             
                             

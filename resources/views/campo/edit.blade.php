@@ -95,7 +95,7 @@
                                   </optgroup> --}}
                                 </select>
                                   {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
-                                  <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="longitud" id ="longitud">
+                                  <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="longitud" id ="longitud" value="{{$TareaCampo->longitud}}">
                                   {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
                                   {{-- <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br> --}}
                                  
@@ -115,18 +115,18 @@
                                   <option value="">Selecciona una condicion..</option>
                                 
                                   <optgroup label="Numéricos">
-                                    <option value=">">></option>
+                                    <option value=">" {{$TareaCampo->condicion==">"?'selected':''}}>></option>
                                     {{-- <option value=">=">>=</option>
                                     <option value="<="><= </option> --}}
-                                    <option value="<"><</option>
-                                    <option value="between">entre</option>
+                                    <option value="<"  {{$TareaCampo->condicion=="<"?'selected':''}}><</option>
+                                    <option value="between" {{$TareaCampo->condicion=="between"?'selected':''}}>entre</option>
                                     {{-- <option value="==">=</option>
                                     <option value="<>"><>(diferente)</option> --}}
                                   </optgroup>
                                 
                                   <optgroup label="Cadenas de caracteres">
-                                    <option value="like">like</option>
-                                    <option value="in">in(Solo esos valores)</option>
+                                    <option value="like" {{$TareaCampo->condicion=="like" ?'selected':''}}>like</option>
+                                    <option value="in" {{$TareaCampo->condicion=="in"?'selected':''}}>in(Solo esos valores)</option>
                                   </optgroup>
   
                                   {{-- <optgroup label="Fecha y hora">
@@ -143,11 +143,17 @@
                                 </select>
                                
                                 {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
-                                <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text[0]">
+                                <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text[0]"  value="{{$condicion_text[0]}}">
+                               
                                 {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
                                 <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br>
                               </div>
-                             
+                              @foreach ($condicion_text as $key => $item)
+                                    @if ($key != 0)
+                                        <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text[]" style="margin-left:50%; width:50%;"
+                                        value="{{ $item }}">
+                                    @endif
+                                @endforeach
                               
                               {{-- <input type="text" class="form-control align-self-end" style="float: right;width: 526px;"> --}}
                             </div>
@@ -163,7 +169,9 @@
                                 </div>
                             </div> --}}
                             <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="0" id="flexCheckDefault" name="null">
+                              <input class="form-check-input" type="checkbox" value="0" id="flexCheckDefault" name="null" 
+                              {{$TareaCampo->null=="0"?'checked':''}}
+                              >
                               <label class="form-check-label" for="flexCheckDefault"  >
                                 No nulo
                               </label>
@@ -178,6 +186,12 @@
 </div>
 
 <script>
+      const columnas = <?php echo json_encode($columnas); ?>;
+    
+    const tipos = <?php echo json_encode($tipos); ?>;
+    // const campo = <?php echo json_encode($TareaCampo["campo"]); ?>;
+    const TareaCampo = <?php echo json_encode($TareaCampo); ?>;
+
   window.onload = function() {
     // Selecciona el elemento <select> por su ID o clase, por ejemplo:
     var selectElement = document.getElementById("firstSelect"); // Cambia "miSelect" por el ID de tu <select>
@@ -185,11 +199,22 @@
     
     // Agrega el evento 'change' al elemento <select>
       selectElement.dispatchEvent(new Event('change'));
-};
 
-</script>
+      var selectElement = document.getElementById("fourthSelect");
+      
+      var options = selectElement.getElementsByTagName("option");
+      
+    for(var i = 0; i < options.length; i++) {
 
-<script>
+      if(options[i].value==TareaCampo["tipoValidar"]){
+        options[i].selected = true;
+     
+      }
+    }
+    selectElement.dispatchEvent(new Event('change'));
+     
+  };
+
 
 document.getElementById("fiveselect").addEventListener("change", function(){
   const valor = this.value;
@@ -233,11 +258,7 @@ document.getElementById("fiveselect").addEventListener("change", function(){
 
 
 
-    const columnas = <?php echo json_encode($columnas); ?>;
-    
-    const tipos = <?php echo json_encode($tipos); ?>;
-    const campo = <?php echo json_encode($TareaCampo["campo"]); ?>;
-    const raro = <?php echo json_encode($TareaCampo); ?>;
+
 
   
   document.getElementById("firstSelect").addEventListener("change", function() {
@@ -257,7 +278,7 @@ document.getElementById("fiveselect").addEventListener("change", function(){
       option.value = item; // Assuming you want the item as the value
       option.text = item;
       // console.log(raro);
-      if(campo==item){
+      if(TareaCampo["campo"]==item){
         option.selected = true;
       }
       secondSelect.add(option);
@@ -315,7 +336,13 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
     if(resultado=="varchar"){
     var options = selectElement.getElementsByTagName("option");
     for(var i = 0; i < options.length; i++) {
+      // console.log()
       options[i].disabled = false;
+      option[i].selected = true;
+      // if(options[i].value==TareaCampo["tipoValidar"]){
+      //   options[i].selected = true;
+     
+      // }
     }
     }
     else{
@@ -326,15 +353,20 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
         if (option.value !== resultado) {
           // Deshabilitar la opción
           option.disabled = true;
+          
           // option.style.display = "none";
         }
         else{
           option.disabled = false;
+          option.selected = true;
           // option.style.display = "block";
         }
+      //   if(options[i].value==TareaCampo["tipoValidar"]){
+      //   options[i].selected = true;
+      // }
       }
     }
-    // selectElement.dispatchEvent(new Event('change'));
+    selectElement.dispatchEvent(new Event('change'));
   });
 
 

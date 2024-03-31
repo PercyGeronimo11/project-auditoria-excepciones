@@ -296,12 +296,13 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
       resultado="varchar";
     }
 
-    selectElement = document.getElementById("fourthSelect")
+    selectElement = document.getElementById("fourthSelect");
 
     if(resultado=="varchar"){
     var options = selectElement.getElementsByTagName("option");
     for(var i = 0; i < options.length; i++) {
       options[i].disabled = false;
+      option[i].selected = true;
     }
     }
     else{
@@ -316,11 +317,12 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
         }
         else{
           option.disabled = false;
+          option.selected = true;
           // option.style.display = "block";
         }
       }
     }
-    // selectElement.dispatchEvent(new Event('change'));
+    selectElement.dispatchEvent(new Event('change'));
   });
 
 
