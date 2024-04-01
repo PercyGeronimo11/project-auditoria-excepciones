@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('host');
             $table->string('nombre_db');
             $table->string('usuario');
-            $table->string('contraseña');
+            $table->string('contraseña')->nullable();
             $table->integer('estado');
             $table->timestamps();
         });
