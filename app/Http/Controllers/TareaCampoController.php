@@ -13,9 +13,12 @@ class TareaCampoController extends Controller
     const PAGINATION=7;
 
     public function index(Request $request){
+        $database = Database::latest()->first(); // Obtener el último registro de la tabla Database
+        $nombre=$database->nombre_db;
         $busqueda=$request->get('buscarpor');
         $TareaCampos=TareaCampo::where('tabla','like','%'.$busqueda.'%')
         ->where('estado','<>','0')
+        ->where('baseDatos','==',$nombre)
         ->paginate($this::PAGINATION);
         // return session()->get('TareaCampos');
         return view('campo.index',compact('TareaCampos','busqueda'));
