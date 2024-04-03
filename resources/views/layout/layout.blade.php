@@ -23,13 +23,13 @@
               </li>
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                 Execpciones
+                 Excepciones
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
                   <li><a class="dropdown-item" href="#">Integridad de tablas</a></li>
                   <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item" href="#">Secuencialidad</a></li>
+                  <li><a class="dropdown-item" href="{{route('secuencialidad.index')}}">Secuencialidad</a></li>
                 </ul>
               </li>
               <li class="nav-item">

@@ -5,7 +5,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TareaCampoController;
 
 use App\Http\Controllers\DatabaseController;
-
+use App\Http\Controllers\SequenceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,3 +31,4 @@ Route::middleware('auth')->group(function () {
 
 });
 Route::resource('tareacampo',TareaCampoController::class);
+Route::resource('secuencialidad',SequenceController::class);
