@@ -13,9 +13,13 @@ class TareaCampoController extends Controller
     const PAGINATION=7;
 
     public function index(Request $request){
+        $database = Database::latest()->first(); // Obtener el último registro de la tabla Database
+        $nombre=$database->nombre_db;
+        // return $nombre;
         $busqueda=$request->get('buscarpor');
         $TareaCampos=TareaCampo::where('tabla','like','%'.$busqueda.'%')
         ->where('estado','<>','0')
+        ->where('baseDatos','=',$nombre)
         ->paginate($this::PAGINATION);
         // return session()->get('TareaCampos');
         return view('campo.index',compact('TareaCampos','busqueda'));
@@ -150,11 +154,13 @@ class TareaCampoController extends Controller
         }
         $data["condicion_text"] =  $data["aux"];
         $data["estado"] = 1;
-        
+        $nombre=$database->nombre_db;
+        $data["database"]=$nombre;
         $data["fecha"] = date('Y-m-d H:i:s');
         $TareaCampo = TareaCampo::create($data);
         // return $data;
-        $TareaCampo->update(['estado' => 1]);
+        // $TareaCampo->update(['estado' => 1]);
+       
         return redirect()->route('tareacampo.index');
     }
     public function analizar($id,$state)
@@ -231,9 +237,16 @@ class TareaCampoController extends Controller
         $columns=$contenido[$TareaCampo->tabla]["columns"];
 
         $tableName = $TareaCampo->tabla;
+        return $columns[0]->Field;
         // return $tableData;
         if($state==1){
-            return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData','TareaCampo'));
+            if (isset($columns[0]->Field)) {
+                return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData','TareaCampo'));
+            }
+            else{
+                return view('conexion.show_tableSQL', compact('tableName', 'columns', 'tableData','TareaCampo'));
+            }
+            
         }
         else {
             return view('campo.reporte', compact('tableName', 'columns', 'tableData','TareaCampo'));

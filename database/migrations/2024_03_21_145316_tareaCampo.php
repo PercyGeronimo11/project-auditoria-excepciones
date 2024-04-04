@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('campo');
             $table->string('condicion');
+            $table->string('baseDatos');
             $table->date('fecha');
             $table->string('tabla');
             $table->tinyInteger('estado');

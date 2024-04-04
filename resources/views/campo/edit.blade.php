@@ -338,12 +338,17 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
     for(var i = 0; i < options.length; i++) {
       // console.log()
       options[i].disabled = false;
-      option[i].selected = true;
+      options[1].selected=true;
+      // if(i=0){
+      //   option[i].selected = true;
+      // }
+     
       // if(options[i].value==TareaCampo["tipoValidar"]){
       //   options[i].selected = true;
      
       // }
     }
+    // option[i].selected = true;
     }
     else{
       for (let i = 0; i < selectElement.options.length; i++) {

@@ -302,7 +302,7 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
     var options = selectElement.getElementsByTagName("option");
     for(var i = 0; i < options.length; i++) {
       options[i].disabled = false;
-      option[i].selected = true;
+      options[1].selected=true;
     }
     }
     else{
