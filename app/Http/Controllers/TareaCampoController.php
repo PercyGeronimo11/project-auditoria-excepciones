@@ -253,7 +253,7 @@ class TareaCampoController extends Controller
                 return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData','TareaCampo'));
             }
             else{
-                return view('conexion.show_tableSQL', compact('tableName', 'columns', 'tableData','TareaCampo'));
+                return view('conexion.show_tableSQL1', compact('tableName', 'columns', 'tableData','TareaCampo'));
             }
             
         }
