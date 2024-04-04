@@ -6,6 +6,7 @@ use App\Http\Controllers\TareaCampoController;
 
 use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\IntegridadTablasController;
+use App\Http\Controllers\SequenceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,3 +36,5 @@ Route::get('/tareacamposs/{id}', [TareaCampoController::class, 'pdf'])->name('ca
 
 Route::get('integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
 
+
+Route::resource('secuencialidad',SequenceController::class);
