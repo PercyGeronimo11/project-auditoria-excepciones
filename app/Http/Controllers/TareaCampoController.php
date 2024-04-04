@@ -245,6 +245,8 @@ class TareaCampoController extends Controller
         $tableData =$columnas;
         $columns=$contenido[$TareaCampo->tabla]["columns"];
 
+        //return $columns;
+
         $tableName = $TareaCampo->tabla;
         // return $columns[0]->Field;
         // return $tableData;
@@ -370,20 +372,6 @@ class TareaCampoController extends Controller
 
     public function cancelar(){
         return redirect()->route('TareaCampo.index')->with('datos','acciona cancelada...');
-    }
-    public function DniRepetido($dni_comprobar){
-        $TareaCampos=TareaCampo::all();
-        if(count($TareaCampos)==0){
-            return false;
-        }else{
-            foreach($TareaCampos as $TareaCampo){
-                if($TareaCampo->$DNI==$dni_comprobar){
-                    return true;
-                    break;
-                }
-            }
-            return false;
-        }
     }
 
 }

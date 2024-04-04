@@ -12,7 +12,7 @@
             <thead>
                 <tr>
                     @foreach($columns as $column)
-                    <th>{{ $column}}</th>
+                    <th>{{ $column["name"]}}</th>
                     @endforeach
                 </tr>
             </thead>
@@ -20,7 +20,7 @@
                 @foreach($tableData as $row)
                 <tr>
                     @foreach($columns as $column)
-                    <td>{{ $row->{$column} }}</td>
+                    <td>{{ $row->{$column["name"]} }}</td>
                     @endforeach
                 </tr>
                 @endforeach
