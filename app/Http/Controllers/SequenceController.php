@@ -24,7 +24,7 @@ class SequenceController extends Controller
                 if($database->tipo == "mysql"){
                     $fields[] = $column->Field;
                 }else{
-                    $fields[] = $column;
+                    $fields[] = $column['name'];
                 }
             }
             foreach($tableData["data"] as $column2) {
