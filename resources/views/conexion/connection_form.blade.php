@@ -37,7 +37,7 @@
                             <input type="password" name="password" id="password" class="form-control">
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Connect</button>
+                            <button type="submit" class="btn btn-primary">Conectar</button>
                         </div>
                     </form>
                 </div>

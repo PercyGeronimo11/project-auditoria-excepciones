@@ -53,15 +53,15 @@ class DatabaseController extends Controller
 
     public function connectDatabase(Request $request)
     {
-        
-            $database = new Database();
-            $database->tipo =  $request->input('driver');
-            $database->host = $request->input('host');
-            $database->nombre_db = $request->input('database');
-            $database->usuario = $request->input('username');
-            $database->contraseña = $request->input('password');
-            $database->estado = '1';
-            $database->save();
+
+        $database = new Database();
+        $database->tipo =  $request->input('driver');
+        $database->host = $request->input('host');
+        $database->nombre_db = $request->input('database');
+        $database->usuario = $request->input('username');
+        $database->contraseña = $request->input('password');
+        $database->estado = '1';
+        $database->save();
 
         $connection = [
             'host' => $request->input('host'),
@@ -72,6 +72,7 @@ class DatabaseController extends Controller
 
         $driver = $request->input('driver');
 
+        //Conexion
         if ($driver == 'mysql') {
             config(['database.connections.dynamic' => array_merge([
                 'driver' => 'mysql',
@@ -87,8 +88,8 @@ class DatabaseController extends Controller
             ], $connection)]);
         }
 
+        //Obtener las tablas
         $tables = [];
-
         if ($driver == 'mysql') {
             $tables = DB::connection('dynamic')->select('SHOW TABLES');
             $tableNames = array_map('current', json_decode(json_encode($tables), true));
@@ -102,11 +103,17 @@ class DatabaseController extends Controller
                 ->toArray();
         }
 
+        //Recuperar las columnas
         $tablesData = [];
-
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
+                $foreignKeys = DB::connection('dynamic')->select("
+                    SELECT COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
+                ");
+
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.COLUMNS')
@@ -115,17 +122,29 @@ class DatabaseController extends Controller
                     ->get()
                     ->pluck('COLUMN_NAME')
                     ->toArray();
+
+                $foreignKeys = DB::connection('dynamic')
+                    ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
+                    ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
+                    ->where('TABLE_NAME', $tableName)
+                    ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
+                    ->get()
+                    ->toArray();
             }
 
             $tableData = DB::connection('dynamic')->table($tableName)->get();
-
             $tablesData[$tableName] = [
                 'columns' => $columns,
+                'foreignKeys' => $foreignKeys,
                 'data' => $tableData
             ];
+          //  dd($foreignKeys);
         }
+
+        //Guardar en la session:
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
+      //  dd($tablesData,$tablesData[$tableName]);
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
@@ -158,8 +177,4 @@ class DatabaseController extends Controller
 
         return view('conexion.show_tableSQL', compact('tableName', 'columns', 'tableData', 'driver'));
     }
-
-
-
 }
-  

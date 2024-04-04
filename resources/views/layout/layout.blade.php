@@ -27,7 +27,7 @@
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
-                  <li><a class="dropdown-item" href="#">Integridad de tablas</a></li>
+                  <li><a class="dropdown-item" href="{{ route('integridadtablas.index') }}">Integridad de tablas</a></li>
                   <li><a class="dropdown-item" href="#">Secuencialidad</a></li>
                 </ul>
               </li>
