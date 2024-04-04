@@ -93,11 +93,17 @@ class TareaCampoController extends Controller
             foreach($tableData["columns"] as $column) {
                 if (isset($column->Field)) {
                     $fields[] = $column->Field;
-                } elseif (isset($column->COLUMN_NAME)) {
-                    $fields[] = $column->COLUMN_NAME;
+                } else {
+                    $fields[] = $column['name'];
                 }
-
-                $types[]= $column->Type;
+// return $column;
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
+               
             }
             foreach($tableData["data"] as $column2) {
                 // return $column2->idActa;
