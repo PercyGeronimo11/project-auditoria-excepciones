@@ -131,6 +131,7 @@ class TareaCampoController extends Controller
     }
     public function store(Request $request){
         // return $request;
+        $database = Database::latest()->first();
         $data = $request->validate([
             'campo' => 'required',
             'condicion' => 'required',
@@ -154,8 +155,9 @@ class TareaCampoController extends Controller
         }
         $data["condicion_text"] =  $data["aux"];
         $data["estado"] = 1;
+        $database = Database::latest()->first();
         $nombre=$database->nombre_db;
-        $data["database"]=$nombre;
+        $data["baseDatos"]=$nombre;
         $data["fecha"] = date('Y-m-d H:i:s');
         $TareaCampo = TareaCampo::create($data);
         // return $data;
@@ -163,6 +165,7 @@ class TareaCampoController extends Controller
        
         return redirect()->route('tareacampo.index');
     }
+
     public function analizar($id,$state)
     {
 
@@ -237,7 +240,7 @@ class TareaCampoController extends Controller
         $columns=$contenido[$TareaCampo->tabla]["columns"];
 
         $tableName = $TareaCampo->tabla;
-        return $columns[0]->Field;
+        // return $columns[0]->Field;
         // return $tableData;
         if($state==1){
             if (isset($columns[0]->Field)) {
