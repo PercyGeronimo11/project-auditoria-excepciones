@@ -49,46 +49,15 @@
           <div class="mb-3 row">
             <label for="orden_secuencia" class="col-sm-2 col-form-label">Orden de clasificación:</label>
             <select class="form-select" aria-label="Default select example" id="thirdSelect2" name="orden_secuencia" id="orden_secuencia">
-              <option value="" selected disabled>Selecciona un orden de secuencia...</option>
-              <option value="ascendente">Ascendente</option>
+              <option value="ascendente" selected>Ascendente</option>
               <option value="descendente">Descendente</option>
             </select>
           </div>
           <div class="mb-3 row">
             <label for="incremento" class="form-label">Incremento</label>
             <input type="number" class="form-control" id="incremento" name="incremento" aria-describedby="emailHelp" value="1">
-          </div>{{-- 
-          <div class="mb-3 row">
-            <label for="valor_inicial_esperado" class="form-label">Valor inicial esperado:</label>
-            <input type="number" class="form-control" id="valor_inicial_esperado" name="valor_inicial_esperado" aria-describedby="emailHelp">
           </div>
-          <div class="mb-3 row">
-            <label for="rango_valores" class="form-label">Rango de valores esperado:</label>
-            <input type="text" class="form-control" id="rango_valores" name="rango_valores" aria-describedby="emailHelp">
-          </div> --}}
-          {{-- <div class=" row mb-3 condiciones d-flex">
-              <label for="inputPassword" class="col-sm-2 col-form-label">Condición</label>
-              <div class="input-group mb-3">
-                  <select class="form-select" aria-label="Default select example" id="thirdSelect" name="condicion">
-                      <option value="">Selecciona una condicion..</option>
-                      <optgroup label="Numéricos">
-                          <option value=">">></option>
-                          <option value="<"><</option>
-                      </optgroup>
-                      <optgroup label="Cadenas de caracteres">
-                          <option value="like">like</option>
-                          <option value="in">in(Solo esos valores)</option>
-                      </optgroup>
-                      <optgroup label="Otro">
-                          <option value="other">Avanzado(SQL)</option>
-                      </optgroup>
-                  </select>
-                  <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text">
-                  <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text[0]">
-                  <button type="button" class="btn btn-primary add-condition-btn">+</button><br>
-              </div>
-          </div> --}}
-          <button type="submit" class="btn btn-primary">analizar</button>
+          <button type="submit" class="btn btn-primary">ANALIZAR</button>
       </form>   
     </div>
   </div>
