@@ -123,19 +123,19 @@ class DatabaseController extends Controller
                     ->pluck('COLUMN_NAME')
                     ->toArray();
 
-                $foreignKeys = DB::connection('dynamic')
+                /* $foreignKeys = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
                     ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
                     ->where('TABLE_NAME', $tableName)
                     ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
                     ->get()
-                    ->toArray();
+                    ->toArray(); */
             }
 
             $tableData = DB::connection('dynamic')->table($tableName)->get();
             $tablesData[$tableName] = [
                 'columns' => $columns,
-                'foreignKeys' => $foreignKeys,
+                /* 'foreignKeys' => $foreignKeys, */
                 'data' => $tableData
             ];
           //  dd($foreignKeys);
