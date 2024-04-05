@@ -110,20 +110,27 @@ class DatabaseController extends Controller
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.COLUMNS')
-                    ->select('COLUMN_NAME')
+                    ->select('COLUMN_NAME', 'DATA_TYPE') // Agregar la selección del tipo de dato
                     ->where('TABLE_NAME', $tableName)
                     ->get()
-                    ->pluck('COLUMN_NAME')
+                    ->map(function ($column) {
+                        return [
+                            'name' => $column->COLUMN_NAME,
+                            'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
+                        ];
+                    })
                     ->toArray();
             }
-
+            
             $tableData = DB::connection('dynamic')->table($tableName)->get();
-
+            
             $tablesData[$tableName] = [
                 'columns' => $columns,
                 'data' => $tableData
             ];
         }
+        session()->put('driverBD', $driver);
+        session()->put('tablesName', $tablesData);
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
@@ -134,6 +141,12 @@ class DatabaseController extends Controller
         $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
         $tableData = DB::connection('dynamic')->table($tableName)->get();
 
+        // $columns = DB::connection('dynamic')
+        //     ->table('INFORMATION_SCHEMA.COLUMNS')
+        //     ->select('TABLE_NAME', 'COLUMN_NAME', 'DATA_TYPE')
+        //     ->get();
+        // return  $columns ;
+        // return $tableData;
         return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData', 'driver'));
     }
 

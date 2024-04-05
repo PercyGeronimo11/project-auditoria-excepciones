@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-      
-        Schema::create('Database', function (Blueprint $table) {
+        Schema::create('sequence_exceptions', function (Blueprint $table) {
             $table->id();
-            $table->string('tipo');
-            $table->string('host');
-            $table->string('nombre_db');
-            $table->string('usuario');
-            $table->string('contraseña')->nullable();
-            $table->integer('estado');
+            $table->unsignedBigInteger("sequence_result_id");
+            $table->string("message");
+            $table->string("location");
+            $table->foreign("sequence_result_id")->references("id")->on("sequence_results")->onDelete("cascade");
             $table->timestamps();
         });
     }
@@ -29,7 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('Database');
-
+        Schema::dropIfExists('sequence_exceptions');
     }
 };

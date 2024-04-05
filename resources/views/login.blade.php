@@ -23,7 +23,7 @@
             <label>Contraseña</label>
         </div>
         <div>
-            <span>No estas registrado? <a href="/register">Registrate</a></span>
+            <span>No estas registrado? <a href="/register">Registrarse</a></span>
         </div><br>
         <button type="submit" class="button buttonBlue">Iniciar sesión
             <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
