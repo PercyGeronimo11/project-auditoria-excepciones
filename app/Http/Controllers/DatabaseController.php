@@ -134,6 +134,11 @@ class DatabaseController extends Controller
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
+                $foreignKeys = DB::connection('dynamic')->select("
+                    SELECT COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
+                ");
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.COLUMNS')
@@ -145,7 +150,13 @@ class DatabaseController extends Controller
                             'name' => $column->COLUMN_NAME,
                             'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
                         ];
-                    })
+                    })->toArray();
+                $foreignKeys = DB::connection('dynamic')
+                    ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
+                    ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
+                    ->where('TABLE_NAME', $tableName)
+                    ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
+                    ->get()
                     ->toArray();
             }
             
@@ -153,10 +164,10 @@ class DatabaseController extends Controller
             
             $tablesData[$tableName] = [
                 'columns' => $columns,
+                'foreignKeys' => $foreignKeys,
                 'data' => $tableData
             ];
         }
-
 
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
