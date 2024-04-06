@@ -34,7 +34,8 @@ Route::resource('tareacampo',TareaCampoController::class);
 Route::get('/tareacampos/{id}/{state}', [TareaCampoController::class, 'analizar'])->name('analizar.campo');
 Route::get('/tareacamposs/{id}', [TareaCampoController::class, 'pdf'])->name('campo.pdf');
 
-Route::get('integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
+//Tablas
+Route::get('excepcion/integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
 
 
 Route::resource('secuencialidad',SequenceController::class);

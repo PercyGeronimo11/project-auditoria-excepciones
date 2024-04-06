@@ -19,20 +19,21 @@ class IntegridadTablasController extends Controller
             $fields = [];
             $tableNameReference=[];
             $colNameReference=[];
-            foreach($tableValueArray["foreignKeys"] as $colForeignKey) {
+            foreach($tableValueArray["columns"] as $colForeignKey) {
                 if (isset($colForeignKey->Field)) {
                     $fields[] = $colForeignKey->Field;
                 } elseif (isset($colForeignKey->COLUMN_NAME)) {
                     $fields[] = $colForeignKey->COLUMN_NAME;
                 }
-                $tableNameReference=$colForeignKey->REFERENCED_TABLE_NAME;
-                $colNameReference=$colForeignKey->REFERENCED_COLUMN_NAME;
+                //$tableNameReference=$colForeignKey->REFERENCED_TABLE_NAME;
+                //$colNameReference=$colForeignKey->REFERENCED_COLUMN_NAME;
             }
             $colForeignKeys[$tableKey] = $fields;
             $tableNamesRefer[$tableKey]= $tableNameReference;
             $columnNamesRefer[$tableKey]=$colNameReference;
         }
-        //dd($tableDataArray, $fields,$columnNamesRefer,$tableNamesRefer[$tableKey]);
+
+        dd($tableDataArray, $fields,$columnNamesRefer,$tableNamesRefer[$tableKey]);
         return view('tablas.index',compact('tableNames','colForeignKeys')); 
     }
 }
