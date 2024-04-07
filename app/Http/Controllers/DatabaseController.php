@@ -135,9 +135,9 @@ class DatabaseController extends Controller
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
                 $foreignKeys = DB::connection('dynamic')->select("
-                    SELECT COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                    SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
                     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-                    WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
+                    WHERE TABLE_NAME = '$tableName'
                 ");
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
