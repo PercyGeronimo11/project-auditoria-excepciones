@@ -93,11 +93,17 @@ class TareaCampoController extends Controller
             foreach($tableData["columns"] as $column) {
                 if (isset($column->Field)) {
                     $fields[] = $column->Field;
-                } elseif (isset($column->COLUMN_NAME)) {
-                    $fields[] = $column->COLUMN_NAME;
+                } else {
+                    $fields[] = $column['name'];
                 }
-
-                $types[]= $column->Type;
+// return $column;
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
+               
             }
             foreach($tableData["data"] as $column2) {
                 // return $column2->idActa;
@@ -247,7 +253,7 @@ class TareaCampoController extends Controller
                 return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData','TareaCampo'));
             }
             else{
-                return view('conexion.show_tableSQL', compact('tableName', 'columns', 'tableData','TareaCampo'));
+                return view('conexion.show_tableSQL1', compact('tableName', 'columns', 'tableData','TareaCampo'));
             }
             
         }
