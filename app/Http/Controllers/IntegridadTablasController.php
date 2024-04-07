@@ -19,6 +19,7 @@ class IntegridadTablasController extends Controller
             $fields = [];
             $tableNameReference=[];
             $colNameReference=[];
+
             foreach($tableValueArray["foreignKeys"] as $colForeignKey) {
                 if (isset($colForeignKey->Field)) {
                     $fields[] = $colForeignKey->Field;
@@ -33,20 +34,48 @@ class IntegridadTablasController extends Controller
             $columnNamesRefer[$tableKey]=$colNameReference;
         }
 
-        //dd($tableDataArray, $fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
+        //dd($tableDataArray, $tableNames,$fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
         return view('tablas.index',compact('tableNames','colForeignKeys','tableNamesRefer','columnNamesRefer')); 
     }
 
     public function analysis(Request $request){
-        $tabla=$request->input('tabla');
-        $claveForanea=$request->input('claveForanea');
-
         $tableDataArray= session()->get('tablesName');
-        $tableDataSelect = $tableDataArray[$tabla];
-        $tableDataReference = $tableDataArray[$tabla];
+        $tableNameSelect=$request->input('tabla');
+        $keyForeignNameSelect=$request->input('claveForanea');
+        $tableNameRefer="";
+        $columnNameRefer="";
 
-        dd($tableDataSelect);
-       
-        return view('tablas.index',compact('tableNames','colForeignKeys')); 
+        //OBTENER DATOS DE LA REFERENCIA
+        foreach($tableDataArray[$tableNameSelect]['foreignKeys'] as $tableValue){
+            if ($tableValue->COLUMN_NAME === "venta_id") {
+                $tableNameRefer = $tableValue->REFERENCED_TABLE_NAME;
+                $columnNameRefer = $tableValue->REFERENCED_COLUMN_NAME;
+            }
+        }
+
+        $tableDataSelect = $tableDataArray[$tableNameSelect];
+        $tableDataRefer = $tableDataArray[$tableNameRefer];
+
+
+        //CALCULO DE EXCEPCIONES
+        $numExcepciones=0;
+        foreach($tableDataSelect['data'] as $registroSelect){
+            $numCorrectos=0;
+            $numIncorrectos=0;
+            foreach($tableDataRefer['data'] as $registroRefer){
+                if($registroSelect->$keyForeignNameSelect==$registroRefer->$columnNameRefer){
+                    $numCorrectos++;
+                }else{
+                    $numIncorrectos++;
+                }
+            }
+            if($numIncorrectos==count($tableDataRefer['data']))
+                $numExcepciones++;
+        }
+    
+        //dd($tableNameSelect,$keyForeignNameSelect,$tableDataArray,$tableDataSelect,$numExcepciones);
+
+        return view('tablas.indexReport',compact('numExcepciones')); 
     }
 }
+

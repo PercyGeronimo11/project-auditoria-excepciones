@@ -151,13 +151,13 @@ class DatabaseController extends Controller
                             'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
                         ];
                     })->toArray();
-                $foreignKeys = DB::connection('dynamic')
-                    ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
-                    ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
-                    ->where('TABLE_NAME', $tableName)
-                    ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
-                    ->get()
-                    ->toArray();
+                // $foreignKeys = DB::connection('dynamic')
+                //     ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
+                //     ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
+                //     ->where('TABLE_NAME', $tableName)
+                //     ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
+                //     ->get()
+                //     ->toArray();
             }
             
             $tableData = DB::connection('dynamic')->table($tableName)->get();
