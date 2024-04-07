@@ -8,27 +8,31 @@
     <script src="https://kit.fontawesome.com/7920972db5.js" crossorigin="anonymous"></script>
 
     <div class="container mt-5">
-        <h1 class="mb-4">INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS</h1>
+        <h2 class="mb-4"> <b>  INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
 
         <div class="card">
+            <div class="card-header">
+                <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+            </div>
+
             <table>
                 <thead>
-                    <th>N</th>
-                    <th>Tabla</th>
+                    <th>N°</th>
                     <th>Clave Foranea</th>
                     <th>Tabla Referenciada</th>
                     <th>Excepcion</th>
                 </thead>
                 <tbody>
-                    <td>
-                        {{ $numExcepciones }}</td>
-                        <td>ventas detalle</td>
-                        <td>ventas_id</td>
+                    @foreach ($listExceptions as $exceptionKey => $exceptionValue)
+                        <td> 1</td>
+                        <td>{{ $exceptionKey }}</td>
                         <td> Ventas</td>
-                        <td>Error 1</td>
+                        <td>{{ $exceptionValue }}</td>
+                    @endforeach
                 </tbody>
 
             </table>
+
 
         </div>
     </div>
