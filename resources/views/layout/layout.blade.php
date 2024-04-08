@@ -22,6 +22,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/cs-skin-elastic.css') }}">
     
     <link rel="stylesheet"  href="{{asset('assets/css/style.css')}}">
+
+
+
+    <link rel="stylesheet" href="{{asset('assets/css/lib/chosen/chosen.min.css')}}">
     <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv.min.js"></script> -->
     <link href="https://cdn.jsdelivr.net/npm/chartist@0.11.0/dist/chartist.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/jqvmap@1.5.1/dist/jqvmap.min.css" rel="stylesheet">
@@ -87,7 +91,7 @@
                     <li class="menu-item-has-children dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-th"></i>Excepciones</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-paper-plane"></i><a href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
+                            <li><i class="menu-icon fa fa-list-alt"></i><a href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
                             <li><i class="fa fa-table"></i><a href="{{ route('integridadtablas.index') }}">Integridad de tablas</a></li>
                             <li><i class="menu-icon fa fa-map-o"></i><a href="{{route('secuencialidad.index')}}">Secuencialidad</a></li>
                         </ul>
@@ -128,6 +132,7 @@
                                 <button class="search-close" type="submit"><i class="fa fa-close"></i></button>
                             </form>
                         </div>
+                        
 
                         <div class="dropdown for-notification">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="notification" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -241,7 +246,14 @@
         <!-- /.site-footer -->
     </div>
     <!-- /#right-panel -->
-
+    <script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.4/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-match-height@0.7.2/dist/jquery.matchHeight.min.js"></script>
+    <script href="{{asset('assets/js/main.js')}}"></script>
+    <script src="{{asset('assets/js/lib/chosen/chosen.jquery.min.js')}}"></script>
+    
+    
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@2.2.4/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.4/dist/umd/popper.min.js"></script>

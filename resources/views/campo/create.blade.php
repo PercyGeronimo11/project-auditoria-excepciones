@@ -23,8 +23,11 @@
                                   <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="email@example.com">
                                 </div>
                             </div> --}}
+                            
                             <div class="mb-3 row">
+
                                 <label for="inputPassword" class="col-sm-2 col-form-label">Tabla</label>
+                                
                                 <select class="form-select" aria-label="Default select example" id="firstSelect" name="tabla"> 
                                     <option selected disabled>Open this select menu</option>
                            
@@ -43,7 +46,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="mb-3 row">
+                            <div class="mb-3 row" style="display: none">
                               <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
                               <select class="form-select" aria-label="Default select example" id="thirdSelect" name="tipo">
                                   <option selected disabled>Open this select menu</option>
@@ -53,24 +56,24 @@
                               </select>
                             </div>
                             <div class="mb-3 row">
-                              <label for="inputPassword" class="col-sm-2 col-form-label">Tipo(Validar)-Longitud</label>
+                              <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
                               
                               <div class="input-group mb-3 " >
                                 <select class="form-select" aria-label="Default select example" id="fourthSelect" name="tipoValidar">
                                   <option value="">Selecciona un tipo de dato...</option>
                                 
                                   <optgroup label="Numéricos">
-                                    <option value="int">INT (Entero)</option>
+                                    <option value="int">Entero</option>
                                     {{-- <option value="bigint">BIGINT (Entero grande)</option>
                                     <option value="smallint">SMALLINT (Entero pequeño)</option>
                                     <option value="tinyint">TINYINT (Entero muy pequeño)</option> --}}
-                                    <option value="decimal">DECIMAL (Decimal)</option>
+                                    <option value="decimal">Decimal</option>
                                     {{-- <option value="numeric">NUMERIC (Numérico)</option> --}}
                                   </optgroup>
                                 
                                   <optgroup label="Cadenas de caracteres">
                                     {{-- <option value="char">CHAR (Cadena fija)</option> --}}
-                                    <option value="varchar">VARCHAR (Cadena variable)</option>
+                                    <option value="varchar">Cadenas de caracteres</option>
                                     {{-- <option value="nchar">NCHAR (Cadena Unicode fija)</option>
                                     <option value="nvarchar">NVARCHAR (Cadena Unicode variable)</option> --}}
                                   </optgroup>
@@ -81,22 +84,22 @@
                                   </optgroup> --}}
                                 
                                   <optgroup label="Fecha y hora">
-                                    <option value="date">DATE (Fecha)</option>
-                                    <option value="time">TIME (Hora)</option>
+                                    <option value="date">Fecha</option>
+                                    <option value="time">Hora</option>
+                                    {{-- <option value="datetime">DATETIME (Fecha y hora)</option>
+                                    <option value="datetime2">DATETIME2 (Fecha y hora con mayor precisión)</option> --}}
+                                  </optgroup>
+
+                                  <optgroup label="Comunes">
+                                    <option value="DNI">DNI</option>
+                                    <option value="email">Correo</option>
                                     {{-- <option value="datetime">DATETIME (Fecha y hora)</option>
                                     <option value="datetime2">DATETIME2 (Fecha y hora con mayor precisión)</option> --}}
                                   </optgroup>
                                 
-                                  {{-- <optgroup label="Otros tipos de datos">
-                                    <option value="bit">BIT (Booleano)</option>
-                                    <option value="uniqueidentifier">UNIQUEIDENTIFIER (Identificador único global)</option>
-                                    <option value="money">MONEY (Moneda)</option>
-                                    <option value="xml">XML (Datos XML)</option>
-                                    <option value="table">TABLE (Tabla temporal)</option>
-                                  </optgroup> --}}
                                 </select>
                                   {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
-                                  <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="longitud" id ="longitud">
+                                  <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="longitud" id ="longitud" placeholder="Longitud">
                                   {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
                                   {{-- <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br> --}}
                                  
@@ -115,7 +118,7 @@
                                 <select class="form-select" aria-label="Default select example" id="fiveselect" name="condicion">
                                   <option value="">Selecciona una condicion..</option>
                                 
-                                  <optgroup label="Numéricos">
+                                  <optgroup label="Numéricos,Fecha y hora">
                                     <option value=">">></option>
                                     {{-- <option value=">=">>=</option>
                                     <option value="<="><= </option> --}}
@@ -130,10 +133,6 @@
                                     <option value="in">in(Solo esos valores)</option>
                                   </optgroup>
   
-                                  {{-- <optgroup label="Fecha y hora">
-                                    <option value="date">DATE (Fecha)</option>
-                                    <option value="time">TIME (Hora)</option>
-                                  </optgroup> --}}
 
 
 
@@ -186,8 +185,23 @@
 
 document.getElementById("fiveselect").addEventListener("change", function(){
   const valor = this.value;
+  const index = this.selectedIndex;
   console.log("gola");
   const boton = document.getElementById("boton-ad");
+  const fourth = document.getElementById("fourthSelect");
+  var elements = document.getElementsByName("condicion_text[0]");
+  
+  elements[0].type = fourth.value;
+if(fourth.selectedIndex <= 2) {
+  elements[0].type = "number";
+}
+  
+
+  var elements = document.getElementsByName("condicion_text[]");
+    for (var i = elements.length - 1; i >= 0; i--) {
+      elements[i].parentNode.removeChild(elements[i]);
+    }
+
   if(valor=="between"){
     boton.click();
   }
@@ -211,9 +225,16 @@ document.getElementById("fiveselect").addEventListener("change", function(){
   const valor = this.value;
   console.log("ddd");
   longitud = document.getElementById("longitud")
+  longitud = document.getElementById("longitud")
+  five = document.getElementById("fiveselect")
   // const boton = document.getElementById("boton-ad");
- if(valor=="date"|| valor=="time"){
+ if(valor=="date"|| valor=="time" || valor=="DNI"|| valor=="correo"){
+
   longitud.style.display="none";
+  longitud.value="";
+  // if( valor=="DNI"|| valor=="correo"){
+  //   condicion.value="";
+  // }
   }
   else{
     // var elements = document.getElementsByName("condicion_text[]");
@@ -221,7 +242,9 @@ document.getElementById("fiveselect").addEventListener("change", function(){
     //   elements[i].parentNode.removeChild(elements[i]);
     // }
     longitud.style.display="block";
+    
   }
+  five.dispatchEvent(new Event('change'));
   });
 
 
@@ -289,12 +312,13 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
     if(resultado=="float"||resultado=="double"){
       resultado="decimal";
     }
-    if (resultado.includes("int")) {
+    if (resultado.includes("int")|| resultado.includes("bo")||resultado.includes("it")) {
       resultado="int";
     }
     if (resultado.includes("char")) {
       resultado="varchar";
     }
+
 
     selectElement = document.getElementById("fourthSelect");
 
@@ -308,13 +332,18 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
     else{
       for (let i = 0; i < selectElement.options.length; i++) {
       const option = selectElement.options[i];
-        console.log()
+        console.log(option.value)
       // Verificar si el valor de la opción coincide con el valor deseado
-        if (option.value !== resultado) {
+       if(option.value ==="DNI"){
+     
+          option.disabled = false;
+          // option.selected = true;
+        }else if (option.value !== resultado) {
           // Deshabilitar la opción
           option.disabled = true;
           // option.style.display = "none";
         }
+        
         else{
           option.disabled = false;
           option.selected = true;
@@ -347,7 +376,11 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
 
 addConditionButton.addEventListener('click', function() {
   const newConditionText = document.createElement('input'); // Create a new input element
-  newConditionText.setAttribute('type', 'text'); // Set the input type to "text"
+  const fourth = document.getElementById("fourthSelect");
+  newConditionText.setAttribute('type', fourth.value); // Set the input type to "text"
+  if(fourth.selectedIndex <= 2) {
+    newConditionText.setAttribute('type', "number");
+} // Set
   newConditionText.setAttribute('class', 'form-control'); // Set the input class
   newConditionText.setAttribute('aria-label', 'Text input with dropdown button'); // Set the aria-label
   newConditionText.setAttribute('name', 'condicion_text[]'); // Set the input name
