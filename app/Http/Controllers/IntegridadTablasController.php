@@ -44,7 +44,6 @@ class IntegridadTablasController extends Controller
         $keyForeignNameSelect=$request->input('claveForanea');
         $tableNameRefer="";
         $columnNameRefer="";
-        $exceptionNotFound="La clave foranea no se encontro en la tabla referenciada";
 
         //OBTENER DATOS DE LA REFERENCIA
         foreach($tableDataArray[$tableNameSelect]['foreignKeys'] as $tableValue){
@@ -72,13 +71,19 @@ class IntegridadTablasController extends Controller
                 }
             }
             if($numIncorrectos==count($tableDataRefer['data'])){
+                $exceptionNotFound="La clave foranea no se encontro en la tabla referenciada";
                 $listExceptions[$registroSelect->$keyForeignNameSelect]=$exceptionNotFound;
                 $numExcepciones++;
+            }else if($numCorrectos>1){
+                $exceptionNotFound="La clave foranea se encuentra ".$numCorrectos." veces en la tabla referenciada";
+                $listExceptions[$registroSelect->$keyForeignNameSelect]=$exceptionNotFound;
+                $numExcepciones++;
+            }elseif($numCorrectos==1){
+                //NO EXISTE EXECPION
             }
         }
         
         //dd($tableNameSelect,$keyForeignNameSelect,$tableDataArray,$tableDataSelect,$numExcepciones);
-
         return view('tablas.indexReport',compact('listExceptions','numExcepciones')); 
     }
 }
