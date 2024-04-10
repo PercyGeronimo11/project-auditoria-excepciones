@@ -12,11 +12,30 @@ class LoginController extends Controller
 {
     public function login(Request $request)
     {
+        $request->validate([
+            'email' => 'required|email', // Validar que el campo email esté presente y sea un correo electrónico válido
+            'password' => 'required|min:8', // Validar que el campo password esté presente y tenga al menos 8 caracteres
+        ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe tener un formato válido.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
+        ]);
         $credentials = $request->only('email', 'password');
         if (Auth::attempt($credentials)) {
             return redirect('/connect');
         }
-        return redirect('/');
+        if (!User::where('email', $request->email)->exists()) {
+            return redirect('/')->with(
+                'correo' , 'El correo electrónico ingresado es incorrecto.'
+            );
+        }else{
+            return redirect('/')->with(
+                'contraseña', 'La contraseña ingresada es incorrecta.'
+            );
+        }
+        
+        //return redirect('/')->with('success', 'Error de inicio de sesion');
     }
 
     

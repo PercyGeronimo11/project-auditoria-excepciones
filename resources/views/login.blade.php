@@ -14,30 +14,37 @@
     </hgroup>
     <form method="POST" action="/login">
         @csrf
-        {{-- <div class="alert alert-success">
-            hola <br>
-            hola
-        </div> --}}
         @if(Session::has('success1'))
             <div class="alert alert-success">
                 {{ Session::get('success1') }} <br>
                 {{ Session::get('success2') }}
             </div>
         @endif
+        @if(Session::has('correo'))
+            <div class="alert alert-danger">
+                {{ Session::get('correo') }}
+            </div>
+        @endif
+
+        @if(Session::has('contraseña'))
+            <div class="alert alert-danger">
+                {{ Session::get('contraseña') }}
+            </div>
+        @endif
         <div class="group">
-            <input type="email" name="email" required>
+            <input type="email" name="email" value="{{ old('email') }}">
             <span class="highlight"></span>
             <span class="bar"></span>
-            <label class="{{ old('name') ? 'used' : '' }}">Correo</label>
+            <label class="{{ old('email') ? 'used' : '' }}">Correo</label>
             @error('email')
                 <span class="error-message">{{ $message }}</span>
             @enderror
         </div>
         <div class="group">
-            <input type="password" name="password" required>
+            <input type="password" name="password">
             <span class="highlight"></span>
             <span class="bar"></span>
-            <label class="{{ old('name') ? 'used' : '' }}">Contraseña</label>
+            <label class="{{ old('password') ? 'used' : '' }}">Contraseña</label>
             @error('password')
                 <span class="error-message">{{ $message }}</span>
             @enderror
