@@ -33,3 +33,16 @@ $(window, document, undefined).ready(function() {
   });
 
 });
+
+function togglePassword() {
+  var passwordInput = document.getElementById("password");
+  var toggleButton = document.querySelector(".toggle-password");
+  
+  if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleButton.textContent = "Ocultar";
+  } else {
+      passwordInput.type = "password";
+      toggleButton.textContent = "Mostrar";
+  }
+}

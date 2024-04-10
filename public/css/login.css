@@ -238,3 +238,17 @@ footer img:focus , footer a:focus { outline: none; }
 .logo_img{
 	width: 9%;
 }
+
+label.used {
+    top: -20px;
+    transform: scale(.75); 
+    left: -2px;
+    color: #4a89dc;
+}
+
+.error-message {
+    display: block;
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
