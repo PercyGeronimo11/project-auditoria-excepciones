@@ -76,7 +76,7 @@ class LoginController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect('/');
+        return redirect('/')->with('success1', '¡Registro exitoso!')->with('success2', 'Ya puedes iniciar sesión.');
     }
 
 

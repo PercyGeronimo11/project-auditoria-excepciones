@@ -252,3 +252,18 @@ label.used {
     font-size: 14px;
     margin-top: 5px;
 }
+
+.alert {
+    padding: 10px;
+    margin-bottom: 30px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+	text-align: center;
+	line-height: 150%;
+}

@@ -14,6 +14,16 @@
     </hgroup>
     <form method="POST" action="/login">
         @csrf
+        {{-- <div class="alert alert-success">
+            hola <br>
+            hola
+        </div> --}}
+        @if(Session::has('success1'))
+            <div class="alert alert-success">
+                {{ Session::get('success1') }} <br>
+                {{ Session::get('success2') }}
+            </div>
+        @endif
         <div class="group">
             <input type="email" name="email" required>
             <span class="highlight"></span>
