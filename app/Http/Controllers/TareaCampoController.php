@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\TareaCampo;
 use App\Models\Database;
 use App\Http\Controllers\DatabaseController;
+// use App\Http\Controllers\array_set();
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 // use App\Models\TareaCampo;
 use Illuminate\Http\Request;
@@ -198,33 +200,65 @@ class TareaCampoController extends Controller
     $campo = $TareaCampo->campo;
     $condicion_text = array_filter(explode(',', $TareaCampo->condicion_text));
     $columnas = [];
-
+    $pruebas=[];
+    $pruebas1=[];
+    $condition =true;
     foreach ($contenido[$TareaCampo->tabla]["data"] as $key) {
         $valorCampo = $key->$campo;
-        $longitudValida = strlen($valorCampo) == $TareaCampo->longitud;
+        $TareaCampo->longitud==0 ? $longitudValida =true : $longitudValida =strlen($valorCampo) == $TareaCampo->longitud;
+  
         $condicion = $TareaCampo->condicion;
+        if (count($condicion_text) > 1) {
+            $min = min($condicion_text);
+            $max = max($condicion_text);
+            $condition = ($valorCampo >= $min && $valorCampo <= $max);
+        }
+     
         $tipoValidar = $TareaCampo->tipoValidar;
-
+        // && $longitudValida
         $validadores = [
             "int" => is_int($valorCampo) && $longitudValida,
             "decimal" => is_float($valorCampo),
             "date" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:Y-m-d'])->passes(),
             "time" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:H:i:s'])->passes(),
+            "DNI" => strlen($valorCampo)==8, 
+            "email" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'email'])->passes(), // Validate email format       
         ];
 
         $condiciones = [
-            "like" => strpos($valorCampo, $condicion_text[0]) === false && $longitudValida,
-            "in" => !in_array($valorCampo, $condicion_text),
+            "like" => strpos($valorCampo, $condicion_text[0]) === false ,
+            "in" => !in_array($valorCampo, $condicion_text) ,
             "null" => $valorCampo == "",
-            ">" => eval("return $valorCampo > $condicion_text[0];"),
-            "<" => eval("return $valorCampo < $condicion_text[0];"),
+            "between" => !$condition,
+            
+            // $TareaCampo->condicion =>!eval('return  $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];'),
         ];
+        // $condiciones["between"] = count($condicion_text) > 1 ?($valorCampo >= $min && $valorCampo <= $max) :null; 
+        if(!array_key_exists($TareaCampo->condicion, $condiciones)){
+            $condiciones[$TareaCampo->condicion] = !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];');
+        }
+        // $condiciones[$TareaCampo->condicion] = !array_key_exists($TareaCampo->condicion, $condiciones) ? !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];') : break;
+        // $condiciones[$TareaCampo->condicion] = $TareaCampo->condicion;
+        // array_set($condiciones, $TareaCampo->condicion, !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];'));
 
-        if ($valorCampo == "" && $TareaCampo->null == "0" || $validadores[$tipoValidar] || $condiciones[$condicion]) {
+
+  
+        if($condiciones[$condicion]){
             $columnas[] = $key;
         }
-    }
+             // if ($valorCampo == "" && $TareaCampo->null == "0" || !$validadores[$tipoValidar] || $condiciones[$condicion]) {
+        //     $columnas[] = $key;
+        //     // return "hola";
+        // }
 
+        
+        // return ($condicion2 ? '1' : '0');
+        // return $condiciones;
+        // return $condicion;
+        // $pruebas[]="condicion:".($condicion2 ? 'true' : 'false');
+        $pruebas[]="condicion:".$condiciones[$condicion]."campo:".$valorCampo." tipo:".!$validadores[$tipoValidar];
+    }
+    // return $pruebas;
     $tableData = $columnas;
     $columns = $contenido[$TareaCampo->tabla]["columns"];
     $tableName = $TareaCampo->tabla;
@@ -235,6 +269,15 @@ class TareaCampoController extends Controller
 }
 
 
+      
+        // return $condiciones;
+        // $condiciones = [
+        //     "like" => strpos($valorCampo, $condicion_text[0]) === false && $longitudValida,
+        //     "in" => !in_array($valorCampo, $condicion_text),
+        //     "null" => $valorCampo == "",
+        //     ">" => eval("return $valorCampo > $condicion_text[0];"),
+        //     "<" => eval("return $valorCampo < $condicion_text[0];"),
+        // ];
 
     public function pdf($id){
         // analizar($id,0);
