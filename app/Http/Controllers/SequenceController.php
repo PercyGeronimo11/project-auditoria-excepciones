@@ -57,6 +57,9 @@ class SequenceController extends Controller
             'tipo_secuencia' => 'required',
             'orden_secuencia' => 'required',
             'incremento' => 'required|numeric'
+        ], [
+            'tabla.required' => 'Seleccionar la tabla es obligatorio.',
+            'campo.required' => 'Seleccionar el campo es obligatorio.',
         ]);
 
         // Capturar los datos del formulario
@@ -99,22 +102,39 @@ class SequenceController extends Controller
                 case 'Numérica':
                     // Verificar la secuencia numérica
                     if ($valor_anterior !== null) {
-                        if ($orden_secuencia === 'ascendente') {
+                        if($datos[$i] == $valor_anterior){
+                            $secuencia_correcta = false;
+                                $excepciones[] = [
+                                    'id' => $i+1,
+                                    'tabla' => $tabla,
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "El valor se mantuvo sin cambios"
+                                ];
+                        }
+                        elseif ($orden_secuencia === 'ascendente') {
                             if ($datos[$i] - $valor_anterior != $incremento) {
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
-                                    'id' => $i,
+                                    'id' => $i+1,
                                     'tabla' => $tabla,
-                                    'mensaje' => " Valor '{$datos[$i]}' es inesperado, se esperaba un incremento de '{$incremento}' desde el valor anterior '{$valor_anterior}'.",
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "Esta creciendo con respecto al anterior"
                                 ];
                             }
                         } else {
                             if ($valor_anterior - $datos[$i] != $incremento) {
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
-                                    'id' => $i,
+                                    'id' => $i+1,
                                     'tabla' => $tabla,
-                                    'mensaje' => " Valor '{$datos[$i]}' es inesperado, se esperaba un decremento de '{$incremento}' desde el valor anterior '{$valor_anterior}'.",
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "Esta decreciendo con respecto al anterior"
                                 ];
                             }
                         }
@@ -140,9 +160,12 @@ class SequenceController extends Controller
                                         // Si no sigue el orden alfabético, agregar una excepción
                                         $secuencia_correcta = false;
                                         $excepciones[] = [
-                                            'id' => $i,
+                                            'id' => $i+1,
                                             'tabla' => $tabla,
-                                            'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden alfabético en la secuencia alfanumérica.",
+                                            'campo' => $campo,
+                                            'actual' => $datos[$i],
+                                            'anterior' => $valor_anterior,
+                                            'mensaje' => "Esta decreciendo",
                                         ];
                                     }
                                 } elseif ($orden_secuencia === 'descendente') {
@@ -151,9 +174,12 @@ class SequenceController extends Controller
                                         // Si no sigue el orden alfabético, agregar una excepción
                                         $secuencia_correcta = false;
                                         $excepciones[] = [
-                                            'id' => $i,
+                                            'id' => $i+1,
                                             'tabla' => $tabla,
-                                            'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden alfabético en la secuencia alfanumérica.",
+                                            'campo' => $campo,
+                                            'actual' => $datos[$i],
+                                            'anterior' => $valor_anterior,
+                                            'mensaje' => "Esta creciendo",
                                         ];
                                     }
                                 }
@@ -163,13 +189,27 @@ class SequenceController extends Controller
                             $num_cmp = $valor_numerico - $valor_anterior_numerico;
     
                             // Verificar si los componentes numéricos siguen el orden esperado
-                            if (($orden_secuencia === 'ascendente' && $num_cmp != 1) || ($orden_secuencia === 'descendente' && $num_cmp != -1)) {
+                            if (($orden_secuencia === 'ascendente' && $num_cmp != 1)) {
                                 // Si los componentes numéricos no siguen el orden esperado, agregar una excepción
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
-                                    'id' => $i,
+                                    'id' => $i+1,
                                     'tabla' => $tabla,
-                                    'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia alfanumérica.",
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "Esta decreciendo",
+                                ];
+                            }
+                            elseif(($orden_secuencia === 'descendente' && $num_cmp != -1)){
+                                $secuencia_correcta = false;
+                                $excepciones[] = [
+                                    'id' => $i+1,
+                                    'tabla' => $tabla,
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "Esta creciendo",
                                 ];
                             }
                         }
@@ -186,26 +226,55 @@ class SequenceController extends Controller
                     // Verificar la secuencia de fechas
                     // Suponiendo que $datos[$i] es una cadena de fecha en formato 'Y-m-d'
                     if ($valor_anterior !== null) {
-                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior)) || ($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))) {
+                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior))) {
                             $secuencia_correcta = false;
                             $excepciones[] = [
-                                'id' => $i,
+                                'id' => $i+1,
                                 'tabla' => $tabla,
-                                'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia de fechas.",
+                                'campo' => $campo,
+                                'actual' => $datos[$i],
+                                'anterior' => $valor_anterior,
+                                'mensaje' => "Es una hora menor que la anterior",
+                            ];
+                        }
+                        elseif(($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))){
+                            $secuencia_correcta = false;
+                            $excepciones[] = [
+                                'id' => $i+1,
+                                'tabla' => $tabla,
+                                'campo' => $campo,
+                                'actual' => $datos[$i],
+                                'anterior' => $valor_anterior,
+                                'mensaje' => "Es una fecha mayor que la anterior",
                             ];
                         }
                     }
+                    
                     break;
                 case 'Hora':
                     // Verificar la secuencia de horas
                     // Suponiendo que $datos[$i] es una cadena de hora en formato 'H:i:s'
                     if ($valor_anterior !== null) {
-                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior)) || ($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))) {
+                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior))) {
                             $secuencia_correcta = false;
                             $excepciones[] = [
-                                'id' => $i,
+                                'id' => $i+1,
                                 'tabla' => $tabla,
-                                'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia de horas.",
+                                'campo' => $campo,
+                                'actual' => $datos[$i],
+                                'anterior' => $valor_anterior,
+                                'mensaje' => "Es una hora menor que la anterior",
+                            ];
+                        }
+                        elseif(($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))){
+                            $secuencia_correcta = false;
+                            $excepciones[] = [
+                                'id' => $i+1,
+                                'tabla' => $tabla,
+                                'campo' => $campo,
+                                'actual' => $datos[$i],
+                                'anterior' => $valor_anterior,
+                                'mensaje' => "Es una hora mayor que la anterior",
                             ];
                         }
                     }
@@ -225,8 +294,11 @@ class SequenceController extends Controller
                 if ($datos[$i] < $minimo || $datos[$i] > $maximo) {
                     $secuencia_correcta = false;
                     $excepciones[] = [
-                        'id' => $i,
+                        'id' => $i+1,
                         'tabla' => $tabla,
+                        'campo' => $campo,
+                        'actual' => $datos[$i],
+                        'anterior' => $valor_anterior,
                         'mensaje' => "Valor '{$datos[$i]}' está fuera del rango de valores esperado '{$rango_valores}'.",
                     ];
                 }
