@@ -216,6 +216,8 @@
                             <br>
                         <button type="submit" class="btn btn-primary">analizar</button>
                     </form>
+                    <a href="{{ route('campo.cancelar')}}" >Cancelar</a>
+                   
                    
                      
                  
