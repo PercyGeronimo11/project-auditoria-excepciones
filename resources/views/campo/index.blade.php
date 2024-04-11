@@ -12,6 +12,17 @@
 
 <div class="container mt-5">
   <h1 class="mb-4">Tareas de integridad de campo</h1>
+  
+  <div id="mensaje">
+    
+    @if (isset($datos))
+    <div class="alert alert-warning alert-dismissible fade show mt-3 emergente" role="alert" style="color: white; background-color: rgb(183, 178, 31) ">
+      {{$datos}}
+    </div>
+   
+     @endif 
+</div>
+
   <br>
   <div  id="search-nav">
     <form class="navbar-left navbar-form nav-search mr-md-3" method="GET" role="search">
@@ -119,7 +130,14 @@
 </div>
 
 
-
+<script>
+    
+    function mensajeQuit(){
+      let mensaje=document.getElementById("mensaje");
+      mensaje.style.display="none";
+    }
+         setTimeout(mensajeQuit,2000);
+</script>
   
 
 @endsection

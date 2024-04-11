@@ -23,8 +23,12 @@ class TareaCampoController extends Controller
         ->where('estado','<>','0')
         ->where('baseDatos','=',$nombre)
         ->paginate($this::PAGINATION);
+
+        // $datos="El campo ya esta registrado-puedes editarlo o eliminarlo";
         // return session()->get('TareaCampos');
-        return view('campo.index',compact('TareaCampos','busqueda'));
+        // return view('campo.index',compact('TareaCampos','busqueda'))->with('datos','Ya esta contratado!!');
+        return view('campo.index', compact('TareaCampos', 'busqueda'));
+        
         // $tableNames = array_keys(session()->get('tablesName'));
 
         // $contenido=session()->get('tablesName');
@@ -142,18 +146,87 @@ class TareaCampoController extends Controller
         $database = Database::latest()->first();
         $data = $request->validate([
             'campo' => 'required',
-            // 'condicion' => 'required',
             'condicion' => '',
             'tabla' => 'required',
             'tipoValidar' => 'required',
-            // 'longitud' => 'numeric', 
-            'condicion_text' => '', 
+            'longitud' => ['nullable', 'numeric'],
+            'condicion_text' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    $condicion = $request->condicion;
+                    // $fail("te falto llenar contenido en la condicion".$condicion);
+                    $valor=false;
+                    foreach ($request->condicion_text as $item ){
+                        if($item == null){
+                            $valor=true;
+                            break;
+                        }
+                    }
+                    // foreach( => intem)
+                    if ($valor && $condicion !="1") {
+                        $fail("te falto llenar contenido en la condicion");
+                    }
+                 
+                },
+            ],
             'null' => '', 
         ]);
-        if( $data["longitud"] = ""){
-            $data["longitud"]="0";
+        // $data = $request->validate([
+        //     'campo' => 'required',
+        //     // 'condicion' => 'required',
+        //     'condicion' => '',
+        //     'tabla' => 'required',
+        //     'tipoValidar' => 'required',
+        //     'longitud' => ['nullable', 'numeric'],
+        //     'condicion_text'=>'',
+        //     // 'condicion_text[]' => 'required_unless:condicion,1',
+        //     // 'condicion_text[]' => 'required_if:condicion,between,==',
+            
+        //     'null' => '', 
+        //     'condicion_text' => [
+        //         function ($attribute, $value, $fail) use ($request) {
+        //             $condicion = $request->condicion;
+        //             // $fail("te falto llenar contenido en la condicion".$condicion);
+        //             $valor=false;
+        //             foreach ($request->condicion_text as $item ){
+        //                 if($item == null){
+        //                     $valor=true;
+        //                     break;
+        //                 }
+        //             }
+        //             // foreach( => intem)
+        //             if ($valor && $condicion !="1") {
+        //                 $fail("te falto llenar contenido en la condicion");
+        //             }
+                 
+        //         },
+        //     ],
+        // ]);
+        // $condicion_text = $request->condicion_text;
+        // return $condicion_text;
+        // $validator =  \Illuminate\Support\Facades\Validator::make([], []);
+        
+        // foreach($condicion_text as $key => $value) {
+        //     return "hola";
+        //     $validator =  \Illuminate\Support\Facades\Validator::make(
+        //         ['condicion_text.' . $key => $value],
+        //         ['condicion_text.' . $key => 'required_unless:condicion,1']
+        //     );
+
+        //     if ($validator->fails()) {
+        //         return $validator->fails();
+        //         return redirect()->back()
+        //             ->withErrors($validator)
+        //             ->withInput();
+        //     }
+        // }
+
+        if( $data['condicion'] = "1"){
+            $data['condicion']="";
         }
-        $tareas =TareaCampo::where('estado','=',1)
+        if( $data['longitud'] = ""){
+            $data['longitud']="0";
+        }
+        $tareas =TareaCampo::where('estado','<>',0)
         ->where('baseDatos','=',$database["nombre_db"])
         ->where('campo','=',$data["campo"] )
         ->get();
@@ -171,9 +244,10 @@ class TareaCampoController extends Controller
             $data["null"]= 1;
         }
         
+        // return  $tareas ;
         if (!($tareas->isEmpty())) {
-            return  $tareas ;
-          return redirect()->back()->with('mensaje', 'El campo ya esta registrado-puedes editarlo o eliminarlo');
+            // return  $tareas ;
+          return redirect()->back()->with('datos', 'El campo ya esta registrado-puedes editarlo o eliminarlo');
         }
         else{
             // return  "empty" ;

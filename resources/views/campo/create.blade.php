@@ -8,9 +8,18 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <div class="container mt-5">
+  <div id="mensaje">
+       
+    @if (session("datos"))
+    <div class="alert alert-warning alert-dismissible fade show mt-3 emergente" role="alert" style="color: white; background-color: rgb(183, 178, 31) ">
+            {{session('datos')}}
+    </div>
+   
+     @endif 
+</div>
     <div class="row">
        
-        
+      
                     {{-- <h5 class="card-title">{{ $tableName }}</h5> --}}
                     <form action="
                             {{ route('tareacampo.store')}}" method="POST" enctype="multipart/form-data">
@@ -28,7 +37,7 @@
 
                                 <label for="inputPassword" class="col-sm-2 col-form-label">Tabla</label>
                                 
-                                <select class="form-select" aria-label="Default select example" id="firstSelect" name="tabla"> 
+                                <select class="form-select  @error('tabla') is-invalid @enderror" aria-label="Default select example" id="firstSelect" name="tabla"> 
                                     <option selected disabled>Open this select menu</option>
                            
                                     @foreach ($tableNames as $item)
@@ -36,30 +45,45 @@
                                     <option value="{{$item}}">{{$item}}</option>
                                     @endforeach
                                 </select>
+                                @error('tabla')
+                            <span class="invalid feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                             </div>
                             <div class="mb-3 row">
                                 <label for="inputPassword" class="col-sm-2 col-form-label">Campo</label>
-                                <select class="form-select" aria-label="Default select example" id="secondSelect" name="campo">
+                                <select class="form-select @error('campo') is-invalid @enderror" aria-label="Default select example" id="secondSelect" name="campo">
                                     <option selected disabled>Open this select menu</option>
                                     @foreach ($columnas[$tableNames[0]] as $item)
                                         <option value={{$item}}>{{$item}}</option>
                                     @endforeach
                                 </select>
+                                @error('campo')
+                                <span class="invalid feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                             </div>
                             <div class="mb-3 row" style="display: none">
                               <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
-                              <select class="form-select" aria-label="Default select example" id="thirdSelect" name="tipo">
+                              <select class="form-select @error('tipo') is-invalid @enderror" aria-label="Default select example" id="thirdSelect" name="tipo">
                                   <option selected disabled>Open this select menu</option>
                                   @foreach ($tipos[$tableNames[0]] as $item)
                                       <option value={{$item}}>{{$item}}</option>
                                   @endforeach
                               </select>
+                              @error('tipo')
+                              <span class="invalid feedback" role="alert">
+                                  <strong>{{ $message }}</strong>
+                              </span>
+                          @enderror
                             </div>
                             <div class="mb-3 row">
                               <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
                               
                               <div class="input-group mb-3 " >
-                                <select class="form-select" aria-label="Default select example" id="fourthSelect" name="tipoValidar">
+                                <select class="form-select @error('tipoValidar') is-invalid @enderror" aria-label="Default select example" id="fourthSelect" name="tipoValidar">
                                   <option value="">Selecciona un tipo de dato...</option>
                                 
                                   <optgroup label="Numéricos">
@@ -98,8 +122,19 @@
                                   </optgroup>
                                 
                                 </select>
+                                @error('tipoValidar')
+                                <span class="invalid feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                                   {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
-                                  <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="longitud" id ="longitud" placeholder="Longitud">
+                                  <input type="text" class="form-control @error('longitud') is-invalid @enderror" aria-label="Text input with dropdown button"  name="longitud" id ="longitud" placeholder="Longitud">
+                                  @error('longitud')
+                                  <span class="invalid feedback" role="alert">
+                                      <strong>{{ $message }}</strong>
+                                  </span>
+                              @enderror
+      
                                   {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
                                   {{-- <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br> --}}
                                  
@@ -115,8 +150,8 @@
                               <label for="inputPassword" class="col-sm-2 col-form-label">Condición</label>
                               <div class="input-group mb-3 " >
                          
-                                <select class="form-select" aria-label="Default select example" id="fiveselect" name="condicion">
-                                  <option value="">Selecciona una condicion..</option>
+                                <select class="form-select @error('condicion') is-invalid @enderror" aria-label="Default select example" id="fiveselect" name="condicion">
+                                  <option value="1">Selecciona una condicion..</option>
                                 
                                   <optgroup label="Numéricos,Fecha y hora">
                                     <option value=">">></option>
@@ -141,9 +176,19 @@
                                   </optgroup> --}}
   
                                 </select>
+                                @error('condicion')
+                            <span class="invalid feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
                                
                                 {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text"> --}}
-                                <input type="text" class="form-control" aria-label="Text input with dropdown button"  name="condicion_text[0]">
+                                <input type="text" class="form-control @error('condicion_text') is-invalid @enderror" aria-label="Text input with dropdown button"  name="condicion_text[0]">
+                                @error('condicion_text')
+                                <span class="invalid feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                                 {{-- <input type="text" class="form-control" aria-label="Text input with dropdown button" name="condicion_text"> --}}
                                 <button type="button" class="btn btn-primary add-condition-btn" id="boton-ad" style="display: none">+</button> <br>
                               </div>
@@ -177,7 +222,14 @@
     </div>
 </div>
 
-
+<script>
+    
+  function mensajeQuit(){
+    let mensaje=document.getElementById("mensaje");
+    mensaje.style.display="none";
+  }
+       setTimeout(mensajeQuit,2000);
+</script>
 
 <script>
 
