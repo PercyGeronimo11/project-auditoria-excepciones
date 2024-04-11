@@ -17,15 +17,24 @@ class SequenceController extends Controller
         $contenido=session()->get('tablesName');
         $tableNames = array_keys($contenido);
         $columnas = [];
+        $tipos = [];
         foreach($contenido as $tableName => $tableData) {
             $fields = [];
             $fields1 = [];
+            $types=[];
             foreach($tableData["columns"] as $column) {
                 if($database->tipo == "mysql"){
                     $fields[] = $column->Field;
                 }else{
                     $fields[] = $column['name'];
                 }
+
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
             }
             foreach($tableData["data"] as $column2) {
                 if (is_object($column2) && isset($column2->idActa)) {
@@ -33,9 +42,10 @@ class SequenceController extends Controller
                   }
             }
             $columnas[$tableName] = $fields;
+            $tipos[$tableName] = $types;
         }
-        //return $columnas;
-        return view('secuencialidad.index',compact('tableNames','columnas'));
+        //return $tipos;
+        return view('secuencialidad.index',compact('tableNames','columnas','tipos'));
     }
 
     public function store(Request $request)
@@ -79,87 +89,124 @@ class SequenceController extends Controller
 
         // Obtener los datos de la tabla seleccionada desde la sesión
         $datos = session()->get('tablesName.' . $tabla . '.data')->pluck($campo);
+        //return $datos;
         /* return session()->get('tablesName'); */
         // Verificar si se detectan excepciones en la secuencia
         $valor_anterior = null;
-        foreach ($datos as $valor) {
+        for ($i = 0; $i < count($datos); $i++) {
             // Verificar el tipo de secuencia
             switch ($tipo_secuencia) {
-                case 'numerica':
+                case 'Numérica':
                     // Verificar la secuencia numérica
                     if ($valor_anterior !== null) {
                         if ($orden_secuencia === 'ascendente') {
-                            if ($valor - $valor_anterior != $incremento) {
+                            if ($datos[$i] - $valor_anterior != $incremento) {
                                 $secuencia_correcta = false;
-                                $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, se esperaba un incremento de '{$incremento}' desde el valor anterior '{$valor_anterior}'.";
+                                $excepciones[] = [
+                                    'id' => $i,
+                                    'tabla' => $tabla,
+                                    'mensaje' => " Valor '{$datos[$i]}' es inesperado, se esperaba un incremento de '{$incremento}' desde el valor anterior '{$valor_anterior}'.",
+                                ];
                             }
                         } else {
-                            if ($valor_anterior - $valor != $incremento) {
+                            if ($valor_anterior - $datos[$i] != $incremento) {
                                 $secuencia_correcta = false;
-                                $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, se esperaba un decremento de '{$incremento}' desde el valor anterior '{$valor_anterior}'.";
+                                $excepciones[] = [
+                                    'id' => $i,
+                                    'tabla' => $tabla,
+                                    'mensaje' => " Valor '{$datos[$i]}' es inesperado, se esperaba un decremento de '{$incremento}' desde el valor anterior '{$valor_anterior}'.",
+                                ];
                             }
                         }
                     }
                     break;
-                case 'alfanumerica':
+                case 'Alfanumérica':
 
-                    if ($valor_anterior !== null) {
-                        // Extraer componentes numéricos y alfabéticos de las cadenas
-                        $valor_numerico = intval(preg_replace('/[^0-9]/', '', $valor));
-                        $valor_anterior_numerico = intval(preg_replace('/[^0-9]/', '', $valor_anterior));
-
-                        if($secuencia_alfabetica === 'si'){
-                            //Valores alfabeticos 
-                            $valor_alfabetico = preg_replace('/[0-9]+/', '', $valor);
-                            $valor_anterior_alfabetico = preg_replace('/[0-9]+/', '', $valor_anterior);
-
-                            // Verificar si la parte alfabética del valor actual sigue el orden alfabético
-                            if ($orden_secuencia === 'ascendente') {
-                                // Si el orden es ascendenteendente, verificar que la letra actual sea mayor o igual a la letra anterior
-                                if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) < 0) {
-                                    // Si no sigue el orden alfabético, agregar una excepción
-                                    $secuencia_correcta = false;
-                                    $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, no sigue el orden alfabético en la secuencia alfanumérica.";
-                                }
-                            } elseif ($orden_secuencia === 'descendente') {
-                                // Si el orden es descendenteendente, verificar que la letra actual sea menor o igual a la letra anterior
-                                if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) > 0) {
-                                    // Si no sigue el orden alfabético, agregar una excepción
-                                    $secuencia_correcta = false;
-                                    $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, no sigue el orden alfabético en la secuencia alfanumérica.";
+                    if (preg_match('/[0-9]+/', $datos[$i])) {
+                        if ($valor_anterior !== null) {
+                            // Extraer componentes numéricos y alfabéticos de las cadenas
+                            $valor_numerico = intval(preg_replace('/[^0-9]/', '', $datos[$i]));
+                            $valor_anterior_numerico = intval(preg_replace('/[^0-9]/', '', $valor_anterior));
+    
+                            if($secuencia_alfabetica === 'si'){
+                                //Valores alfabeticos 
+                                $valor_alfabetico = preg_replace('/[0-9]+/', '', $datos[$i]);
+                                $valor_anterior_alfabetico = preg_replace('/[0-9]+/', '', $valor_anterior);
+    
+                                // Verificar si la parte alfabética del valor actual sigue el orden alfabético
+                                if ($orden_secuencia === 'ascendente') {
+                                    // Si el orden es ascendenteendente, verificar que la letra actual sea mayor o igual a la letra anterior
+                                    if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) < 0) {
+                                        // Si no sigue el orden alfabético, agregar una excepción
+                                        $secuencia_correcta = false;
+                                        $excepciones[] = [
+                                            'id' => $i,
+                                            'tabla' => $tabla,
+                                            'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden alfabético en la secuencia alfanumérica.",
+                                        ];
+                                    }
+                                } elseif ($orden_secuencia === 'descendente') {
+                                    // Si el orden es descendenteendente, verificar que la letra actual sea menor o igual a la letra anterior
+                                    if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) > 0) {
+                                        // Si no sigue el orden alfabético, agregar una excepción
+                                        $secuencia_correcta = false;
+                                        $excepciones[] = [
+                                            'id' => $i,
+                                            'tabla' => $tabla,
+                                            'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden alfabético en la secuencia alfanumérica.",
+                                        ];
+                                    }
                                 }
                             }
+    
+                            // Comparar los componentes numéricos
+                            $num_cmp = $valor_numerico - $valor_anterior_numerico;
+    
+                            // Verificar si los componentes numéricos siguen el orden esperado
+                            if (($orden_secuencia === 'ascendente' && $num_cmp != 1) || ($orden_secuencia === 'descendente' && $num_cmp != -1)) {
+                                // Si los componentes numéricos no siguen el orden esperado, agregar una excepción
+                                $secuencia_correcta = false;
+                                $excepciones[] = [
+                                    'id' => $i,
+                                    'tabla' => $tabla,
+                                    'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia alfanumérica.",
+                                ];
+                            }
                         }
-
-                        // Comparar los componentes numéricos
-                        $num_cmp = $valor_numerico - $valor_anterior_numerico;
-
-                        // Verificar si los componentes numéricos siguen el orden esperado
-                        if (($orden_secuencia === 'ascendente' && $num_cmp != 1) || ($orden_secuencia === 'descendente' && $num_cmp != -1)) {
-                            // Si los componentes numéricos no siguen el orden esperado, agregar una excepción
-                            $secuencia_correcta = false;
-                            $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia alfanumérica.";
-                        }
+                    } else {
+                        $excepciones[] = [
+                            'error' => "Los valores no contienen una parte numérica, por lo tanto, no se realiza el análisis de secuencialidad alfanumérica o numérica.",
+                        ];
+                        return $excepciones;
                     }
+                    
                 break;
                    
-                case 'fecha':
+                case 'Fecha':
                     // Verificar la secuencia de fechas
-                    // Suponiendo que $valor es una cadena de fecha en formato 'Y-m-d'
+                    // Suponiendo que $datos[$i] es una cadena de fecha en formato 'Y-m-d'
                     if ($valor_anterior !== null) {
-                        if (($orden_secuencia === 'ascendente' && strtotime($valor) < strtotime($valor_anterior)) || ($orden_secuencia === 'descendente' && strtotime($valor) > strtotime($valor_anterior))) {
+                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior)) || ($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))) {
                             $secuencia_correcta = false;
-                            $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia de fechas.";
+                            $excepciones[] = [
+                                'id' => $i,
+                                'tabla' => $tabla,
+                                'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia de fechas.",
+                            ];
                         }
                     }
                     break;
-                case 'hora':
+                case 'Hora':
                     // Verificar la secuencia de horas
-                    // Suponiendo que $valor es una cadena de hora en formato 'H:i:s'
+                    // Suponiendo que $datos[$i] es una cadena de hora en formato 'H:i:s'
                     if ($valor_anterior !== null) {
-                        if (($orden_secuencia === 'ascendente' && strtotime($valor) < strtotime($valor_anterior)) || ($orden_secuencia === 'descendente' && strtotime($valor) > strtotime($valor_anterior))) {
+                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior)) || ($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))) {
                             $secuencia_correcta = false;
-                            $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia de horas.";
+                            $excepciones[] = [
+                                'id' => $i,
+                                'tabla' => $tabla,
+                                'mensaje' => " Valor '{$datos[$i]}' es inesperado, no sigue el orden {$orden_secuencia} en la secuencia de horas.",
+                            ];
                         }
                     }
                     break;
@@ -175,14 +222,18 @@ class SequenceController extends Controller
                 // descendenteomponer el rango de valores
                 list($minimo, $maximo) = explode('-', $rango_valores);
                 // Verificar si el valor está dentro del rango esperado
-                if ($valor < $minimo || $valor > $maximo) {
+                if ($datos[$i] < $minimo || $datos[$i] > $maximo) {
                     $secuencia_correcta = false;
-                    $excepciones[] = "Excepción de secuencialidad detectada: Valor '{$valor}' está fuera del rango de valores esperado '{$rango_valores}'.";
+                    $excepciones[] = [
+                        'id' => $i,
+                        'tabla' => $tabla,
+                        'mensaje' => "Valor '{$datos[$i]}' está fuera del rango de valores esperado '{$rango_valores}'.",
+                    ];
                 }
             }
 
             // Actualizar el valor anterior para la próxima iteración
-            $valor_anterior = $valor;
+            $valor_anterior = $datos[$i];
         }
 
         // Si la secuencia es correcta, retornar un mensaje de éxito
