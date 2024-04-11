@@ -269,7 +269,7 @@ class TareaCampoController extends Controller
     public function analizar($id, $state)
 {
     $TareaCampo = TareaCampo::findOrFail($id);
-    $TareaCampo->update(['estado' => 2]);
+    // $TareaCampo->update(['estado' => 2]);
     $contenido = session()->get('tablesName');
     $campo = $TareaCampo->campo;
     $condicion_text = array_filter(explode(',', $TareaCampo->condicion_text));
