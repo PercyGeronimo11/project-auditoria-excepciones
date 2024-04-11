@@ -238,3 +238,38 @@ footer img:focus , footer a:focus { outline: none; }
 .logo_img{
 	width: 9%;
 }
+
+label.used {
+    top: -20px;
+    transform: scale(.75); 
+    left: -2px;
+    color: #4a89dc;
+}
+
+.error-message {
+    display: block;
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 30px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+	text-align: center;
+	line-height: 150%;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
