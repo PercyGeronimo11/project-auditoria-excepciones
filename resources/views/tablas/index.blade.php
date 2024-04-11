@@ -10,47 +10,39 @@
     <div class="container mt-5">
         <h1 class="mb-4">INTEGRIDAD DE TABLAS</h1>
         <br>
-        <div id="search-nav">
-            <form class="navbar-left navbar-form nav-search mr-md-3" method="GET" role="search">
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button type="submit" class="btn btn-search pr-1">
-                            <i class="fa fa-search search-icon"></i>
-                        </button>
-                    </div>
-                    <input type="text" placeholder="Buscar por tabla" class="form-control" value=""
-                        name="buscarpor">
+        {{-- Formulario de analisis --}}
+        <form action="{{ route('integridadtablas.analysis') }}">
+            <div class="form-group">
+                <div class="mb-3 row">
+                    <label for="inputPassword" class="col-sm-2 form-label">Tabla</label>
+                    <select class="form-select" aria-label="Default select example" id="firstSelect" name="tabla">
+                        <option selected disabled>Seleccionar</option>
+                        @foreach ($tableNames as $item)
+                            <option value="{{ $item }}">{{ $item }}</option>
+                        @endforeach
+                    </select>
                 </div>
-            </form>
-        </div>
+            </div>
+            <div class="form-group">
+                <div class="mb-3 row">
+                    <label for="inputPassword" class="col-sm-2 col-form-label">Clave Foranea</label>
+                    <select class="form-select" aria-label="Default select example" id="secondSelect" name="claveForanea">
+                        <option selected disabled>Seleccionar</option>
+                        @foreach ($colForeignKeys[$tableNames[0]] as $item)
+                            <option value="{{ $item }}">{{ $item }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <form action="{{route('integridadtablas.analysis')}}">
-            <div class="mb-3 row">
-                <label for="inputPassword" class="col-sm-2 col-form-label">Tabla</label>
-                <select class="form-select" aria-label="Default select example" id="firstSelect" name="tabla">
-                    <option selected disabled>Seleccionar</option>
-                    @foreach ($tableNames as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
-                    @endforeach
-                </select>
             </div>
-            <div class="mb-3 row">
-                <label for="inputPassword" class="col-sm-2 col-form-label">Clave Foranea</label>
-                <select class="form-select" aria-label="Default select example" id="secondSelect" name="claveForanea">
-                    <option selected disabled>Seleccionar</option>
-                    @foreach ($colForeignKeys[$tableNames[0]] as $item)
-                        <option value={{ $item }}>{{ $item }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-              <button type="submit" class="button bg-warning">Analizar</button>
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-warning">Analizar</button>
             </div>
         </form>
     </div>
 
     <script>
-    
         const colForeignKeys = <?php echo json_encode($colForeignKeys); ?>;
 
 
@@ -81,7 +73,5 @@
             }
             secondSelect.dispatchEvent(new Event('change'));
         });
-
-      
     </script>
 @endsection
