@@ -22,7 +22,9 @@
 </div>
     <div class="row">
        
-      
+
+
+
                     {{-- <h5 class="card-title">{{ $tableName }}</h5> --}}
                     <form action="
                             {{ route('tareacampo.store')}}" method="POST" enctype="multipart/form-data">
@@ -40,7 +42,7 @@
 
                                 <label for="inputPassword" class="col-sm-2 col-form-label">Tabla</label>
                                 
-                                <select class="form-select  @error('tabla') is-invalid @enderror tabla" aria-label="Default select example" id="firstSelect" name="tabla"> 
+                                <select class="form-select  @error('tabla') is-invalid @enderror select2" aria-label="Default select example" id="firstSelect" name="tabla"> 
                                     <option selected disabled>Open this select menu</option>
                            
                                     @foreach ($tableNames as $item)
@@ -55,7 +57,7 @@
                         @enderror
                             </div>
                             <div class="mb-3 row">
-                                <label for="inputPassword" class="col-sm-2 col-form-label">Campo</label>
+                                <label for="inputPassword" class="col-sm-2 col-form-label select2">Campo</label>
                                 <select class="form-select @error('campo') is-invalid @enderror" aria-label="Default select example" id="secondSelect" name="campo">
                                     <option selected disabled>Open this select menu</option>
                                     @foreach ($columnas[$tableNames[0]] as $item)
@@ -236,18 +238,19 @@
 
 {{-- <script src="path/to/select2.min.js"></script> --}}
 
-<script>
+{{-- <script>
   $(document).ready(function() {
     $("#mySelect").select2();
   });
-</script>
+</script> --}}
 <script>
   function mensaje() {
-  $('#tabla').select2();
+ var $disabledResults = $(".select2");
+  $disabledResults.select2();
   // $('#idLibro').select2();
   // $('#idFolio').select2();
   }
-  setTimeout(mensaje,100);
+  setTimeout(mensaje,10000);
 </script>
 
 <script>
