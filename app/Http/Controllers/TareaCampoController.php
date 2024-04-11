@@ -220,7 +220,7 @@ class TareaCampoController extends Controller
         //     }
         // }
 
-        if( $data['condicion'] = "1"){
+        if( $data['condicion'] == "1"){
             $data['condicion']="";
         }
         if( $data['longitud'] = ""){
