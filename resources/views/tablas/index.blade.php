@@ -50,42 +50,7 @@
     </div>
 
     <script>
-        document.getElementById("fiveselect").addEventListener("change", function() {
-            const valor = this.value;
-            console.log("gola");
-            const boton = document.getElementById("boton-ad");
-            if (valor == "between") {
-                boton.click();
-            } else if (valor == "in") {
-                boton.style.display = "block";
-            } else {
-                var elements = document.getElementsByName("condicion_text[]");
-                for (var i = elements.length - 1; i >= 0; i--) {
-                    elements[i].parentNode.removeChild(elements[i]);
-                }
-                boton.style.display = "none";
-            }
-        });
-
-
-        document.getElementById("fourthSelect").addEventListener("change", function() {
-            const valor = this.value;
-            console.log("ddd");
-            longitud = document.getElementById("longitud")
-            // const boton = document.getElementById("boton-ad");
-            if (valor == "date" || valor == "time") {
-                longitud.style.display = "none";
-            } else {
-                // var elements = document.getElementsByName("condicion_text[]");
-                // for (var i = elements.length - 1; i >= 0; i--) {
-                //   elements[i].parentNode.removeChild(elements[i]);
-                // }
-                longitud.style.display = "block";
-            }
-        });
-
-
-
+    
         const colForeignKeys = <?php echo json_encode($colForeignKeys); ?>;
 
 
@@ -115,86 +80,8 @@
                 secondSelect.add(option);
             }
             secondSelect.dispatchEvent(new Event('change'));
-            // secondSelect.options[0].selected = true;
-            console.log("caimos")
         });
 
-        document.getElementById("secondSelect").addEventListener("change", function() {
-            // Obtener el valor seleccionado del primer select
-            const selectedIndex = this.selectedIndex;
-            const selectedValue = document.getElementById("firstSelect").value;
-            // Obtener una referencia al segundo select
-            const secondSelect = document.getElementById("thirdSelect");
-
-            // Limpiar cualquier opción existente en el segundo select
-            secondSelect.innerHTML = "";
-
-            // Crear nuevas opciones basadas en el valor seleccionado
-            const option = document.createElement("option");
-
-            option.selected = true;
-            secondSelect.add(option);
-            console.log("caimossssssss");
-            secondSelect.dispatchEvent(new Event('change'));
-            // Seleccionar la primera opción en el segundo select
-            // secondSelect.options[0].selected = true;
-        });
-
-        // document.getElementById("thirdSelect").addEventListener("change", function(){
-        //     const valor = this.value;
-
-        //     var resultado = valor.split('(')[0];
-        //     if(resultado=="float"||resultado=="double"){
-        //       resultado="decimal";
-        //     }
-        //     if (resultado.includes("int")) {
-        //       resultado="int";
-        //     }
-        //     if (resultado.includes("char")) {
-        //       resultado="varchar";
-        //     }
-
-        //     selectElement = document.getElementById("fourthSelect");
-
-        //     if(resultado=="varchar"){
-        //     var options = selectElement.getElementsByTagName("option");
-        //     for(var i = 0; i < options.length; i++) {
-        //       options[i].disabled = false;
-        //       option[i].selected = true;
-        //     }
-        //     }
-        //     else{
-        //       for (let i = 0; i < selectElement.options.length; i++) {
-        //       const option = selectElement.options[i];
-        //         console.log()
-        //       // Verificar si el valor de la opción coincide con el valor deseado
-        //         if (option.value !== resultado) {
-        //           // Deshabilitar la opción
-        //           option.disabled = true;
-        //           // option.style.display = "none";
-        //         }
-        //         else{
-        //           option.disabled = false;
-        //           option.selected = true;
-        //           // option.style.display = "block";
-        //         }
-        //       }
-        //     }
-        //     selectElement.dispatchEvent(new Event('change'));
-        //   });
-
-        const addConditionButton = document.querySelector('.add-condition-btn');
-
-        addConditionButton.addEventListener('click', function() {
-            const newConditionText = document.createElement('input'); // Create a new input element
-            newConditionText.setAttribute('type', 'text'); // Set the input type to "text"
-            newConditionText.setAttribute('class', 'form-control'); // Set the input class
-            newConditionText.setAttribute('aria-label', 'Text input with dropdown button'); // Set the aria-label
-            newConditionText.setAttribute('name', 'condicion_text[]'); // Set the input name
-
-            newConditionText.setAttribute('style', 'margin-left:50%; width:50%;'); // Set the input name
-            const conditionGroup = document.querySelector('.condiciones'); // Get the parent div
-            conditionGroup.appendChild(newConditionText); // Append the clone to the parent div
-        });
+      
     </script>
 @endsection
