@@ -67,6 +67,7 @@ class LoginController extends Controller
                         'hotmail.es',
                         'outlook.es',
                         'icloud.es',
+                        'unitru.edu.pe'
                     ];
                     $domain = substr(strrchr($value, "@"), 1); // Obtener el dominio del correo electrónico
                     if (!in_array($domain, $allowedDomains)) {
