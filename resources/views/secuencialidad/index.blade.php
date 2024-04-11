@@ -132,6 +132,16 @@ document.getElementById("secondSelect").addEventListener("change", function() {
         option.text = text;
         tipoSecuenciaSelect.add(option);
     }
+});document.getElementById("secondSelect").addEventListener("change", function() {
+    const incrementoInput = document.getElementById("incremento");
+    const tipoSecuencia = document.getElementById("tipo_secuencia").value;
+    console.log(tipoSecuencia);
+    // Habilitar o deshabilitar el campo de incremento según el tipo de secuencia seleccionado
+    if (tipoSecuencia === "Alfanumérica") {
+        incrementoInput.disabled = false;
+    } else {
+        incrementoInput.disabled = true;
+    }
 });
 
   </script>
