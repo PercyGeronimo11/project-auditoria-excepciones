@@ -33,10 +33,10 @@
             <label for="tipo_secuencia" class="col-sm-2 col-form-label">Tipo de secuencia:</label>
             <select class="form-select" aria-label="Default select example" id="tipo_secuencia" name="tipo_secuencia" id="tipo_secuencia">
                 <option value="" selected disabled>Selecciona un tipo de secuencia...</option>
-                <option value="numerica">Numérica</option>
+                {{-- <option value="numerica">Numérica</option>
                 <option value="alfanumerica">Alfanumérica</option>
                 <option value="fecha">Fecha</option>
-                <option value="hora">Hora</option>
+                <option value="hora">Hora</option> --}}
             </select>
           </div>
           <div id="alfanumericaInput" class="mb-3 row" style="display: none;">
@@ -64,6 +64,7 @@
 
   <script>
     const columnas = <?php echo json_encode($columnas); ?>;
+    const tipos = <?php echo json_encode($tipos); ?>;
     document.getElementById("firstSelect").addEventListener("change", function() {
         // Obtener el valor seleccionado del primer select
         const selectedValue = this.value;
@@ -90,6 +91,48 @@
             secondSelect.add(option);
         }
     });
+document.getElementById("secondSelect").addEventListener("change", function() {
+    const selectedColumn = this.value;
+    const selectedTable = document.getElementById("firstSelect").value;
+    const tipoSecuenciaSelect = document.getElementById("tipo_secuencia");
+
+    tipoSecuenciaSelect.innerHTML = "";
+
+    // Obtener los tipos de columna de la tabla seleccionada
+    const tiposColumna = tipos[selectedTable];
+
+    // Buscar el índice de la columna seleccionada en el array de columnas de la tabla
+    const columnIndex = columnas[selectedTable].indexOf(selectedColumn);
+    console.log(tiposColumna);
+    // Verificar si la columna seleccionada existe en las columnas de la tabla
+    if (columnIndex !== -1) {
+        // Si la columna existe, obtener el tipo de columna correspondiente
+        const tipoColumna = tiposColumna[columnIndex];
+        let tipoSecuencia = "";
+        // Crear opciones según el tipo de columna
+        if (tipoColumna.toLowerCase().includes("char") || tipoColumna.toLowerCase().includes("varchar")) {
+            tipoSecuencia = "Alfanumérica";
+        } else if (tipoColumna.toLowerCase() === "date") {
+            tipoSecuencia = "Fecha";
+        } else if (tipoColumna.toLowerCase() === "time") {
+            tipoSecuencia = "Hora";
+        } else {
+            tipoSecuencia = "Numérica";
+        }
+        addOption(tipoSecuencia);
+    } else {
+        // Si la columna seleccionada no existe, mostrar un mensaje de error o manejar la situación según sea necesario
+        console.error("La columna seleccionada no existe en la tabla seleccionada.");
+    }
+
+    // Función para agregar una opción al select de tipo de secuencia
+    function addOption(text) {
+        const option = document.createElement("option");
+        option.value = text;
+        option.text = text;
+        tipoSecuenciaSelect.add(option);
+    }
+});
 
   </script>
 @endsection
