@@ -491,7 +491,7 @@ class TareaCampoController extends Controller
 
 
     public function cancelar(){
-        return redirect()->route('TareaCampo.index')->with('datos','acciona cancelada...');
+        return redirect()->route('tareacampo.index')->with('datos','acciona cancelada...');
     }
 
     public function analizarback($id,$state)
