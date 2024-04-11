@@ -355,6 +355,9 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
     if (resultado.includes("char")) {
       resultado="varchar";
     }
+    if (resultado.includes("ate")) {
+      resultado="date";
+    }
 
     selectElement = document.getElementById("fourthSelect")
 
