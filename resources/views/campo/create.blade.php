@@ -57,8 +57,8 @@
                         @enderror
                             </div>
                             <div class="mb-3 row">
-                                <label for="inputPassword" class="col-sm-2 col-form-label select2">Campo</label>
-                                <select class="form-select @error('campo') is-invalid @enderror" aria-label="Default select example" id="secondSelect" name="campo">
+                                <label for="inputPassword" class="col-sm-2 col-form-label">Campo</label>
+                                <select class="form-select @error('campo') is-invalid @enderror  select2" aria-label="Default select example" id="secondSelect" name="campo">
                                     <option selected disabled>Open this select menu</option>
                                     @foreach ($columnas[$tableNames[0]] as $item)
                                         <option value={{$item}}>{{$item}}</option>
