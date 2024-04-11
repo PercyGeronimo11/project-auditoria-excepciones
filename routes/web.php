@@ -38,5 +38,7 @@ Route::get('/cancelar', [TareaCampoController::class, 'cancelar'])->name('campo.
 //Tablas
 Route::get('excepcion/integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
 Route::get('excepcion/integridad-tablas/analisis',[IntegridadTablasController::class,'analysis'])->name('integridadtablas.analysis');
+Route::get('excepcion/integridad-tablas/cancelar',[IntegridadTablasController::class,'cancelar'])->name('integridadtablas.cancelar');
+
 
 Route::resource('secuencialidad',SequenceController::class);

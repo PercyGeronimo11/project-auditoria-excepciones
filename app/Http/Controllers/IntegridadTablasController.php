@@ -81,5 +81,9 @@ class IntegridadTablasController extends Controller
 
         return view('tablas.indexReport',compact('listExceptions','numExcepciones')); 
     }
+
+    public function cancelar(){
+        return redirect()->route('integridadtablas.index');
+    }
 }
 

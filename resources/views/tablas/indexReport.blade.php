@@ -8,15 +8,15 @@
     <script src="https://kit.fontawesome.com/7920972db5.js" crossorigin="anonymous"></script>
 
     <div class="container mt-5">
-        <h2 class="mb-4"> <b>  INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
+        <h2 class="mb-4"> <b> INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
 
         <div class="card">
             <div class="card-header">
                 <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
             </div>
 
-            <table>
-                <thead>
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="table-danger">
                     <th>N°</th>
                     <th>Clave Foranea</th>
                     <th>Tabla Referenciada</th>
@@ -30,11 +30,11 @@
                         <td>{{ $exceptionValue }}</td>
                     @endforeach
                 </tbody>
-
             </table>
-
-
         </div>
+        <a href="{{route('integridadtablas.cancelar')}}">
+            <button type="button" class="btn btn-warning">Atras</button>
+        </a>
     </div>
 
 @endsection
