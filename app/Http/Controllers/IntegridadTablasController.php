@@ -10,7 +10,7 @@ class IntegridadTablasController extends Controller
     public function index(Request $request){
         $tableDataArray=session()->get('tablesName');
         $tableNames = array_keys($tableDataArray);
-        
+
         $colForeignKeys = [];
         $tableNamesRefer =[];
         $columnNamesRefer =[];
@@ -19,6 +19,7 @@ class IntegridadTablasController extends Controller
             $fields = [];
             $tableNameReference=[];
             $colNameReference=[];
+
             foreach($tableValueArray["foreignKeys"] as $colForeignKey) {
                 if (isset($colForeignKey->Field)) {
                     $fields[] = $colForeignKey->Field;
@@ -32,7 +33,57 @@ class IntegridadTablasController extends Controller
             $tableNamesRefer[$tableKey]= $tableNameReference;
             $columnNamesRefer[$tableKey]=$colNameReference;
         }
-        //dd($tableDataArray, $fields,$columnNamesRefer,$tableNamesRefer[$tableKey]);
-        return view('tablas.index',compact('tableNames','colForeignKeys')); 
+
+        //dd($tableDataArray, $tableNames,$fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
+        return view('tablas.index',compact('tableNames','colForeignKeys','tableNamesRefer','columnNamesRefer')); 
+    }
+
+    public function analysis(Request $request){
+        $tableDataArray= session()->get('tablesName');
+        $tableNameSelect=$request->input('tabla');
+        $keyForeignNameSelect=$request->input('claveForanea');
+        $tableNameRefer="";
+        $columnNameRefer="";
+        $exceptionNotFound="La clave foranea no se encontro en la tabla referenciada";
+
+        //OBTENER DATOS DE LA REFERENCIA
+        foreach($tableDataArray[$tableNameSelect]['foreignKeys'] as $tableValue){
+            if ($tableValue->COLUMN_NAME === "venta_id") {
+                $tableNameRefer = $tableValue->REFERENCED_TABLE_NAME;
+                $columnNameRefer = $tableValue->REFERENCED_COLUMN_NAME;
+            }
+        }
+
+        $tableDataSelect = $tableDataArray[$tableNameSelect];
+        $tableDataRefer = $tableDataArray[$tableNameRefer];
+
+
+        //CALCULO DE EXCEPCIONES
+        $listExceptions=[];
+        $numExcepciones=0;
+        foreach($tableDataSelect['data'] as $registroSelect){
+            $numCorrectos=0;
+            $numIncorrectos=0;
+            foreach($tableDataRefer['data'] as $registroRefer){
+                if($registroSelect->$keyForeignNameSelect==$registroRefer->$columnNameRefer){
+                    $numCorrectos++;
+                }else{
+                    $numIncorrectos++;
+                }
+            }
+            if($numIncorrectos==count($tableDataRefer['data'])){
+                $listExceptions[$registroSelect->$keyForeignNameSelect]=$exceptionNotFound;
+                $numExcepciones++;
+            }
+        }
+        
+        //dd($tableNameSelect,$keyForeignNameSelect,$tableDataArray,$tableDataSelect,$numExcepciones);
+
+        return view('tablas.indexReport',compact('listExceptions','numExcepciones')); 
+    }
+
+    public function cancelar(){
+        return redirect()->route('integridadtablas.index');
     }
 }
+

@@ -26,12 +26,15 @@ class DatabaseController extends Controller
 
     public function showConnectionForm()
     {
-        return view('conexion.connection_form');
+        $databases = Database::all(); // Obtener todas las bases de datos
+        return view('conexion.connection_form', compact('databases'));  
+    
     }
 
     protected function configureDatabaseConnection()
     {
         $database = Database::latest()->first(); // Obtener el último registro de la tabla Database
+        
         if ($database) {
             config(['database.connections.' . $this->connectionName => [
                 'driver' => $database->tipo,
@@ -54,14 +57,11 @@ class DatabaseController extends Controller
     public function connectDatabase(Request $request)
     {
         
-            $database = new Database();
-            $database->tipo =  $request->input('driver');
-            $database->host = $request->input('host');
-            $database->nombre_db = $request->input('database');
-            $database->usuario = $request->input('username');
-            $database->contraseña = $request->input('password');
-            $database->estado = '1';
-            $database->save();
+        $driver = $request->input('driver');
+
+        $databaseName = $request->input('database');        
+
+        $existingDatabase = Database::where('nombre_db', $databaseName)->exists();
 
         $connection = [
             'host' => $request->input('host'),
@@ -70,7 +70,7 @@ class DatabaseController extends Controller
             'password' => $request->input('password'),
         ];
 
-        $driver = $request->input('driver');
+        try{
 
         if ($driver == 'mysql') {
             config(['database.connections.dynamic' => array_merge([
@@ -85,6 +85,33 @@ class DatabaseController extends Controller
                 'driver' => 'sqlsrv',
                 'port' => 1433,
             ], $connection)]);
+        }
+            DB::connection('dynamic')->getPdo();
+            if (!$existingDatabase) {
+                $database = new Database();
+                $database->tipo =  $request->input('driver');
+                $database->host = $request->input('host');
+                $database->nombre_db = $request->input('database');
+                $database->usuario = $request->input('username');
+                $database->contraseña = $request->input('password');
+                $database->estado = '1';
+                $database->save();
+            }else{
+                Database::where('nombre_db', $databaseName)->delete();
+                $database = new Database();
+                $database->tipo =  $request->input('driver');
+                $database->host = $request->input('host');
+                $database->nombre_db = $request->input('database');
+                $database->usuario = $request->input('username');
+                $database->contraseña = $request->input('password');
+                $database->estado = '1';
+                $database->save();
+
+            }
+
+        } catch (\Exception $e) {
+            $errorMessage = "Error al conectar a la base de datos: " . $e->getMessage();
+            return back()->withError($errorMessage)->withInput();
         }
 
         $tables = [];
@@ -107,6 +134,11 @@ class DatabaseController extends Controller
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
+                $foreignKeys = DB::connection('dynamic')->select("
+                    SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = '$tableName'
+                ");
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.COLUMNS')
@@ -118,17 +150,25 @@ class DatabaseController extends Controller
                             'name' => $column->COLUMN_NAME,
                             'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
                         ];
-                    })
-                    ->toArray();
+                    })->toArray();
+                // $foreignKeys = DB::connection('dynamic')
+                //     ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
+                //     ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
+                //     ->where('TABLE_NAME', $tableName)
+                //     ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
+                //     ->get()
+                //     ->toArray();
             }
             
             $tableData = DB::connection('dynamic')->table($tableName)->get();
             
             $tablesData[$tableName] = [
                 'columns' => $columns,
+                'foreignKeys' => $foreignKeys,
                 'data' => $tableData
             ];
         }
+
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
 
@@ -165,6 +205,13 @@ class DatabaseController extends Controller
     }
 
 
+
+    
+    public function listDatabases()
+    {
+        $databases = DB::table('database')->get();
+        return view('conexion.connection_form', compact('databases'));
+    }
 
 }
   
