@@ -17,17 +17,25 @@
 
             <table class="table table-striped table-bordered table-hover">
                 <thead class="table-danger">
+                    <tr> 
                     <th>N°</th>
+                    <th>Tabla</th>
                     <th>Clave Foranea</th>
                     <th>Tabla Referenciada</th>
                     <th>Excepcion</th>
+                </tr> 
                 </thead>
                 <tbody>
+                    @php $index = 1; @endphp
                     @foreach ($listExceptions as $exceptionKey => $exceptionValue)
-                        <td> 1</td>
+                    <tr> 
+                        <td> {{$index}}</td>
+                        <td>{{ $tableNameSelect }}</td>
                         <td>{{ $exceptionKey }}</td>
-                        <td> Ventas</td>
+                        <td>{{ $tableRefNameSelect}}</td>
                         <td>{{ $exceptionValue }}</td>
+                    </tr> 
+                    @php $index++; @endphp
                     @endforeach
                 </tbody>
             </table>

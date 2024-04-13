@@ -7,83 +7,134 @@ use Illuminate\Support\Facades\DB;
 
 class IntegridadTablasController extends Controller
 {
-    public function index(Request $request){
-        $tableDataArray=session()->get('tablesName');
+    public function index()
+    {
+        return view('tablas.index');
+    }
+
+    public function create(Request $request)
+    {
+        $tableDataArray = session()->get('tablesName');
         $tableNames = array_keys($tableDataArray);
 
+        //dd($tableDataArray);
         $colForeignKeys = [];
-        $tableNamesRefer =[];
-        $columnNamesRefer =[];
+        $colPrimaryKeys = [];
 
-        foreach($tableDataArray as $tableKey => $tableValueArray) {
+        foreach ($tableDataArray as $tableKey => $tableValueArray) {
             $fields = [];
-            $tableNameReference=[];
-            $colNameReference=[];
+            $fieldsPrimary = [];
 
-            foreach($tableValueArray["foreignKeys"] as $colForeignKey) {
+            //para claves foraneas
+            foreach ($tableValueArray["foreignKeys"] as $colForeignKey) {
                 if (isset($colForeignKey->Field)) {
                     $fields[] = $colForeignKey->Field;
                 } elseif (isset($colForeignKey->COLUMN_NAME)) {
                     $fields[] = $colForeignKey->COLUMN_NAME;
                 }
-                $tableNameReference=$colForeignKey->REFERENCED_TABLE_NAME;
-                $colNameReference=$colForeignKey->REFERENCED_COLUMN_NAME;
             }
             $colForeignKeys[$tableKey] = $fields;
-            $tableNamesRefer[$tableKey]= $tableNameReference;
-            $columnNamesRefer[$tableKey]=$colNameReference;
+
+            // Para claves primarias
+            foreach ($tableValueArray["primaryKeys"] as $colprimaryKey) {
+                if (isset($colprimaryKey->Field)) {
+                    $fieldsPrimary[] = $colprimaryKey->Field;
+                } elseif (isset($colprimaryKey->COLUMN_NAME)) {
+                    $fieldsPrimary[] = $colprimaryKey->COLUMN_NAME;
+                }
+            }
+            $colPrimaryKeys[$tableKey] = $fieldsPrimary;
         }
 
         //dd($tableDataArray, $tableNames,$fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
-        return view('tablas.index',compact('tableNames','colForeignKeys','tableNamesRefer','columnNamesRefer')); 
+        return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
 
-    public function analysis(Request $request){
-        $tableDataArray= session()->get('tablesName');
-        $tableNameSelect=$request->input('tabla');
-        $keyForeignNameSelect=$request->input('claveForanea');
-        $tableNameRefer="";
-        $columnNameRefer="";
-        $exceptionNotFound="La clave foranea no se encontro en la tabla referenciada";
+    public function analysis(Request $request)
+    {
+        $tableDataArray = session()->get('tablesName');
+        $tableNameSelect = $request->input('nameTabla');
+        $keyForeignNameSelect = $request->input('nameClaveForanea');
 
-        //OBTENER DATOS DE LA REFERENCIA
-        foreach($tableDataArray[$tableNameSelect]['foreignKeys'] as $tableValue){
-            if ($tableValue->COLUMN_NAME === "venta_id") {
-                $tableNameRefer = $tableValue->REFERENCED_TABLE_NAME;
-                $columnNameRefer = $tableValue->REFERENCED_COLUMN_NAME;
-            }
-        }
+        $tableRefNameSelect = $request->input('nameTablaRef');
+        $keyPrimaryNameSelect = $request->input('nameClavePrimary');
+
 
         $tableDataSelect = $tableDataArray[$tableNameSelect];
-        $tableDataRefer = $tableDataArray[$tableNameRefer];
+        $tableDataRefer = $tableDataArray[$tableRefNameSelect];
 
 
         //CALCULO DE EXCEPCIONES
-        $listExceptions=[];
-        $numExcepciones=0;
-        foreach($tableDataSelect['data'] as $registroSelect){
-            $numCorrectos=0;
-            $numIncorrectos=0;
-            foreach($tableDataRefer['data'] as $registroRefer){
-                if($registroSelect->$keyForeignNameSelect==$registroRefer->$columnNameRefer){
-                    $numCorrectos++;
-                }else{
-                    $numIncorrectos++;
+        $listExceptions = [];
+        $numExcepciones = 0;
+
+        foreach ($tableDataSelect['data'] as $registroSelect) {
+            $numCorrectos = 0;
+            $numIncorrectos = 0;
+            
+            if (($registroSelect->$keyForeignNameSelect) != "NULL") {
+                //dd($registroSelect,$registroSelect->$keyForeignNameSelect);
+                foreach ($tableDataRefer['data'] as $registroRefer) {
+                    if ($registroSelect->$keyForeignNameSelect == $registroRefer->$keyPrimaryNameSelect) {
+                        $numCorrectos++;
+                    } else {
+                        $numIncorrectos++;
+                    }
                 }
+            } else {
+                $exceptionNotNull = "La Clave foranea es NULL";
+                $listExceptions["NULL-" . $numExcepciones] = $exceptionNotNull;
+                $numExcepciones++;
             }
-            if($numIncorrectos==count($tableDataRefer['data'])){
-                $listExceptions[$registroSelect->$keyForeignNameSelect]=$exceptionNotFound;
+            if ($numIncorrectos == count($tableDataRefer['data'])) {
+                $exceptionNotFound = "La clave foranea no se encontro en la tabla referenciada";
+                $listExceptions[$registroSelect->$keyForeignNameSelect] = $exceptionNotFound;
                 $numExcepciones++;
             }
         }
-        
-        //dd($tableNameSelect,$keyForeignNameSelect,$tableDataArray,$tableDataSelect,$numExcepciones);
 
-        return view('tablas.indexReport',compact('listExceptions','numExcepciones')); 
+      //  dd($listExceptions);
+    
+        $item=1;
+        return view('tablas.show', compact('listExceptions', 'tableNameSelect', 'tableRefNameSelect', 'numExcepciones','item'));
     }
 
-    public function cancelar(){
-        return redirect()->route('integridadtablas.index');
+    public function cancelar()
+    {
+        return redirect()->route('integridadtablas.create');
+    }
+
+
+    public function create_anterior(Request $request)
+    {
+        $tableDataArray = session()->get('tablesName');
+        $tableNames = array_keys($tableDataArray);
+
+        //dd($tableDataArray);
+        $colForeignKeys = [];
+        $tableNamesRefer = [];
+        $columnNamesRefer = [];
+
+        foreach ($tableDataArray as $tableKey => $tableValueArray) {
+            $fields = [];
+            $tableNameReference = [];
+            $colNameReference = [];
+
+            foreach ($tableValueArray["foreignKeys"] as $colForeignKey) {
+                if (isset($colForeignKey->Field)) {
+                    $fields[] = $colForeignKey->Field;
+                } elseif (isset($colForeignKey->COLUMN_NAME)) {
+                    $fields[] = $colForeignKey->COLUMN_NAME;
+                }
+                //$tableNameReference=$colForeignKey->REFERENCED_TABLE_NAME;
+                //$colNameReference=$colForeignKey->REFERENCED_COLUMN_NAME;
+            }
+            $colForeignKeys[$tableKey] = $fields;
+            //$tableNamesRefer[$tableKey]= $tableNameReference;
+            //$columnNamesRefer[$tableKey]=$colNameReference;
+        }
+
+        //dd($tableDataArray, $tableNames,$fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
+        return view('tablas.create', compact('tableNames', 'colForeignKeys', 'tableNamesRefer', 'columnNamesRefer'));
     }
 }
-

@@ -36,6 +36,8 @@ Route::get('/tareacamposs/{id}', [TareaCampoController::class, 'pdf'])->name('ca
 Route::get('/cancelar', [TareaCampoController::class, 'cancelar'])->name('campo.cancelar');
 
 //Tablas
+Route::get('excepcion/integridad-tablas/create',[IntegridadTablasController::class,'create'])->name('integridadtablas.create');
+
 Route::get('excepcion/integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
 Route::get('excepcion/integridad-tablas/analisis',[IntegridadTablasController::class,'analysis'])->name('integridadtablas.analysis');
 Route::get('excepcion/integridad-tablas/cancelar',[IntegridadTablasController::class,'cancelar'])->name('integridadtablas.cancelar');
