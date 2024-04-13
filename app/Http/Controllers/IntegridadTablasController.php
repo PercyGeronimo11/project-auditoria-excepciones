@@ -72,7 +72,8 @@ class IntegridadTablasController extends Controller
             $numCorrectos = 0;
             $numIncorrectos = 0;
             
-            if (($registroSelect->$keyForeignNameSelect) != "NULL") {
+            if (($registroSelect->$keyForeignNameSelect) != null &&
+            ($registroSelect->$keyForeignNameSelect) != "NULL") {
                 //dd($registroSelect,$registroSelect->$keyForeignNameSelect);
                 foreach ($tableDataRefer['data'] as $registroRefer) {
                     if ($registroSelect->$keyForeignNameSelect == $registroRefer->$keyPrimaryNameSelect) {
@@ -81,22 +82,20 @@ class IntegridadTablasController extends Controller
                         $numIncorrectos++;
                     }
                 }
-            } else {
+                if ($numIncorrectos == count($tableDataRefer['data'])) {
+                    $exceptionNotFound = "La clave foranea no se encontro en la tabla referenciada";
+                    $listExceptions[$registroSelect->$keyForeignNameSelect] = $exceptionNotFound;
+                    $numExcepciones++;
+                }
+            } else {     
+                //dd($registroSelect,$registroSelect->$keyForeignNameSelect);         
                 $exceptionNotNull = "La Clave foranea es NULL";
                 $listExceptions["NULL-" . $numExcepciones] = $exceptionNotNull;
                 $numExcepciones++;
             }
-            if ($numIncorrectos == count($tableDataRefer['data'])) {
-                $exceptionNotFound = "La clave foranea no se encontro en la tabla referenciada";
-                $listExceptions[$registroSelect->$keyForeignNameSelect] = $exceptionNotFound;
-                $numExcepciones++;
-            }
         }
 
-      //  dd($listExceptions);
-    
-        $item=1;
-        return view('tablas.show', compact('listExceptions', 'tableNameSelect', 'tableRefNameSelect', 'numExcepciones','item'));
+        return view('tablas.show', compact('listExceptions', 'tableNameSelect', 'tableRefNameSelect', 'numExcepciones'));
     }
 
     public function cancelar()

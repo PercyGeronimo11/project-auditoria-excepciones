@@ -9,7 +9,6 @@
 
     <div class="container mt-5">
         <h2 class="mb-4"> <b> INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
-
         <div class="card">
             <div class="card-header">
                 <h2>Se encontro {{ $numExcepciones }} excepciones</h2>

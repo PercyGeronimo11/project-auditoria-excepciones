@@ -67,7 +67,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-warning">Analizar</button>
+                        <button type="submit" class="btn btn-warning">Guardar</button>
                     </div>
                 </div>
             </div>
