@@ -25,17 +25,24 @@
                 </tr> 
                 </thead>
                 <tbody>
-                    @php $index = 1; @endphp
-                    @foreach ($listExceptions as $exceptionKey => $exceptionValue)
-                    <tr> 
-                        <td> {{$index}}</td>
-                        <td>{{ $tableNameSelect }}</td>
-                        <td>{{ $exceptionKey }}</td>
-                        <td>{{ $tableRefNameSelect}}</td>
-                        <td>{{ $exceptionValue }}</td>
-                    </tr> 
-                    @php $index++; @endphp
-                    @endforeach
+                    @if(count($listExceptions)>0)
+                        @php $index = 1; @endphp
+                        @foreach ($listExceptions as $exceptionKey => $exceptionValue)
+                        <tr> 
+                            <td> {{$index}}</td>
+                            <td>{{ $tableNameSelect }}</td>
+                            <td>{{ $exceptionKey }}</td>
+                            <td>{{ $tableRefNameSelect}}</td>
+                            <td>{{ $exceptionValue }}</td>
+                        </tr> 
+                        @php $index++; @endphp
+                        @endforeach
+                    @else
+                    <tr>
+                        <td> No Se encontraron excepciones</td>
+                    </tr>
+                        
+                    @endif
                 </tbody>
             </table>
         </div>

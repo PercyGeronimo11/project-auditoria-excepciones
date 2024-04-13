@@ -6,6 +6,7 @@ use App\Models\TablaIntegridad;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Ramsey\Uuid\Type\Time;
 
 class IntegridadTablasController extends Controller
 {
@@ -61,9 +62,10 @@ class IntegridadTablasController extends Controller
             $table = new TablaIntegridad();
             $table->table = $request->input('nameTabla');
             $table->column_foreignkey = $request->input('nameClaveForanea');
-            $table->table_refer = $tableRefNameSelect = $request->input('nameTablaRef');
+            $table->table_refer = $request->input('nameTablaRef');
             $table->column_primarykey = $request->input('nameClavePrimary');
             $table->estado=1;
+            $table->fecha=date("Y-m-d");
             $table->save();
 
             return redirect()->route('integridadtablas.index');
@@ -72,14 +74,21 @@ class IntegridadTablasController extends Controller
         }
     }
 
-    public function analysis(Request $request)
+    public function analysis(Request $request, $id)
     {
+        $integridad=TablaIntegridad::find($id);
         $tableDataArray = session()->get('tablesName');
-        $tableNameSelect = $request->input('nameTabla');
-        $keyForeignNameSelect = $request->input('nameClaveForanea');
+        $tableNameSelect = $integridad->table;
+        $keyForeignNameSelect = $integridad->column_foreignkey;
 
-        $tableRefNameSelect = $request->input('nameTablaRef');
-        $keyPrimaryNameSelect = $request->input('nameClavePrimary');
+        $tableRefNameSelect = $integridad->table_refer;
+        $keyPrimaryNameSelect = $integridad->column_primarykey;
+
+        // $tableNameSelect = $request->input('nameTabla');
+        // $keyForeignNameSelect = $request->input('nameClaveForanea');
+
+        // $tableRefNameSelect = $request->input('nameTablaRef');
+        // $keyPrimaryNameSelect = $request->input('nameClavePrimary');
 
 
         $tableDataSelect = $tableDataArray[$tableNameSelect];

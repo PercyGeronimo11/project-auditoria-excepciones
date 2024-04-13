@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger("id_integridad");
             $table->string("data_key");
-            $table->string("location");
+            $table->string("message");
             $table->foreign("id_integridad")->references("id")->on("tabla_integridad")->onDelete("cascade");
             $table->timestamps();
         });

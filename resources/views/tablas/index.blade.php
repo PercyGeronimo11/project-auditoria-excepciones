@@ -10,42 +10,52 @@
     <div class="container mt-5">
         <h1 class="mb-4">LISTA DE INTEGRIDAD DE TABLAS</h1>
 
-        <a href="{{ route('integridadtablas.create') }}">
+        <a href="{{ route('integridadtablas.create') }}" method="GET">
             <div class="btn btn-warning">
                 Nuevo
             </div>
         </a>
 
-        <table>
-            <thead>
+        <br>
+        <table class="table table-striped">
+            <thead class="thead-dark">
                 <tr>
-                    <td>N°</td>
-                    <td>Tabla</td>
-                    <td>Clave Foranea</td>
-                    <td>Tabla Referenciada</td>
-                    <td>Clave Primaria</td>
-                    <td>Opciones</td>
+                    <th scope="col">N°</th>
+                    <th scope="col">Tabla</th>
+                    <th scope="col">Clave Foránea</th>
+                    <th scope="col">Tabla Referenciada</th>
+                    <th scope="col">Clave Primaria</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Opciones</th>
                 </tr>
             </thead>
             <tbody>
-                @if ($integridades->count() > 0)
-                    @php $index=0; @endphp
+                @if (count($integridades) > 0)
+                    @php $index=1; @endphp
                     @foreach ($integridades as $integridad)
                         <tr>
-                            <td>{{ $index }}</td>
+                            <th scope="row">{{ $index }}</th>
                             <td>{{ $integridad->table }}</td>
                             <td>{{ $integridad->column_foreignkey }}</td>
                             <td>{{ $integridad->table_refer }}</td>
                             <td>{{ $integridad->column_primarykey }}</td>
                             <td>{{ $integridad->fecha }}</td>
+                            <td>
+                                <a href="{{ route('integridadtablas.analysis', $integridad->id) }}" class="btn btn-warning">
+                                    Analizar
+                                </a>
+                            </td>
                         </tr>
                         @php $index++; @endphp
                     @endforeach
                 @else
-                <div>No hay Información</div>
+                    <tr>
+                        <td colspan="7">No hay información</td>
+                    </tr>
                 @endif
             </tbody>
         </table>
+        
     </div>
 
     <script>
