@@ -11,7 +11,7 @@
         <h1 class="mb-4">INTEGRIDAD DE TABLAS</h1>
         <br>
         {{-- Formulario de analisis --}}
-        <form action="{{ route('integridadtablas.analysis') }}">
+        <form action="{{ route('integridadtablas.store') }}">
             <div class="row">
                 <div class="col col-6">
                     <div class="mb-3 row">

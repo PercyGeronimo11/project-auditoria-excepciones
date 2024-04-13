@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\TablaIntegridad;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -9,7 +11,9 @@ class IntegridadTablasController extends Controller
 {
     public function index()
     {
-        return view('tablas.index');
+        $integridades=TablaIntegridad::where('estado','<>','0')->get();
+        
+        return view('tablas.index', compact('integridades'));
     }
 
     public function create(Request $request)
@@ -50,6 +54,24 @@ class IntegridadTablasController extends Controller
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
 
+
+    public function store(Request $request)
+    {
+        try {
+            $table = new TablaIntegridad();
+            $table->table = $request->input('nameTabla');
+            $table->column_foreignkey = $request->input('nameClaveForanea');
+            $table->table_refer = $tableRefNameSelect = $request->input('nameTablaRef');
+            $table->column_primarykey = $request->input('nameClavePrimary');
+            $table->estado=1;
+            $table->save();
+
+            return redirect()->route('integridadtablas.index');
+        } catch (Exception $ex) {
+            return $ex;
+        }
+    }
+
     public function analysis(Request $request)
     {
         $tableDataArray = session()->get('tablesName');
@@ -71,9 +93,10 @@ class IntegridadTablasController extends Controller
         foreach ($tableDataSelect['data'] as $registroSelect) {
             $numCorrectos = 0;
             $numIncorrectos = 0;
-            
+
             if (($registroSelect->$keyForeignNameSelect) != null &&
-            ($registroSelect->$keyForeignNameSelect) != "NULL") {
+                ($registroSelect->$keyForeignNameSelect) != "NULL"
+            ) {
                 //dd($registroSelect,$registroSelect->$keyForeignNameSelect);
                 foreach ($tableDataRefer['data'] as $registroRefer) {
                     if ($registroSelect->$keyForeignNameSelect == $registroRefer->$keyPrimaryNameSelect) {
@@ -87,7 +110,7 @@ class IntegridadTablasController extends Controller
                     $listExceptions[$registroSelect->$keyForeignNameSelect] = $exceptionNotFound;
                     $numExcepciones++;
                 }
-            } else {     
+            } else {
                 //dd($registroSelect,$registroSelect->$keyForeignNameSelect);         
                 $exceptionNotNull = "La Clave foranea es NULL";
                 $listExceptions["NULL-" . $numExcepciones] = $exceptionNotNull;
