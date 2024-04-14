@@ -8,70 +8,71 @@
     <script src="https://kit.fontawesome.com/7920972db5.js" crossorigin="anonymous"></script>
 
     <div class="container mt-5">
-        <h1 class="mb-4">INTEGRIDAD DE TABLAS</h1>
-        <br>
-        {{-- Formulario de analisis --}}
-        <form action="{{ route('integridadtablas.analysis') }}">
-            <div class="form-group">
-                <div class="mb-3 row">
-                    <label for="inputPassword" class="col-sm-2 form-label">Tabla</label>
-                    <select class="form-select" aria-label="Default select example" id="firstSelect" name="tabla">
-                        <option selected disabled>Seleccionar</option>
-                        @foreach ($tableNames as $item)
-                            <option value="{{ $item }}">{{ $item }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="mb-3 row">
-                    <label for="inputPassword" class="col-sm-2 col-form-label">Clave Foranea</label>
-                    <select class="form-select" aria-label="Default select example" id="secondSelect" name="claveForanea">
-                        <option selected disabled>Seleccionar</option>
-                        @foreach ($colForeignKeys[$tableNames[0]] as $item)
-                            <option value="{{ $item }}">{{ $item }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        <h1 class="mb-4">LISTA DE INTEGRIDAD DE TABLAS</h1>
 
+        <a href="{{ route('integridadtablas.create') }}" method="GET">
+            <div class="btn btn-primary">
+                Nuevo
             </div>
+        </a>
+        @if (session('warning'))
+            <div class="alert alert-danger">
+                {{ session('warning') }}
+            </div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-danger">
+                {{ session('success') }}
+            </div>
+        @endif
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">N°</th>
+                    <th scope="col">Tabla</th>
+                    <th scope="col">Clave Foránea</th>
+                    <th scope="col">Tabla Referenciada</th>
+                    <th scope="col">Clave Primaria</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (count($integridades) > 0)
+                    @php $index=1; @endphp
+                    @foreach ($integridades as $integridad)
+                        <tr>
+                            <th scope="row">{{ $index }}</th>
+                            <td>{{ $integridad->table }}</td>
+                            <td>{{ $integridad->column_foreignkey }}</td>
+                            <td>{{ $integridad->table_refer }}</td>
+                            <td>{{ $integridad->column_primarykey }}</td>
+                            <td>{{ $integridad->fecha }}</td>
+                            <td>
+                                <a href="{{ route('integridadtablas.analysis', $integridad->id) }}" class="btn btn-warning">
+                                    Analizar
+                                </a>
+                                <a href="{{ route('integridadtablas.delete', $integridad->id) }}" class="btn btn-danger">
+                                    Borrar
+                                </a>
+                            </td>
+                        </tr>
+                        @php $index++; @endphp
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="7">No hay información</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
 
-            <div class="mb-3">
-                <button type="submit" class="btn btn-warning">Analizar</button>
-            </div>
-        </form>
     </div>
 
     <script>
-        const colForeignKeys = <?php echo json_encode($colForeignKeys); ?>;
-
-
-        document.getElementById("firstSelect").addEventListener("change", function() {
-            // Get the selected value from the first select
-            const selectedValue = this.value;
-
-            // Get a reference to the second select
-            const secondSelect = document.getElementById("secondSelect");
-
-            // Clear any existing options in the second select
-            secondSelect.innerHTML = "";
-
-            // Create new options based on the selected value
-            if (selectedValue in colForeignKeys) {
-                for (const item of colForeignKeys[selectedValue]) {
-                    const option = document.createElement("option");
-                    option.value = item; // Assuming you want the item as the value
-                    option.text = item;
-                    secondSelect.add(option);
-                }
-            } else {
-                // Handle the case where there are no options for the selected value
-                const option = document.createElement("option");
-                option.disabled = true;
-                option.text = "No options available";
-                secondSelect.add(option);
-            }
-            secondSelect.dispatchEvent(new Event('change'));
-        });
+        setTimeout(function() {
+            $('#alert').fadeOut('slow');
+        }, 5000); // 5000 milisegundos = 5 segundos
     </script>
+
 @endsection
