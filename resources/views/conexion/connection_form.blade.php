@@ -1,4 +1,4 @@
-@extends('layout.layout')
+@extends('layout.layout_inhabil')
 
 @section('title', 'Formulario de Conexión')
 
@@ -22,7 +22,18 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>         
-        @endif
+           @endif
+
+           @if(session('success'))
+           <div class="sufee-alert alert with-close alert-primary alert-dismissible fade show">
+            <span class="badge badge-pill badge-primary">Success</span>
+            {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>        
+           @endif
+
             <div class="card">
                 <div class="card-header">
                     <strong class="card-title">Formulario de Conexión</strong>
@@ -94,7 +105,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $id = 1; @endphp 
+                                @if($databases->isEmpty())
+                                <tr>
+                                    <td colspan="6" class="text-center">No hay bases de datos registradas.</td>
+                                </tr>
+                                @else
+                                @php $id = 1; 
+                                @endphp 
                                 @foreach($databases as $database)
                                 <tr>
                                     <td>{{ $id++ }}</td>
@@ -103,11 +120,14 @@
                                     <td>{{ $database->host }}</td>
                                     <td>{{ $database->usuario }}</td>
                                     <td class="text-center">
-                                        <a id="logoutLink" class="nav-link" onclick="actualizarFila('{{ $database->id }}', '{{ $database->nombre_db }}', '{{ $database->host }}', '{{ $database->usuario }}')"><i class="fa  fa-sign-in"></i></a>
-
+                                        <div style="display: flex; justify-content: flex-end; width: 100%;">
+                                            <a id="logoutLink" class="nav-link" onclick="actualizarFila('{{ $database->id }}','{{ $database->tipo }}', '{{ $database->nombre_db }}', '{{ $database->host }}', '{{ $database->usuario }}')"><i class="fa fa-sign-in"></i></a>
+                                            <a id="deleteLink" class="nav-link" onclick="eliminarRegistro('{{ $database->id }}', '{{ $database->nombre_db }}')"><i class="fa fa-minus-circle"></i></a>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach
+                                @endif
                             </tbody>
                         </table>
                     </div>
@@ -121,10 +141,19 @@
 
 <script>
     // Esta función se ejecutará cuando se presione el botón "Actualizar" en una fila
-    function actualizarFila(id, database, host, usuario, password) {
+    function actualizarFila(id,tipo, database, host, usuario, password) {
         // Establecer los valores en el formulario
+        document.getElementById('driver').value = tipo;
         document.getElementById('database').value = database;
         document.getElementById('host').value = host;
         document.getElementById('username').value = usuario;
+    }
+
+        // Función para eliminar una fila con confirmación
+        function eliminarRegistro(id, nombre) {
+        if (confirm('¿Estás seguro de que deseas eliminar el registro "' + nombre + '"?')) {
+            // Si el usuario confirma, enviar una solicitud al servidor para eliminar el registro
+            window.location.href = '/eliminar-registro/' + id; // Reemplaza '/eliminar-registro/' con la ruta adecuada en tu aplicación
+        }
     }
 </script>
