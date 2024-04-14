@@ -11,12 +11,20 @@
         <h1 class="mb-4">LISTA DE INTEGRIDAD DE TABLAS</h1>
 
         <a href="{{ route('integridadtablas.create') }}" method="GET">
-            <div class="btn btn-warning">
+            <div class="btn btn-primary">
                 Nuevo
             </div>
         </a>
-
-        <br>
+        @if (session('warning'))
+            <div class="alert alert-danger">
+                {{ session('warning') }}
+            </div>
+        @endif
+        @if (session('success'))
+            <div class="alert alert-danger">
+                {{ session('success') }}
+            </div>
+        @endif
         <table class="table table-striped">
             <thead class="thead-dark">
                 <tr>
@@ -44,6 +52,9 @@
                                 <a href="{{ route('integridadtablas.analysis', $integridad->id) }}" class="btn btn-warning">
                                     Analizar
                                 </a>
+                                <a href="{{ route('integridadtablas.delete', $integridad->id) }}" class="btn btn-danger">
+                                    Borrar
+                                </a>
                             </td>
                         </tr>
                         @php $index++; @endphp
@@ -55,8 +66,13 @@
                 @endif
             </tbody>
         </table>
-        
+
     </div>
 
     <script>
-    @endsection
+        setTimeout(function() {
+            $('#alert').fadeOut('slow');
+        }, 5000); // 5000 milisegundos = 5 segundos
+    </script>
+
+@endsection

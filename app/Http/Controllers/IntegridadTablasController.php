@@ -59,16 +59,30 @@ class IntegridadTablasController extends Controller
     public function store(Request $request)
     {
         try {
-            $table = new TablaIntegridad();
-            $table->table = $request->input('nameTabla');
-            $table->column_foreignkey = $request->input('nameClaveForanea');
-            $table->table_refer = $request->input('nameTablaRef');
-            $table->column_primarykey = $request->input('nameClavePrimary');
-            $table->estado=1;
-            $table->fecha=date("Y-m-d");
-            $table->save();
+            $tableFind=TablaIntegridad::where('table',$request->input('nameTabla'))
+            ->where('column_foreignkey',$request->input('nameClaveForanea'))
+            ->where('table_refer',$request->input('nameTablaRef'))
+            ->where('column_primarykey', $request->input('nameClavePrimary'))
+            ->where('estado',1)
+            ->first();
 
-            return redirect()->route('integridadtablas.index');
+
+            if($tableFind){
+                $mensaje="La Integridad que desa analizar, Ya existe en la lista";
+                return redirect()->route('integridadtablas.index')->with('warning', $mensaje);
+            }else{
+                $table = new TablaIntegridad();
+                $table->table = $request->input('nameTabla');
+                $table->column_foreignkey = $request->input('nameClaveForanea');
+                $table->table_refer = $request->input('nameTablaRef');
+                $table->column_primarykey = $request->input('nameClavePrimary');
+                $table->estado=1;
+                $table->fecha=date("Y-m-d");
+                $table->save();
+                $mensaje="Se guardo exitosamente";
+                return redirect()->route('integridadtablas.index')->with('success', $mensaje);
+            }
+
         } catch (Exception $ex) {
             return $ex;
         }
@@ -167,5 +181,13 @@ class IntegridadTablasController extends Controller
 
         //dd($tableDataArray, $tableNames,$fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'tableNamesRefer', 'columnNamesRefer'));
+    }
+
+    public function delete($id)
+    {
+        $integridad=TablaIntegridad::find($id);
+        $integridad->estado=0;
+        $integridad->save();
+        return redirect()->route('integridadtablas.index');
     }
 }

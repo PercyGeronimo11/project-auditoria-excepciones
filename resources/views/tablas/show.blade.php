@@ -9,46 +9,55 @@
 
     <div class="container mt-5">
         <h2 class="mb-4"> <b> INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
+        <a href="{{ route('integridadtablas.cancelar') }}">
+            <button type="button" class="btn btn-warning">
+                <=< /button>
+        </a>
+        <form action="" method="POST">
+            @csrf
+            <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
+            <button type="submit" class="btn btn-primary">Guardar Excepciones</button>
+        </form>
+
         <div class="card">
             <div class="card-header">
                 <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
             </div>
 
-            <table class="table table-striped table-bordered table-hover">
-                <thead class="table-danger">
-                    <tr> 
-                    <th>N°</th>
-                    <th>Tabla</th>
-                    <th>Clave Foranea</th>
-                    <th>Tabla Referenciada</th>
-                    <th>Excepcion</th>
-                </tr> 
+            <table class="table table-striped table-danger">
+                <thead style="background-color: red; color: white;">
+                    <tr>
+                        <th scope="col">N°</th>
+                        <th scope="col">Tabla</th>
+                        <th scope="col">Clave Foranea</th>
+                        <th scope="col">Tabla Referenciada</th>
+                        <th scope="col">Excepcion</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    @if(count($listExceptions)>0)
+                    @if (count($listExceptions) > 0)
                         @php $index = 1; @endphp
                         @foreach ($listExceptions as $exceptionKey => $exceptionValue)
-                        <tr> 
-                            <td> {{$index}}</td>
-                            <td>{{ $tableNameSelect }}</td>
-                            <td>{{ $exceptionKey }}</td>
-                            <td>{{ $tableRefNameSelect}}</td>
-                            <td>{{ $exceptionValue }}</td>
-                        </tr> 
-                        @php $index++; @endphp
+                            <tr>
+                                <th scope="row">{{ $index }}</th>
+                                <td>{{ $tableNameSelect }}</td>
+                                <td>{{ $exceptionKey }}</td>
+                                <td>{{ $tableRefNameSelect }}</td>
+                                <td>{{ $exceptionValue }}</td>
+                            </tr>
+                            @php $index++; @endphp
                         @endforeach
                     @else
-                    <tr>
-                        <td> No Se encontraron excepciones</td>
-                    </tr>
-                        
+                        <tr>
+                            <td colspan="7"> No Se encontraron excepciones</td>
+                        </tr>
+
                     @endif
                 </tbody>
             </table>
+
         </div>
-        <a href="{{route('integridadtablas.cancelar')}}">
-            <button type="button" class="btn btn-warning">Atras</button>
-        </a>
+
     </div>
 
 @endsection

@@ -38,6 +38,7 @@ Route::get('/cancelar', [TareaCampoController::class, 'cancelar'])->name('campo.
 //Tablas
 Route::get('excepcion/integridad-tablas/create',[IntegridadTablasController::class,'create'])->name('integridadtablas.create');
 Route::post('excepcion/integridad-tablas/store',[IntegridadTablasController::class,'store'])->name('integridadtablas.store');
+Route::get('excepcion/integridad-tablas/delete/{id}',[IntegridadTablasController::class,'delete'])->name('integridadtablas.delete');
 Route::get('excepcion/integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
 Route::get('excepcion/integridad-tablas/analisis/{id}',[IntegridadTablasController::class,'analysis'])->name('integridadtablas.analysis');
 Route::get('excepcion/integridad-tablas/cancelar',[IntegridadTablasController::class,'cancelar'])->name('integridadtablas.cancelar');
