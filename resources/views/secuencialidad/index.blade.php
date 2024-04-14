@@ -87,7 +87,7 @@
 
         // Get a reference to the second select
         const secondSelect = document.getElementById("secondSelect");
-
+        secondSelect.options.length = 1;
         // Clear any existing options in the second select
         //secondSelect.innerHTML = "";
 

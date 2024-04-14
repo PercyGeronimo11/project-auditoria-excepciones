@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
 {
@@ -42,6 +43,8 @@ class LoginController extends Controller
 
     public function register(Request $request)
     {
+        $data="";
+        
         $request->validate([
             'name' => 'required|string|max:50',
             'email' => [
@@ -50,26 +53,13 @@ class LoginController extends Controller
                 'email',
                 'max:50',
                 Rule::unique('users', 'email')->ignore($request->user()),
-                function ($attribute, $value, $fail) {
+                function ($attribute, $value, $fail) use (&$data) {
                     $value = trim($value);
-                    $allowedDomains = [
-                        'gmail.com',
-                        'yahoo.com',
-                        'hotmail.com',
-                        'outlook.com',
-                        'icloud.com',
-                        'aol.com',
-                        'protonmail.com',
-                        'gmx.com',
-                        'mail.com',
-                        'gmail.es',
-                        'yahoo.es',
-                        'hotmail.es',
-                        'outlook.es',
-                        'icloud.es',
-                    ];
-                    $domain = substr(strrchr($value, "@"), 1); // Obtener el dominio del correo electrónico
-                    if (!in_array($domain, $allowedDomains)) {
+                    $access_key = '016431d472b998d83725c8df2ffc92f39d036b35';
+                    $dominio = substr(strrchr($value, "@"), 1);
+                    $response = Http::get("https://api.hunter.io/v2/email-count?domain=$dominio&api_key=$access_key");
+                    $data = $response->json();
+                    if($data['data']['total']==0){
                         $fail('El dominio del correo electrónico no es válido.');
                     }
                 },
@@ -94,7 +84,6 @@ class LoginController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
-
         return redirect('/')->with('success1', '¡Registro exitoso!')->with('success2', 'Ya puedes iniciar sesión.');
     }
 

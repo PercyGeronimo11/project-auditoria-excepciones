@@ -139,6 +139,19 @@ class SequenceController extends Controller
                             }
                         }
                     }
+                    elseif($datos[$i] != null){
+                        if($datos[$i]>1 && $orden_secuencia === 'ascendente'){
+                            $secuencia_correcta = false;
+                            $excepciones[]=[
+                                'id' => $i+1,
+                                    'tabla' => $tabla,
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => '-',
+                                    'mensaje' => "No existen los valores desde el 1 al '{$datos[$i]}'",
+                            ];
+                        }
+                    }
                     break;
                 case 'Alfanumérica':
 
@@ -210,6 +223,21 @@ class SequenceController extends Controller
                                     'actual' => $datos[$i],
                                     'anterior' => $valor_anterior,
                                     'mensaje' => "Esta creciendo",
+                                ];
+                            }
+                        }
+                        elseif($datos[$i] != null){
+                            //return $datos[$i];
+                            $valor_numerico = intval(preg_replace('/[^0-9]/', '', $datos[$i]));
+                            if($valor_numerico>1 && $orden_secuencia === 'ascendente'){
+                                $secuencia_correcta = false;
+                                $excepciones[]=[
+                                    'id' => $i+1,
+                                        'tabla' => $tabla,
+                                        'campo' => $campo,
+                                        'actual' => $datos[$i],
+                                        'anterior' => "-",
+                                        'mensaje' => "No existen los valores desde el 1 al '{$datos[$i]}'",
                                 ];
                             }
                         }
