@@ -243,7 +243,7 @@
     $("#mySelect").select2();
   });
 </script> --}}
-<script>
+{{-- <script>
   function mensaje() {
  var $disabledResults = $(".select2");
   $disabledResults.select2();
@@ -251,7 +251,7 @@
   // $('#idFolio').select2();
   }
   setTimeout(mensaje,10000);
-</script>
+</script> --}}
 
 <script>
     
