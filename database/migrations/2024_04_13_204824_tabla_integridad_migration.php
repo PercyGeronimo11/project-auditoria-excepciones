@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('column_primarykey'); 
             $table->tinyInteger('estado');
             $table->date('fecha');
+            $table->String('name_bd');
             $table->timestamps();
         });
     }

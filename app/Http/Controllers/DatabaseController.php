@@ -5,17 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Database;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Schema;
 
 class DatabaseController extends Controller
 {
-
-
     protected $connectionName = 'dynamic';
     protected $driver; // Propiedad para almacenar el driver
-    
-
 
     public function __construct()
     {
@@ -143,7 +137,6 @@ class DatabaseController extends Controller
                     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
                     WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
                 ");
-
                 foreach ($columns as $column) {
                     $columnTypes[$column->Field] = $column->Type;
                     if ($column->Key == 'PRI') {
@@ -151,7 +144,6 @@ class DatabaseController extends Controller
                     }
                 }
 
-            
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.COLUMNS')
@@ -202,15 +194,11 @@ class DatabaseController extends Controller
         return view('conexion.show_tableSQL', compact('tableName', 'columns', 'tableData', 'driver'));
     }
 
-
-
-
     public function listDatabases()
     {
         $databases = DB::table('database')->get();
         return view('conexion.connection_form', compact('databases'));
     }
-
 
     public function eliminarRegistro($id)
     {
