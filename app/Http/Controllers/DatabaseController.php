@@ -14,13 +14,14 @@ class DatabaseController extends Controller
 
     protected $connectionName = 'dynamic';
     protected $driver; // Propiedad para almacenar el driver
+    
 
 
     public function __construct()
     {
-        // Configurar la conexión a la base de datos en el constructor
         $this->configureDatabaseConnection();
-        $this->driver = request()->input('driver');
+        $latestDatabase = Database::latest()->first();
+        $this->driver = $latestDatabase ? $latestDatabase->tipo : null;
     }
 
 
@@ -127,6 +128,7 @@ class DatabaseController extends Controller
         }
 
         $tablesData = [];
+        $columnTypes = [];
 
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
@@ -137,17 +139,18 @@ class DatabaseController extends Controller
                 //     WHERE TABLE_NAME = '$tableName'
                 // ");
                 $foreignKeys = DB::connection('dynamic')->select("
-                    SELECT COLUMN_NAME
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = '$tableName'
-                    AND COLUMN_KEY = 'MUL'
+                    SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
                 ");
-                $primaryKeys = DB::connection('dynamic')->select("
-                    SELECT COLUMN_NAME
-                    FROM INFORMATION_SCHEMA.COLUMNS
-                    WHERE TABLE_NAME = '$tableName'
-                    AND COLUMN_KEY = 'PRI'
-                ");
+
+                foreach ($columns as $column) {
+                    $columnTypes[$column->Field] = $column->Type;
+                    if ($column->Key == 'PRI') {
+                        $primaryKeys[] = $column->Field;
+                    }
+                }
+
             
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
@@ -161,21 +164,12 @@ class DatabaseController extends Controller
                             'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
                         ];
                     })->toArray();
-                // $foreignKeys = DB::connection('dynamic')
-                //     ->table('INFORMATION_SCHEMA.KEY_COLUMN_USAGE')
-                //     ->select('COLUMN_NAME', 'CONSTRAINT_NAME', 'REFERENCED_TABLE_NAME', 'REFERENCED_COLUMN_NAME')
-                //     ->where('TABLE_NAME', $tableName)
-                //     ->where('CONSTRAINT_NAME', '<>', 'PRIMARY')
-                //     ->get()
-                //     ->toArray();
             }
 
             $tableData = DB::connection('dynamic')->table($tableName)->get();
 
             $tablesData[$tableName] = [
                 'columns' => $columns,
-                'foreignKeys' => $foreignKeys,
-                'primaryKeys' => $primaryKeys,
                 'data' => $tableData
             ];
         }
@@ -191,13 +185,6 @@ class DatabaseController extends Controller
         $driver = $this->driver;
         $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
         $tableData = DB::connection('dynamic')->table($tableName)->get();
-
-        // $columns = DB::connection('dynamic')
-        //     ->table('INFORMATION_SCHEMA.COLUMNS')
-        //     ->select('TABLE_NAME', 'COLUMN_NAME', 'DATA_TYPE')
-        //     ->get();
-        // return  $columns ;
-        // return $tableData;
         return view('conexion.show_tableMysql', compact('tableName', 'columns', 'tableData', 'driver'));
     }
 
@@ -223,4 +210,137 @@ class DatabaseController extends Controller
         $databases = DB::table('database')->get();
         return view('conexion.connection_form', compact('databases'));
     }
+
+
+    public function eliminarRegistro($id)
+    {
+       $database = Database::findOrFail($id);
+       $nombre = $database->nombre_db; 
+       $database->delete(); 
+
+       return back()->with('success', 'Se eliminó la base de datos "' . $nombre . '".');
+    }
+
+
+    public function showAllTables()
+    {
+
+        $driver = $this->driver;
+        
+        if ($driver == 'mysql') {
+            $tables = DB::connection('dynamic')->select('SHOW TABLES');
+            $tableNames = array_map('current', json_decode(json_encode($tables), true));
+        } elseif ($driver == 'sqlsrv') {
+            $tableNames = DB::connection('dynamic')
+                ->table('INFORMATION_SCHEMA.TABLES')
+                ->select('TABLE_NAME')
+                ->where('TABLE_TYPE', 'BASE TABLE')
+                ->get()
+                ->pluck('TABLE_NAME')
+                ->toArray();
+        }
+
+        $tablesData = [];
+
+
+        foreach ($tableNames as $tableName) {
+            if ($driver == 'mysql') {
+                $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
+                $foreignKeys = DB::connection('dynamic')->select("
+                    SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = '$tableName'
+                ");
+            } elseif ($driver == 'sqlsrv') {
+                $columns = DB::connection('dynamic')
+                    ->table('INFORMATION_SCHEMA.COLUMNS')
+                    ->select('COLUMN_NAME', 'DATA_TYPE') // Agregar la selección del tipo de dato
+                    ->where('TABLE_NAME', $tableName)
+                    ->get()
+                    ->map(function ($column) {
+                        return [
+                            'name' => $column->COLUMN_NAME,
+                            'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
+                        ];
+                    })->toArray();
+            }
+
+        $tableData = DB::connection('dynamic')->table($tableName)->get();
+            
+        $tablesData[$tableName] = [
+            'columns' => $columns,
+            'data' => $tableData
+        ];
+        }
+
+        session()->put('driverBD', $driver);
+        session()->put('tablesName', $tablesData);
+
+        return view('conexion.database_info', compact('tablesData', 'driver'));
+    }
+    
+    public function showTableStructure($tableName)
+    {
+        $driver = $this->driver;
+        $columnTypes = [];
+        $primaryKey = [];
+        $foreignKeys = [];
+    
+        if ($driver == 'mysql') {
+            $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
+    
+            foreach ($columns as $column) {
+                $columnTypes[$column->Field] = $column->Type;
+                if ($column->Key == 'PRI') {
+                    $primaryKey[] = $column->Field;
+                }
+            }
+    
+            $foreignKeys = DB::connection('dynamic')->select("
+                SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
+            ");
+        } elseif ($driver == 'sqlsrv') {
+            $columns = DB::connection('dynamic')
+                ->table('INFORMATION_SCHEMA.COLUMNS')
+                ->select('COLUMN_NAME', 'DATA_TYPE') // Agregar la selección del tipo de dato
+                ->where('TABLE_NAME', $tableName)
+                ->get();
+    
+            foreach ($columns as $column) {
+                $columnTypes[$column->COLUMN_NAME] = $column->DATA_TYPE;
+            }
+    
+            $primaryKeys = DB::connection('dynamic')
+                ->table('INFORMATION_SCHEMA.TABLE_CONSTRAINTS')
+                ->join('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE', function ($join) use ($tableName) {
+                    $join->on('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME', '=', 'INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME')
+                        ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME', '=', $tableName)
+                        ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE', '=', 'PRIMARY KEY');
+                })
+                ->select('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME')
+                ->get();
+    
+            foreach ($primaryKeys as $primaryKeyColumn) {
+                $primaryKey[] = $primaryKeyColumn->COLUMN_NAME;
+            }
+    
+            $foreignKeys = DB::connection('dynamic')
+            ->table('INFORMATION_SCHEMA.TABLE_CONSTRAINTS')
+            ->join('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE', function ($join) use ($tableName) {
+                $join->on('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME', '=', 'INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME')
+                    ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME', '=', $tableName)
+                    ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE', '=', 'FOREIGN KEY');
+            })
+            ->select('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME', 'INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.TABLE_NAME')
+            ->get();
+        
+        
+        }
+    
+        return view('conexion.table_structure', compact('tableName', 'columns', 'columnTypes', 'primaryKey', 'foreignKeys', 'driver'));
+    }
+    
+
 }

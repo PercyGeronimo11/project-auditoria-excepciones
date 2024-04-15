@@ -21,40 +21,39 @@ class IntegridadTablasController extends Controller
     {
         $tableDataArray = session()->get('tablesName');
         $tableNames = array_keys($tableDataArray);
-
-        //dd($tableDataArray);
+    
         $colForeignKeys = [];
         $colPrimaryKeys = [];
-
-        foreach ($tableDataArray as $tableKey => $tableValueArray) {
-            $fields = [];
-            $fieldsPrimary = [];
-
-            //para claves foraneas
-            foreach ($tableValueArray["foreignKeys"] as $colForeignKey) {
-                if (isset($colForeignKey->Field)) {
-                    $fields[] = $colForeignKey->Field;
-                } elseif (isset($colForeignKey->COLUMN_NAME)) {
-                    $fields[] = $colForeignKey->COLUMN_NAME;
+        
+    
+        foreach ($tableNames as $tableName) {
+            $tableData = $tableDataArray[$tableName]; 
+            $primaryKeys = [];
+            $foreignKeys = [];
+    
+            foreach ($tableData['columns'] as $column) {
+                if ($column->Key == 'PRI') {
+                    $primaryKeys[] = $column->Field; 
                 }
-            }
-            $colForeignKeys[$tableKey] = $fields;
 
-            // Para claves primarias
-            foreach ($tableValueArray["primaryKeys"] as $colprimaryKey) {
-                if (isset($colprimaryKey->Field)) {
-                    $fieldsPrimary[] = $colprimaryKey->Field;
-                } elseif (isset($colprimaryKey->COLUMN_NAME)) {
-                    $fieldsPrimary[] = $colprimaryKey->COLUMN_NAME;
-                }
+                if ($column->Key == 'MUL') {
+                    $foreignKeys[] = $column->Field; 
+                } 
+                     
+
+
             }
-            $colPrimaryKeys[$tableKey] = $fieldsPrimary;
+    
+            $colPrimaryKeys[$tableName] = $primaryKeys;
+            $colForeignKeys[$tableName] = $foreignKeys;
+
+            
         }
-
-        //dd($tableDataArray, $tableNames,$fields,$tableNamesRefer[$tableKey],$columnNamesRefer[$tableKey]);
+    
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
-
+    
+    
 
     public function store(Request $request)
     {

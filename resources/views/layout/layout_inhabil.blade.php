@@ -66,7 +66,13 @@
 
     </style>
 
-
+<style>
+    /* Estilo para los enlaces deshabilitados */
+    .disabled {
+        pointer-events: none; /* Evita que los enlaces sean clicables */
+        color: #999; /* Cambia el color del texto para que parezca deshabilitado */
+    }
+</style>
 
 <title>@yield('title')</title>
 
@@ -85,10 +91,10 @@
                     <li class="menu-item-has">
                         <a href="{{ route('show.connection.form') }}"><i class="menu-icon fa fa-cogs"></i>Conexion </a>
                     </li>
-                    <li class="menu-item-has">
+                    <li class="menu-item-has disabled">
                         <a href="{{ route('show.tables') }}"><i class="menu-icon fa fa-table"></i>Tablas </a>
                     </li> 
-                    <li class="menu-item-has-children dropdown">
+                    <li class="menu-item-has-children dropdown disabled">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-th"></i>Excepciones</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-paper-plane"></i><a href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
@@ -96,7 +102,7 @@
                             <li><i class="menu-icon fa fa-map-o"></i><a href="{{route('secuencialidad.index')}}">Secuencialidad</a></li>
                         </ul>
                     </li>        
-                    <li class="menu-item-has">
+                    <li class="menu-item-has disabled">
                         <a href="{{ route('show.connection.form') }}"><i class="menu-icon fa fa-glass"></i>Scripts</a>
                     </li>
                               
