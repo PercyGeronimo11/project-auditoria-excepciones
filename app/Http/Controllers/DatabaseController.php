@@ -181,9 +181,12 @@ class DatabaseController extends Controller
                 'columns' => $columns,
                 'data' => $tableData
             ];
+            $columnas[$tableName] = $nombreColumna;
+            $tipos[$tableName] = $tipoColumna;
             
         }
-
+        session()->put('columnas', $columnas);
+        session()->put('tipos', $tipos);
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
 
