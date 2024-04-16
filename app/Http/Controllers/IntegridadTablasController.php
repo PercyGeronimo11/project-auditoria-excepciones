@@ -6,6 +6,7 @@ use App\Models\TablaIntegridad;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\Database;
+use Dompdf\Dompdf;
 
 class IntegridadTablasController extends Controller
 {
@@ -125,7 +126,27 @@ class IntegridadTablasController extends Controller
         }
     }
 
+    public function exportarPdf(Request $request)
+    {
+        $listExceptions = json_decode($request->input('listExceptions'), true);
+        $numExcepciones = $request->input('numExcepciones');
+        $tableNameSelect = $request->input('tableNameSelect');
+        $tableRefNameSelect = $request->input('tableRefNameSelect');
     
+        // Verificar si $listExceptions es un array antes de usar count()
+        $countListExceptions = is_array($listExceptions) ? count($listExceptions) : 0;
+    
+        // Cargar la vista Blade que deseas convertir en PDF
+        $html = view('tablas.reportpdf', compact('listExceptions', 'numExcepciones','tableNameSelect','tableRefNameSelect',))->render();
+        
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+
+        //return view('SolicitudDNI/dniPdf',compact('solicitud'));
+        return $dompdf->stream('report.pdf');
+    }
+
   
 
     // public function store(Request $request)

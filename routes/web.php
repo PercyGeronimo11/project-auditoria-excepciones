@@ -48,6 +48,7 @@ Route::get('excepcion/integridad-tablas/delete/{id}',[IntegridadTablasController
 Route::get('excepcion/integridad-tablas/index',[IntegridadTablasController::class,'index'])->name('integridadtablas.index');
 Route::get('excepcion/integridad-tablas/analisis/{id}',[IntegridadTablasController::class,'analysis'])->name('integridadtablas.analysis');
 Route::get('excepcion/integridad-tablas/cancelar',[IntegridadTablasController::class,'cancelar'])->name('integridadtablas.cancelar');
+Route::post('excepcion/integridad-tablas/exportapdf',[IntegridadTablasController::class,'exportarPdf'])->name('integridadtablas.exportpdf');
 
 
 Route::resource('secuencialidad',SequenceController::class);

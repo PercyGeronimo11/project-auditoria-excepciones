@@ -15,9 +15,12 @@
                     Atrás
                 </button>
             </a>
-            <form action="" method="POST">
+            <form action="{{route('integridadtablas.exportpdf')}}" method="POST">
                 @csrf
                 <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
+                <input type="hidden" name="numExcepciones" value="{{ $numExcepciones }}">
+                <input type="hidden" name="tableNameSelect" value="{{ $tableNameSelect  }}">
+                <input type="hidden" name="tableRefNameSelect" value="{{ $tableRefNameSelect }}">
                 <button type="submit" class="btn btn-danger">Exportar PDF</button>
             </form>
         </div>
