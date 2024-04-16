@@ -45,3 +45,8 @@ Route::get('excepcion/integridad-tablas/cancelar',[IntegridadTablasController::c
 
 
 Route::resource('secuencialidad',SequenceController::class);
+
+Route::get('excepcion/secuencialidad/pdf/{id}',[SequenceController::class,'generatepdf'])->name('generatepdf');
+Route::get('excepcion/secuencialidad/use/{id}',[SequenceController::class,'useRegister'])->name('useRegister');
+Route::get('excepcion/create',[SequenceController::class,'create'])->name('createSecuencialidad');
+Route::get('excepcion/delete/{id}',[SequenceController::class,'eliminar'])->name('deleteSecuencialidad');

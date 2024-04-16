@@ -3,16 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Database;
+use App\Models\Sequence_result;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Factories\Sequence;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 /* use App\Http\Controllers\DatabaseController; */
 
 class SequenceController extends Controller
 {
 
-    public function index(Request $request){
+    public function create(Request $request){
         $database = Database::latest()->first();
         $contenido=session()->get('tablesName');
         $tableNames = array_keys($contenido);
@@ -20,7 +25,6 @@ class SequenceController extends Controller
         $tipos = [];
         foreach($contenido as $tableName => $tableData) {
             $fields = [];
-            $fields1 = [];
             $types=[];
             foreach($tableData["columns"] as $column) {
                 if($database->tipo == "mysql"){
@@ -36,16 +40,11 @@ class SequenceController extends Controller
                     $types[]= $column["type"];
                 } 
             }
-            foreach($tableData["data"] as $column2) {
-                if (is_object($column2) && isset($column2->idActa)) {
-                    $fields1[] = $column2->idActa;
-                  }
-            }
             $columnas[$tableName] = $fields;
             $tipos[$tableName] = $types;
         }
         //return $tipos;
-        return view('secuencialidad.index',compact('tableNames','columnas','tipos'));
+        return view('secuencialidad.create',compact('tableNames','columnas','tipos'));
     }
 
     public function store(Request $request)
@@ -68,23 +67,34 @@ class SequenceController extends Controller
         $tipo_secuencia = $request->input('tipo_secuencia');
         $orden_secuencia = $request->input('orden_secuencia');
         $incremento = $request->input('incremento');
-        $valor_inicial_esperado = $request->input('valor_inicial_esperado');
         $rango_valores = $request->input('rango_valores');
-        if($tipo_secuencia == "alfanumerica"){
-            $secuencia_alfabetica = $request->input('secuencia_alfabetica');
-        }else{
-            $secuencia_alfabetica =null;
-        }
         //return Database::latest()->first();
         //return session()->get('tablesName');
         // Realizar el análisis de secuencialidad
-        $resultado_analisis = $this->analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $valor_inicial_esperado, $rango_valores, $secuencia_alfabetica);
-        
+        $database = Database::latest()->first();
+        $data= Sequence_result::create([
+            'bdManager' => $database->tipo,
+            'dbName' => $database->nombre_db,
+            'tableName' => $tabla, 
+            'field' => $campo, 
+            'sequenceType' => $tipo_secuencia,
+            'sequenceOrder' => $orden_secuencia, 
+            'increment' => $incremento,
+            'state' => 1,
+            'user' => Auth::user()->email
+        ]);
+        $resultado_analisis = $this->analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores);
+        //dd($resultado_analisis);
+        $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data]);
+        $pdfPath = 'pdfs/' . uniqid() . '.pdf';
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+        $data->update(['url_doc' => $pdfPath]);
+        //return $pdf->download();
         // Guardar el resultado del análisis o mostrarlo en la interfaz de usuario
         return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis);
     }
 
-    private function analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $valor_inicial_esperado, $rango_valores, $secuencia_alfabetica)
+    private function analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores)
     {
         // Inicializar variables para el seguimiento del análisis
         $secuencia_correcta = true;
@@ -115,6 +125,12 @@ class SequenceController extends Controller
                         }
                         elseif ($orden_secuencia === 'ascendente') {
                             if ($datos[$i] - $valor_anterior != $incremento) {
+                                $mensaje="";
+                                if($datos[$i] - $valor_anterior == ($incremento+1)){
+                                    $mensaje= "Se omitió el valor ".($valor_anterior+1);
+                                }else{
+                                    $mensaje= "Se omitieron los valores del ".($valor_anterior+1)." al ".($datos[$i]-1);
+                                }
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -122,7 +138,7 @@ class SequenceController extends Controller
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
                                     'anterior' => $valor_anterior,
-                                    'mensaje' => "Esta creciendo con respecto al anterior"
+                                    'mensaje' => $mensaje
                                 ];
                             }
                         } else {
@@ -148,7 +164,7 @@ class SequenceController extends Controller
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
                                     'anterior' => '-',
-                                    'mensaje' => "No existen los valores desde el 1 al '{$datos[$i]}'",
+                                    'mensaje' => "No existen los valores desde el 1 al ".($datos[$i]-1),
                             ];
                         }
                     }
@@ -160,14 +176,11 @@ class SequenceController extends Controller
                             // Extraer componentes numéricos y alfabéticos de las cadenas
                             $valor_numerico = intval(preg_replace('/[^0-9]/', '', $datos[$i]));
                             $valor_anterior_numerico = intval(preg_replace('/[^0-9]/', '', $valor_anterior));
-    
-                            if($secuencia_alfabetica === 'si'){
-                                //Valores alfabeticos 
-                                $valor_alfabetico = preg_replace('/[0-9]+/', '', $datos[$i]);
-                                $valor_anterior_alfabetico = preg_replace('/[0-9]+/', '', $valor_anterior);
-    
+                            $valor_alfabetico = preg_replace('/[0-9]+/', '', $datos[$i]);
+                            $valor_anterior_alfabetico = preg_replace('/[0-9]+/', '', $valor_anterior);
+                            if($valor_alfabetico!="" && $valor_anterior_alfabetico!=""){
                                 // Verificar si la parte alfabética del valor actual sigue el orden alfabético
-                                if ($orden_secuencia === 'ascendente') {
+                                if ($orden_secuencia === 'ascendente' && $valor_alfabetico!="") {
                                     // Si el orden es ascendenteendente, verificar que la letra actual sea mayor o igual a la letra anterior
                                     if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) < 0) {
                                         // Si no sigue el orden alfabético, agregar una excepción
@@ -203,15 +216,25 @@ class SequenceController extends Controller
     
                             // Verificar si los componentes numéricos siguen el orden esperado
                             if (($orden_secuencia === 'ascendente' && $num_cmp != 1)) {
+                                $mensaje="";
+                                if($num_cmp>1){
+                                    $mensaje="No existen los valores desde el ".($valor_anterior_numerico+1)." hasta el ".($valor_numerico-1);
+                                }
+                                elseif($num_cmp==0){
+                                    $mensaje="El valor no ha incrementado";
+                                }
+                                elseif($num_cmp<0){
+                                    $mensaje="Esta decreciendo";
+                                }
                                 // Si los componentes numéricos no siguen el orden esperado, agregar una excepción
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
                                     'tabla' => $tabla,
                                     'campo' => $campo,
-                                    'actual' => $datos[$i],
-                                    'anterior' => $valor_anterior,
-                                    'mensaje' => "Esta decreciendo",
+                                    'actual' => $valor_numerico,
+                                    'anterior' => $valor_anterior_numerico,
+                                    'mensaje' => $mensaje,
                                 ];
                             }
                             elseif(($orden_secuencia === 'descendente' && $num_cmp != -1)){
@@ -252,32 +275,76 @@ class SequenceController extends Controller
                    
                 case 'Fecha':
                     // Verificar la secuencia de fechas
-                    // Suponiendo que $datos[$i] es una cadena de fecha en formato 'Y-m-d'
+                    // Suponiendo que $datos[$i] es una cadena de fecha en formato 'Y-m-d' o 'Y-m-d H:i:s'
                     if ($valor_anterior !== null) {
-                        if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior))) {
-                            $secuencia_correcta = false;
+                        $fecha_actual = strtotime($datos[$i]);
+                        $fecha_anterior = strtotime($valor_anterior);
+                        
+                        if ($fecha_actual !== false && $fecha_anterior !== false) {
+                            // Verificar si las fechas son iguales
+                            $fecha_actual_sin_hora = date('Y-m-d', $fecha_actual);
+                            $fecha_anterior_sin_hora = date('Y-m-d', $fecha_anterior);
+                
+                            if ($fecha_actual_sin_hora == $fecha_anterior_sin_hora) {
+                                // Las fechas son iguales, comparar las horas solo si son datetimes
+                                if (strpos($datos[$i], ' ') !== false && strpos($valor_anterior, ' ') !== false) {
+                                    $hora_actual = strtotime($datos[$i]);
+                                    $hora_anterior = strtotime($valor_anterior);
+                                    if ($hora_actual < $hora_anterior && $orden_secuencia === 'ascendente') {
+                                        $secuencia_correcta = false;
+                                        $excepciones[] = [
+                                            'id' => $i+1,
+                                            'tabla' => $tabla,
+                                            'campo' => $campo,
+                                            'actual' => $datos[$i],
+                                            'anterior' => $valor_anterior,
+                                            'mensaje' => "La hora actual es menor que la anterior en la misma fecha",
+                                        ];
+                                    } elseif ($hora_actual > $hora_anterior && $orden_secuencia === 'descendente') {
+                                        $secuencia_correcta = false;
+                                        $excepciones[] = [
+                                            'id' => $i+1,
+                                            'tabla' => $tabla,
+                                            'campo' => $campo,
+                                            'actual' => $datos[$i],
+                                            'anterior' => $valor_anterior,
+                                            'mensaje' => "La hora actual es mayor que la anterior en la misma fecha",
+                                        ];
+                                    }
+                                }
+                            } elseif ($fecha_actual < $fecha_anterior && $orden_secuencia === 'ascendente') {
+                                $secuencia_correcta = false;
+                                $excepciones[] = [
+                                    'id' => $i+1,
+                                    'tabla' => $tabla,
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "Es una fecha menor que la anterior",
+                                ];
+                            } elseif ($fecha_actual > $fecha_anterior && $orden_secuencia === 'descendente') {
+                                $secuencia_correcta = false;
+                                $excepciones[] = [
+                                    'id' => $i+1,
+                                    'tabla' => $tabla,
+                                    'campo' => $campo,
+                                    'actual' => $datos[$i],
+                                    'anterior' => $valor_anterior,
+                                    'mensaje' => "Es una fecha mayor que la anterior",
+                                ];
+                            }
+                        } else {
+                            // Manejar el caso de datos no válidos (fechas incorrectas)
                             $excepciones[] = [
                                 'id' => $i+1,
                                 'tabla' => $tabla,
                                 'campo' => $campo,
                                 'actual' => $datos[$i],
                                 'anterior' => $valor_anterior,
-                                'mensaje' => "Es una hora menor que la anterior",
-                            ];
-                        }
-                        elseif(($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))){
-                            $secuencia_correcta = false;
-                            $excepciones[] = [
-                                'id' => $i+1,
-                                'tabla' => $tabla,
-                                'campo' => $campo,
-                                'actual' => $datos[$i],
-                                'anterior' => $valor_anterior,
-                                'mensaje' => "Es una fecha mayor que la anterior",
+                                'mensaje' => "Los datos no son una fecha válida",
                             ];
                         }
                     }
-                    
                     break;
                 case 'Hora':
                     // Verificar la secuencia de horas
@@ -338,13 +405,92 @@ class SequenceController extends Controller
 
         // Si la secuencia es correcta, retornar un mensaje de éxito
         if ($secuencia_correcta) {
-            return "La secuencia en el campo '{$campo}' de la tabla '{$tabla}' es correcta.";
+            return "La secuencia en el campo '{$campo}' de la tabla '{$tabla}' es correcta";
         } else {
             // Si se detectan excepciones, retornar un arreglo de excepciones
             return $excepciones;
         }
     }
 
+    public function generatepdf($id){
+        $sequence = Sequence_result::findOrFail($id);
+        $pdfPath = $sequence->url_doc;
+        if (Storage::disk("public")->exists($pdfPath)) {
+            return response()->download(Storage::disk("public")->path($pdfPath));
+        } else {
+            return response()->json(['error' => 'PDF not found'], 404);
+        }
+    }
 
+    public function index(){
+        $sequence_results = Sequence_result::all();
+        return view("secuencialidad.index", compact('sequence_results'));
+    }
 
+    public function eliminar($id){
+        $sequence_result = Sequence_result::findOrFail($id);
+        $sequence_result->delete();
+        return redirect('/secuencialidad');
+    }
+
+    public function useRegister($id){
+        $sequence_result = Sequence_result::findOrFail($id);
+        $database = Database::latest()->first();
+        $contenido=session()->get('tablesName');
+        $tableNames = array_keys($contenido);
+        $columnas = [];
+        $tipos = [];
+        foreach($contenido as $tableName => $tableData) {
+            $fields = [];
+            $types=[];
+            foreach($tableData["columns"] as $column) {
+                if($database->tipo == "mysql"){
+                    $fields[] = $column->Field;
+                }else{
+                    $fields[] = $column['name'];
+                }
+
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
+            }
+            $columnas[$tableName] = $fields;
+            $tipos[$tableName] = $types;
+        }
+        //return $tipos;
+        return view('secuencialidad.create',compact('tableNames','columnas','tipos','sequence_result'));
+    }
+
+    /* public function useRegister($id){
+        $sequence_result = Sequence_result::findOrFail($id);
+        $database = Database::latest()->first();
+        $data= Sequence_result::create([
+            'bdManager' => $database->tipo,
+            'dbName' => $database->nombre_db,
+            'tableName' => $sequence_result->tableName, 
+            'field' => $sequence_result->field, 
+            'sequenceType' => $sequence_result->sequenceType,
+            'sequenceOrder' => $sequence_result->sequenceOrder, 
+            'increment' => $sequence_result->increment,
+            'state' => 1,
+            'user' => Auth::user()->email
+        ]);
+        $resultado_analisis = $this->analizarSecuencialidad($sequence_result->tableName, $sequence_result->field, $sequence_result->sequenceType, $sequence_result->sequenceOrder, $sequence_result->increment, null);
+        //dd($resultado_analisis);
+        $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data]);
+        $pdfPath = 'pdfs/' . uniqid() . '.pdf';
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+        $data->update(['url_doc' => $pdfPath]);
+        //return $pdf->download();
+        // Guardar el resultado del análisis o mostrarlo en la interfaz de usuario
+        return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis);
+    } */
+
+    /* public function generatepdf2(){
+        $pdf = Pdf::loadView('secuencialidad.pdf');
+        return $pdf->download('prueba.pdf');
+    } */
 }

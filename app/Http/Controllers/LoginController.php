@@ -59,7 +59,8 @@ class LoginController extends Controller
                     $dominio = substr(strrchr($value, "@"), 1);
                     $response = Http::get("https://api.hunter.io/v2/email-count?domain=$dominio&api_key=$access_key");
                     $data = $response->json();
-                    if($data['data']['total']==0){
+                    $data2 = dns_get_record($dominio, DNS_MX);
+                    if($data['data']['total']==0 && count($data2)==0){
                         $fail('El dominio del correo electrónico no es válido.');
                     }
                 },

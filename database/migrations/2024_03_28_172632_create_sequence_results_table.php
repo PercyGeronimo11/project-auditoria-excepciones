@@ -13,14 +13,17 @@ return new class extends Migration
     {
         Schema::create('sequence_results', function (Blueprint $table) {
             $table->id();
+            $table->string("bdManager");
+            $table->string("dbName");
             $table->string("tableName");
             $table->string("field");
             $table->string("sequenceType");
+            $table->string("sequenceOrder");
             $table->integer("increment");
-            $table->string("result");
             $table->string("state");
             $table->string("user");
-            $table->string("observation");
+            $table->string("observation")->nullable();
+            $table->string("url_doc")->nullable();
             $table->timestamps();
         });
     }

@@ -30,6 +30,21 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.9.0/dist/fullcalendar.min.css" rel="stylesheet" />
 
    <style>
+    .content {
+    height: 100%;
+    overflow-y: auto; /* Para agregar una barra de desplazamiento vertical si el contenido es más largo que la pantalla */
+    }
+
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    }
+
+    .right-panel{
+        height: calc(100% - 55px - 89.6px);
+    }
+
     #weatherWidget .currentDesc {
         color: #ffffff!important;
     }
@@ -228,14 +243,9 @@
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-inner bg-white">
-                <div class="row">
-                    <div class="col-sm-6">
-                        Copyright &copy; 2018 Ela Admin
-                    </div>
-                    <div class="col-sm-6 text-right">
-                        Designed by <a href="https://colorlib.com">Colorlib</a>
-                    </div>
-                </div>
+                <center>
+                    Copyright &copy; 2024 - Grupo N° 5 de auditoría informática
+                </center>
             </div>
         </footer>
         <!-- /.site-footer -->
