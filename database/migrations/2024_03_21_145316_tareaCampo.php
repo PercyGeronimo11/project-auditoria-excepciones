@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('condicion_text');
             $table->string('longitud');
             $table->string('tipoValidar');
-         
+            $table->string("url_doc")->nullable();
             $table->tinyInteger('null');
             $table->timestamps();
         });

@@ -57,7 +57,12 @@
                 <thead>
                     <tr>
                         @foreach($columns as $column)
-                        <th>{{ $column->Field }}</th>
+                        @if (isset($column->Field))
+                            <th>{{ $column->Field }}</th>
+                        @else
+                            <th>{{ $column["name"]}}</th>
+                        @endif
+                     
                         @endforeach
                     </tr>
                 </thead>
@@ -65,7 +70,12 @@
                     @foreach($tableData as $row)
                     <tr>
                         @foreach($columns as $column)
+                        @if (isset($column->Field))
                         <td>{{ $row->{$column->Field} }}</td>
+                        @else
+                        <td>{{ $row->{$column["name"]} }}</td>
+                        @endif
+                   
                         @endforeach
                     </tr>
                     @endforeach
