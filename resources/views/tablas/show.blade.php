@@ -15,11 +15,11 @@
                     Atrás
                 </button>
             </a>
-            <form action="{{route('integridadtablas.exportpdf')}}" method="POST">
+            <form action="{{ route('integridadtablas.exportpdf',$integridad->id) }}" method="POST">
                 @csrf
                 <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
                 <input type="hidden" name="numExcepciones" value="{{ $numExcepciones }}">
-                <input type="hidden" name="tableNameSelect" value="{{ $tableNameSelect  }}">
+                <input type="hidden" name="tableNameSelect" value="{{ $tableNameSelect }}">
                 <input type="hidden" name="tableRefNameSelect" value="{{ $tableRefNameSelect }}">
                 <button type="submit" class="btn btn-danger">Exportar PDF</button>
             </form>
@@ -28,7 +28,13 @@
         <br>
         <div class="card">
             <div class="card-header">
-                <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+                <div>
+                    <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+                </div>
+                <div>
+                    <h3>Tabla en evaluacion: {{$integridad->table}}</h3>
+                </div>
+
             </div>
 
             <table class="table table-striped table-danger">
