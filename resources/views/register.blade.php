@@ -6,6 +6,30 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Register</title>
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    <style>
+        .group {
+            position: relative;
+            margin-bottom: 45px;
+        }
+
+        #emailName,
+        select {
+            font-size: 18px;
+            padding: 10px;
+            display: inline-block;
+            width: calc(50% - 5px);
+            border: none;
+            border-bottom: 1px solid #757575;
+        }
+
+        #emailName {
+            width: calc(50% - 5px);
+        }
+
+        select {
+            width: 50%;
+        }
+    </style>
 </head>
 <body>
     <hgroup>
@@ -15,21 +39,32 @@
     <form method="POST" action="/register/user">
         @csrf
         <div class="group">
-            <input type="text" name="name" value="{{ old('name') }}"><span class="highlight"></span><span class="bar"></span>
+            <input type="text" name="name" value="{{ old('name') }}">
+            <span class="highlight"></span>
+            <span class="bar"></span>
             <label class="{{ old('name') ? 'used' : '' }}">Nombre</label>
             @error('name')
                 <span class="error-message">{{ $message }}</span>
             @enderror
         </div>
         <div class="group">
-            <input type="email" name="email" value="{{ old('email') }}"><span class="highlight"></span><span class="bar"></span>
+            <input type="text" name="email" value="{{ old('email') }}" id="emailName">
+            <select name="email_domain">
+                <option value="@hotmail.com" selected>@hotmail.com</option>
+                <option value="@gmail.com">@gmail.com</option>
+                <!-- Agrega más opciones según tus necesidades -->
+            </select>
+            <span class="highlight"></span>
+            <span class="bar"></span>
             <label class="{{ old('email') ? 'used' : '' }}">Correo</label>
             @error('email')
                 <span class="error-message">{{ $message }}</span>
             @enderror
         </div>
         <div class="group">
-            <input type="password" name="password" value="{{ old('password') }}"><span class="highlight"></span><span class="bar"></span>
+            <input type="password" name="password" value="{{ old('password') }}">
+            <span class="highlight"></span>
+            <span class="bar"></span>
             <label class="{{ old('password') ? 'used' : '' }}">Contraseña</label>
             @error('password')
                 <span class="error-message">{{ $message }}</span>

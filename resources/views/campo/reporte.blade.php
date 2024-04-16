@@ -23,10 +23,99 @@
             text-align: center;
         }
     </style>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 0;
+        }
+    
+        .container {
+          max-width: 800px;
+          margin: 20px auto;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        h1 {
+          text-align: center;
+          color: #333;
+        }
+    
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+    
+        table, th, td {
+          border: 1px solid #ddd;
+        }
+    
+        th, td {
+          padding: 12px;
+          text-align: left;
+        }
+    
+        thead {
+          background-color: #f2f2f2;
+        }
+    
+        tbody tr:nth-child(even) {
+          background-color: #f9f9f9;
+        }
+    
+        tbody tr:hover {
+          background-color: #f2f2f2;
+        }
+    
+        .highlight {
+          background-color: #ffe6e6;
+        }
+      </style>
 </head>
 <body>
+    <div class="container">
+        <h1>INFORME DE INTEGRIDAD DE CAMPOS</h1>
+        <table>
+          <thead>
+            <tr>
+              <th colspan="4" style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">INFORMACIÓN GENERAL DE ANÁLISIS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="col" width="25%">Gestor de Base de Datos:</th>
+              <td width="25%">{{$TareaCampo->bdManager}}</td>
+              <th scope="col">Base de Datos:</th>
+              <td>{{ $TareaCampo->baseDatos}}</td>
+            </tr>
+            <tr>
+              <th scope="col" width="25%">Tabla:</th>
+              <td width="25%">{{ $TareaCampo->tabla}}</td>
+              <th scope="col">Campo:</th>
+              <td>{{ $TareaCampo->campo}}</td>
+            </tr>
+            <tr>
+              <th scope="col">Tipo:</th>
+              <td>{{ $TareaCampo->tipoValidar }}</td>
+              <th scope="col">Regla de validación:</th>
+              <td>{{ $TareaCampo->condicion }}.{{$TareaCampo->condicion_text }}</td>
+            </tr>
+            <tr>
+              <th scope="col">Usuario:</th>
+              <td>{{ $TareaCampo->user}}</td>
+              <th scope="col">Fecha de Análisis:</th>
+              <td>{{ date('Y-m-d', strtotime( $TareaCampo->fecha)) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+
+
+
+
     <h1>Reporte de Integridad de Campos</h1>
-    <p>Fecha: {{ date('Y-m-d') }}</p>
 
     <h2>Resumen Ejecutivo</h2>
 

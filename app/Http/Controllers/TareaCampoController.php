@@ -83,6 +83,7 @@ class TareaCampoController extends Controller
 public function store(Request $request){
     // return $request;
     $database = Database::latest()->first();
+
     $data = $request->validate([
         'campo' => 'required',
         'condicion' => '',
@@ -140,6 +141,8 @@ public function store(Request $request){
 
         $nombre=$database->nombre_db;
         $data["baseDatos"]=$nombre;
+        $data["bdManager"]=$database->tipo;
+        $data["user"]= Auth::user()->email;
         $data["fecha"] = date('Y-m-d H:i:s');
         $TareaCampo = TareaCampo::create($data);
 

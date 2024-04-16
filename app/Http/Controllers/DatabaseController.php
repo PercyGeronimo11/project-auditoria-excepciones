@@ -185,11 +185,10 @@ class DatabaseController extends Controller
             $tipos[$tableName] = $tipoColumna;
             
         }
-
-        session()->put('driverBD', $driver);
-        session()->put('tablesName', $tablesData);
         session()->put('columnas', $columnas);
         session()->put('tipos', $tipos);
+        session()->put('driverBD', $driver);
+        session()->put('tablesName', $tablesData);
 
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
