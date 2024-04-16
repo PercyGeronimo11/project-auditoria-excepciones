@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use App\Models\Database;
 use Dompdf\Dompdf;
+use Illuminate\Support\Facades\Auth;
 
 class IntegridadTablasController extends Controller
 {
@@ -57,6 +58,7 @@ class IntegridadTablasController extends Controller
             $colPrimaryKeys[$tableName] = $primaryKeys;
             $colForeignKeys[$tableName] = $foreignKeys;
         }
+       // dd("paso create",$request);
     
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
@@ -66,6 +68,7 @@ class IntegridadTablasController extends Controller
     
     public function store(Request $request)
     {
+        //dd("No se pudo evaluar",$request);
         $nameTabla = $request->input('nameTabla');
         $nameKeyForanea = $request->input('nameClaveForanea');
         $nameTablaRef = $request->input('nameTablaRef');
@@ -86,6 +89,7 @@ class IntegridadTablasController extends Controller
         }
 
         if (!$this->isCompatible($tipoDato_FK, $tipoDato_PK)) {
+            dd("No se pudo evaluar",$tipoDato_FK,$tipoDato_PK);
             $message = "La selección que desea evaluar no se puede realizar por incompatibilidad de tipo de datos";
             return redirect()->route('integridadtablas.create')->with('message', $message);
         }
@@ -102,46 +106,31 @@ class IntegridadTablasController extends Controller
                 $mensaje = "La Integridad que desa analizar, Ya existe en la lista";
                 return redirect()->route('integridadtablas.index')->with('warning', $mensaje);
             } else {
-                $table = new TablaIntegridad();
-                $table->table = $nameTabla;
-                $table->column_foreignkey = $nameKeyForanea;
-                $table->table_refer = $nameTablaRef;
-                $table->column_primarykey = $nameKeyPrimary;
-                $table->estado = 1;
                 $database = Database::latest()->first(); 
-                $table->name_bd=$database->nombre_db;
-                $table->name_bd=$database->nombre_db;
-
-                if($table->save()){
-                    $mensaje = "Se guardo exitosamente";
-                    return redirect()->route('integridadtablas.index')->with('success', $mensaje);
-                }else{
-                    $mensaje = "Ocurrio un problema al guardar";
-                    return redirect()->route('integridadtablas.create')->with('success', $mensaje);
-                }
-
+                    $table = new TablaIntegridad([
+                        'table' => $nameTabla,
+                        'column_foreignkey' => $nameKeyForanea,
+                        'table_refer' => $nameTablaRef,
+                        'column_primarykey' => $nameKeyPrimary,
+                        'estado' => 1,
+                        'name_bd' => $database->nombre_db,
+                        'type_db' => $database->tipo,
+                        'user' => Auth::user()->email
+                    ]);
+                    $table->save();
                 
+                    $mensaje = "Se guardó exitosamente";
+                    return redirect()->route('integridadtablas.index')->with('success', $mensaje);
             }
         } catch (Exception $ex) {
-            return $ex;
+            return $ex->getMessage();
         }
     }
 
-    public function exportarPdf(Request $request)
+    public function exportarPdf(Request $request, $id)
     {
-        $database = Database::latest()->first();
-        // $data= TablaIntegridad::create([
-        //     'bdManager' => $database->tipo,
-        //     'dbName' => $database->nombre_db,
-        //     'tableName' => $tabla, 
-        //     'field' => $campo, 
-        //     'sequenceType' => $tipo_secuencia,
-        //     'sequenceOrder' => $orden_secuencia, 
-        //     'increment' => $incremento,
-        //     'state' => 1,
-        //     'user' => Auth::user()->email
-        // ]);
 
+        $integridad=TablaIntegridad::find($id);
         $listExceptions = json_decode($request->input('listExceptions'), true);
         $numExcepciones = $request->input('numExcepciones');
         $tableNameSelect = $request->input('tableNameSelect');
@@ -149,7 +138,7 @@ class IntegridadTablasController extends Controller
     
         $countListExceptions = is_array($listExceptions) ? count($listExceptions) : 0;
     
-        $html = view('tablas.reportpdf', compact('listExceptions', 'numExcepciones','tableNameSelect','tableRefNameSelect',))->render();
+        $html = view('tablas.reportpdf', compact('listExceptions', 'numExcepciones','tableNameSelect','tableRefNameSelect','integridad'))->render();
         
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
@@ -270,7 +259,7 @@ class IntegridadTablasController extends Controller
             }
         }
 
-        return view('tablas.show', compact('listExceptions', 'tableNameSelect', 'tableRefNameSelect', 'numExcepciones'));
+        return view('tablas.show', compact('listExceptions', 'tableNameSelect', 'tableRefNameSelect', 'numExcepciones','integridad'));
     }
 
     public function cancelar()

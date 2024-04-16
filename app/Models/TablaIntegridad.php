@@ -16,7 +16,7 @@ class TablaIntegridad extends Model
         'table_refer',
         'column_primarykey',
         'name_bd',
-        'type_bd',
+        'type_db',
         'estado',
         'user',
         'url_pdf'
