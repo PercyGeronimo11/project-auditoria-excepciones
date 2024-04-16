@@ -8,9 +8,11 @@ use App\Http\Controllers\DatabaseController;
 // use App\Http\Controllers\array_set();
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 // use App\Models\TareaCampo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TareaCampoController extends Controller
 {
@@ -47,6 +49,34 @@ class TareaCampoController extends Controller
         $tipos = session()->get('tipos');
 
         return view('campo.create',compact('tableNames','columnas','tipos'));
+
+
+
+        // $tableNames = array_keys(session()->get('tablesName'));
+        // $contenido=session()->get('tablesName');
+        // $columnas = [];
+        // $tipos = [];
+        // foreach($contenido as $tableName => $tableData) {
+        //     $fields = [];
+        //     $types=[];
+        //     foreach($tableData["columns"] as $column) {
+        //         if (isset($column->Field)) {
+        //             $fields[] = $column->Field;
+        //         } else {
+        //             $fields[] = $column['name'];
+        //         }
+        //         if (isset($column->Type)) {
+        //             $types[]= $column->Type;
+        //         }
+        //         else{
+        //             $types[]= $column["type"];
+        //         } 
+               
+        //     }
+        //     // Agregar este array al array de resultados con el nombre de la tabla como clave
+        //     $columnas[$tableName] = $fields;
+        //     $tipos[$tableName] = $types;
+        // }
 
     }
 
@@ -123,6 +153,8 @@ public function store(Request $request){
 {
     $TareaCampo = TareaCampo::findOrFail($id);
     $TareaCampo->update(['estado' => 2]);
+
+
     $contenido = session()->get('tablesName');
     $campo = $TareaCampo->campo;
     $condicion_text = array_filter(explode(',', $TareaCampo->condicion_text));
@@ -130,7 +162,7 @@ public function store(Request $request){
     $pruebas=[];
     $pruebas1=[];
     $condition =true;
-    try {
+
         foreach ($contenido[$TareaCampo->tabla]["data"] as $key) {
             $valorCampo = $key->$campo;
             $TareaCampo->longitud==0 ? $longitudValida =true : $longitudValida =strlen($valorCampo) == $TareaCampo->longitud;
@@ -175,33 +207,89 @@ public function store(Request $request){
     
             // $pruebas[]="condicion:".$condiciones[$condicion]."campo:".$valorCampo." tipo:".!$validadores[$tipoValidar];
         }
+
+
+        
         // return $pruebas;
         $tableData = $columnas;
         $columns = $contenido[$TareaCampo->tabla]["columns"];
         $tableName = $TareaCampo->tabla;
         $view = isset($columns[0]->Field) ? 'conexion.show_tableMysql' : 'conexion.show_tableSQL1';
         $view = $state == 1 ? $view : 'campo.reporte';
+
+        if( $state == 0){
+            // return "hola";
+            $TareaCampo=TareaCampo::findOrFail($id);
+
+            $pdf = pdf::loadView('campo.reporte',['tableName' => $tableName, 'columns' => $columns, 'tableData' => $tableData, 'TareaCampo' => $TareaCampo]);
+            $pdfPath = 'pdfs/' . uniqid() . '.pdf';
+            $TareaCampo->update(['url_doc' => $pdfPath]);
+            // return "cambio";
+            // $TareaCampo->update(['url_doc' => $pdfPath]);
+            // return $pdfPath;
+            Storage::disk('public')->put($pdfPath, $pdf->output());
+        
+
+
+            // if($request->hasFile('curriculum')){
+            //     $archivo=$request->file('curriculum')->store('ArchivosCurriculum','public');
+            //     $url = Storage::url($archivo);
+            //     $Postulacion->curriculum=$url;
+            // }
+
+
+
+        }
+
+       
     
         return view($view, compact('tableName', 'columns', 'tableData', 'TareaCampo'));
-    } catch (\Exception $e) {
-        // Manejo del error
-        $tableData = $columnas;
-        $columns = $contenido[$TareaCampo->tabla]["columns"];
-        $tableName = $TareaCampo->tabla;
-        $view = isset($columns[0]->Field) ? 'conexion.show_tableMysql' : 'conexion.show_tableSQL1';
-        $view = $state == 1 ? $view : 'campo.reporte';
-    
-        return view($view, compact('tableName', 'columns', 'tableData', 'TareaCampo'));
-    }
+
     
    
 }
 
 
 
+public function generatepdf($id){
+    $sequence = Sequence_result::findOrFail($id);
+    $pdfPath = $sequence->url_doc;
+    if (Storage::disk("public")->exists($pdfPath)) {
+        return response()->download(Storage::disk("public")->path($pdfPath));
+    } else {
+        return response()->json(['error' => 'PDF not found'], 404);
+    }
+}
+
     public function pdf($id){
         // analizar($id,0);
         // Assuming you want to pass 1 as the value for $state
+
+        // $database = Database::latest()->first();
+        // $data= Sequence_result::create([
+        //     'bdManager' => $database->tipo,
+        //     'dbName' => $database->nombre_db,
+        //     'tableName' => $tabla, 
+        //     'field' => $campo, 
+        //     'sequenceType' => $tipo_secuencia,
+        //     'sequenceOrder' => $orden_secuencia, 
+        //     'increment' => $incremento,
+        //     'state' => 1,
+        //     'user' => Auth::user()->email
+        // ]);
+
+        // $pdf = pdf::loadView('analizar.campo',['id' => $$id, 'state' => 0]);
+
+        // Storage::disk('public')->put($pdfPath, $pdf->output());
+        // $data->update(['url_doc' => $pdfPath]);
+
+        // $TareaCampo=TareaCampo::findOrFail($id);
+
+        // $pdf = pdf::loadView('campo.reporte',['$id' => $resultado_analisis, 'dataGeneral' => $data]);
+        // $pdfPath = 'pdfs/' . uniqid() . '.pdf';
+        // Storage::disk('public')->put($pdfPath, $pdf->output());
+        // $TareaCampo->update(['url_doc' => $pdfPath]);
+
         return redirect()->route('analizar.campo', ['id' => $id, 'state' => 0]);
 
         // return redirect()->route('tareacampo.index');
@@ -239,19 +327,34 @@ public function store(Request $request){
         $condicion_text = explode(',', $TareaCampo["condicion_text"]);
         $condicion_text = array_filter($condicion_text);
         $condicion=1;
-        // $condicion_text = $TareaCampo.split(',');
-// return  $condicion_text;
-        // return $TareaCampo;
+
 
         return view('campo.edit',compact('tableNames','columnas','tipos','TareaCampo','condicion_text','condicion'));
 
-
-
-        // if (Auth::user()->rol=='Administrativo'){ //boton editar
-        //     $TareaCampo=TareaCampo::findOrFail($id);
-        //     return view('TareaCampo.edit',compact('TareaCampo'));
-        // }else{
-        //     return redirect()->route('tareacampo.index')->with('datos','..::No tiene Acceso ..::');
+        // $tableNames = array_keys(session()->get('tablesName'));
+        // $contenido=session()->get('tablesName');
+        // $columnas = [];
+        // $tipos = [];
+        // foreach($contenido as $tableName => $tableData) {
+        //     $fields = [];
+        //     $types=[];
+        //     foreach($tableData["columns"] as $column) {
+        //         if (isset($column->Field)) {
+        //             $fields[] = $column->Field;
+        //         } else {
+        //             $fields[] = $column['name'];
+        //         }
+        //         if (isset($column->Type)) {
+        //             $types[]= $column->Type;
+        //         }
+        //         else{
+        //             $types[]= $column["type"];
+        //         } 
+               
+        //     }
+        //     // Agregar este array al array de resultados con el nombre de la tabla como clave
+        //     $columnas[$tableName] = $fields;
+        //     $tipos[$tableName] = $types;
         // }
     }
 
