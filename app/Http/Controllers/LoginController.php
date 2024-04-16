@@ -38,10 +38,60 @@ class LoginController extends Controller
         
         //return redirect('/')->with('success', 'Error de inicio de sesion');
     }
-
-    
-
     public function register(Request $request)
+    {
+        $data="";
+        $email_full="";
+        
+        $request->validate([
+            'name' => 'required|string|max:50',
+            'email_domain' => 'required|in:@gmail.com,@hotmail.com',
+            'email' => [
+                'required',
+                'string',
+                'max:50',
+                function ($attribute, $value, $fail) use ($request, $email_full) {
+                    $email_full = $value . $request->input('email_domain');
+                    if (strpos($value, '@') !== false) {
+                        $fail('El formato del correo electrónico es inválido .');
+                    }else{
+                        if (User::where('email', $email_full)->exists()) {
+                            $fail('Este correo electrónico ya está registrado.');
+                        }
+                    }
+                },
+            ],
+            'password' => 'required|string|min:8',
+        ], [
+            'name.required' => 'El nombre es obligatorio.',
+            'name.string' => 'El nombre debe ser una cadena de caracteres.',
+            'name.max' => 'El nombre no puede tener más de 50 caracteres.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.string' => 'El correo electrónico debe ser una cadena de caracteres.',
+            'email.max' => 'El nombre del correo electrónico no puede tener más de 50 caracteres.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.string' => 'La contraseña debe ser una cadena de caracteres.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
+        ]);
+        $email_full = $request->input('email') . $request->input('email_domain');
+        User::create([
+            'name' => $request->name,
+            'email' => $email_full,
+            'password' => Hash::make($request->password),
+        ]);
+        return redirect('/')->with('success1', '¡Registro exitoso!')->with('success2', 'Ya puedes iniciar sesión.');
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        return redirect('/');
+    }
+
+    /* public function register(Request $request)
     {
         $data="";
         
@@ -86,15 +136,5 @@ class LoginController extends Controller
             'password' => Hash::make($request->password),
         ]);
         return redirect('/')->with('success1', '¡Registro exitoso!')->with('success2', 'Ya puedes iniciar sesión.');
-    }
-
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-
-        return redirect('/');
-    }
+    } */
 }

@@ -127,14 +127,8 @@ class DatabaseController extends Controller
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
-                $nombreColumna = DB::connection('dynamic')->getSchemaBuilder()->getColumnListing($tableName);
-                // return $nombreColumna ;
                 $database = Database::latest()->first(); 
-                $tipoColumna = $types = DB::connection('dynamic')
-                ->table('INFORMATION_SCHEMA.COLUMNS')
-                ->where('TABLE_SCHEMA', '=', $database->nombre_db)
-                ->where('TABLE_NAME', '=', $tableName)
-                ->pluck('COLUMN_TYPE');
+                
 
                 // $foreignKeys = DB::connection('dynamic')->select("
                 //     SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
@@ -173,15 +167,11 @@ class DatabaseController extends Controller
                 'columns' => $columns,
                 'data' => $tableData
             ];
-            $columnas[$tableName] = $nombreColumna;
-            $tipos[$tableName] = $tipoColumna;
             
         }
 
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
-        session()->put('columnas', $columnas);
-        session()->put('tipos', $tipos);
 
 
         return view('conexion.database_info', compact('tablesData', 'driver'));

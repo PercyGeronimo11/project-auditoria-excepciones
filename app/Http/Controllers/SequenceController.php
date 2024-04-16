@@ -180,7 +180,7 @@ class SequenceController extends Controller
                             $valor_anterior_alfabetico = preg_replace('/[0-9]+/', '', $valor_anterior);
                             if($valor_alfabetico!="" && $valor_anterior_alfabetico!=""){
                                 // Verificar si la parte alfabética del valor actual sigue el orden alfabético
-                                if ($orden_secuencia === 'ascendente' && $valor_alfabetico!="") {
+                                if ($orden_secuencia === 'ascendente') {
                                     // Si el orden es ascendenteendente, verificar que la letra actual sea mayor o igual a la letra anterior
                                     if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) < 0) {
                                         // Si no sigue el orden alfabético, agregar una excepción
@@ -215,10 +215,10 @@ class SequenceController extends Controller
                             $num_cmp = $valor_numerico - $valor_anterior_numerico;
     
                             // Verificar si los componentes numéricos siguen el orden esperado
-                            if (($orden_secuencia === 'ascendente' && $num_cmp != 1)) {
+                            if (($orden_secuencia === 'ascendente' && $num_cmp != $incremento)) {
                                 $mensaje="";
-                                if($num_cmp>1){
-                                    $mensaje="No existen los valores desde el ".($valor_anterior_numerico+1)." hasta el ".($valor_numerico-1);
+                                if($num_cmp>$incremento){
+                                    $mensaje="No existen los valores desde el ".($valor_anterior_numerico+$incremento)." hasta el ".($valor_numerico-$incremento);
                                 }
                                 elseif($num_cmp==0){
                                     $mensaje="El valor no ha incrementado";
@@ -265,10 +265,10 @@ class SequenceController extends Controller
                             }
                         }
                     } else {
-                        $excepciones[] = [
-                            'error' => "Los valores no contienen una parte numérica, por lo tanto, no se realiza el análisis de secuencialidad alfanumérica o numérica.",
+                        $excepciones2[] = [
+                            'error' => "Hay valores que no contienen una parte numérica, por lo tanto, no se realiza el análisis de secuencialidad alfanumérica o numérica.",
                         ];
-                        return $excepciones;
+                        return $excepciones2;
                     }
                     
                 break;

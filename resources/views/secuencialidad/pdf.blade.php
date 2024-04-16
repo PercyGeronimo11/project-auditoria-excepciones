@@ -98,33 +98,37 @@
               {{ $results }}, <b>NO SE ENCONTRARON EXCEPCIONES</b>
             </div>
     @else
-    <table>
-      <thead>
-        <tr>
-          <th colspan="4" style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">EXCEPCIONES ENCONTRADAS</th>
-        </tr>
-        <tr>
-          <th scope="col">ID</th>{{-- 
-          <th scope="col">Tabla</th>
-          <th scope="col">Campo</th> --}}
-          <th scope="col">Valor Anterior</th>
-          <th scope="col">Valor Actual</th>
-          <th scope="col">Excepción</th>
-        </tr>
-      </thead>
-      <tbody>
-        @foreach ($results as $item)
-        <tr class="@if($item['mensaje'] === 'Excepción encontrada') highlight @endif">
-          <td>{{ $item['id'] }}</td>{{-- 
-          <td>{{ $item['tabla'] }}</td>
-          <td>{{ $item['campo'] }}</td> --}}
-          <td>{{ $item['anterior'] }}</td>
-          <td>{{ $item['actual'] }}</td>
-          <td>{{ $item['mensaje'] }}</td>
-        </tr>
-        @endforeach
-      </tbody>
-    </table>
+      @if (isset($results[0]['error']))
+        <h5 class="alert alert-danger text-center">{{ $results[0]['error'] }}</h5>
+      @else
+        <table>
+          <thead>
+            <tr>
+              <th colspan="4" style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">EXCEPCIONES ENCONTRADAS</th>
+            </tr>
+            <tr>
+              <th scope="col">ID</th>{{-- 
+              <th scope="col">Tabla</th>
+              <th scope="col">Campo</th> --}}
+              <th scope="col">Valor Anterior</th>
+              <th scope="col">Valor Actual</th>
+              <th scope="col">Excepción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach ($results as $item)
+            <tr>
+              <td>{{ $item['id'] }}</td>{{-- 
+              <td>{{ $item['tabla'] }}</td>
+              <td>{{ $item['campo'] }}</td> --}}
+              <td>{{ $item['anterior'] }}</td>
+              <td>{{ $item['actual'] }}</td>
+              <td>{{ $item['mensaje'] }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      @endif
     @endif
     
   </div>
