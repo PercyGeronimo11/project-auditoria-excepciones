@@ -15,12 +15,12 @@
                     Atrás
                 </button>
             </a>
-            <form action="{{route('integridadtablas.exportpdf')}}" method="POST">
+            <form action="{{ route('integridadtablas.exportpdf',$integridad->id) }}" method="POST">
                 @csrf
                 <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
                 <input type="hidden" name="numExcepciones" value="{{ $numExcepciones }}">
-                <input type="hidden" name="tableNameSelect" value="{{ $tableNameSelect  }}">
-                <input type="hidden" name="tableRefNameSelect" value="{{ $tableRefNameSelect }}">
+                <input type="hidden" name="nameTable" value="{{ $nameTable }}">
+                <input type="hidden" name="nameTableRef" value="{{ $nameTableRef }}">
                 <button type="submit" class="btn btn-danger">Exportar PDF</button>
             </form>
         </div>
@@ -28,7 +28,13 @@
         <br>
         <div class="card">
             <div class="card-header">
-                <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+                <div>
+                    <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+                </div>
+                <div>
+                    <h3>Tabla en evaluacion: {{$integridad->table}}</h3>
+                </div>
+
             </div>
 
             <table class="table table-striped table-danger">
@@ -36,23 +42,28 @@
                     <tr>
                         <th scope="col">N°</th>
                         <th scope="col">Tabla</th>
-                        <th scope="col">Clave Foranea</th>
+                        <th scope="col">Registro</th>
+                        <th scope="col">Clave Foranea [{{$integridad->column_foreignkey}}]</th>
                         <th scope="col">Tabla Referenciada</th>
-                        <th scope="col">Excepcion</th>
+                        <th scope="col">Condicion</th>
+                        <th scope="col">Criterio</th>
+                        <th scope="col">Efecto</th>
+                        <th scope="col">Causa</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (count($listExceptions) > 0)
                         @php $index = 1; @endphp
-                        @foreach ($listExceptions as $exceptionKey => $exceptionValue)
-                            <tr>
-                                <th scope="row">{{ $index }}</th>
-                                <td>{{ $tableNameSelect }}</td>
-                                <td>{{ $exceptionKey }}</td>
-                                <td>{{ $tableRefNameSelect }}</td>
-                                <td>{{ $exceptionValue }}</td>
-                            </tr>
-                            @php $index++; @endphp
+                        @foreach($listExceptions as $item)
+                        <tr>
+                            <th scope="row">{{ $index }}</th>
+                            <td>{{ $integridad->table }}</td>
+                            <td>{{ $item['keyPrimaryTable'] }}</td>
+                            <td>{{ $item['keyForeignTable'] }}</td>
+                            <td>{{ $integridad->table_refer }}</td>
+                            <td>{{ $item['message']  }}</td>
+                        </tr>
+                        @php $index++; @endphp
                         @endforeach
                     @else
                         <tr>

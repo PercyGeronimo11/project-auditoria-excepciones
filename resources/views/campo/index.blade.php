@@ -77,7 +77,37 @@
                       
                   
                         
-                    @endif    
+                    @endif  
+                    <button   class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdropp{{$row->id}}">
+                      <i class="fa-solid fa-file-circle-check"></i>
+                  </button>
+          
+                  
+                  
+                  <!-- Modal -->
+                  <div class="modal fade " id="staticBackdropp{{$row->id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                          <h1 class="modal-title fs-5" id="staticBackdropLabel">Reporte</h1>
+                      
+                          </div>
+                          <div class="modal-body">
+                        
+                              <iframe  src="{{$row->url_doc}}" class="object-cover  mt-2 " height="500vh" width="450vh" frameborder="0" scrolling=""> </iframe>
+                          
+                          </div>
+                          <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              
+                          </div>
+                      </div>
+                      </div>
+                  </div>
+                    
+
+
+
                     <a href="{{ route('tareacampo.show',$row->id) }}" class="btn btn-info btn-sm"><i class="fa fa-clone"></i></a> 
                     <a href="{{ route('analizar.campo', ['state' => 1, 'id' => $row->id]) }}" class="btn btn-info btn-sm">
                       <i class="fa-solid fa-magnifying-glass-chart"></i>
@@ -132,7 +162,8 @@
   @endif
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 <script>
     
     function mensajeQuit(){

@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('tabla_integridad', function (Blueprint $table) {
@@ -17,9 +14,11 @@ return new class extends Migration
             $table->string('column_foreignkey');
             $table->string('table_refer');
             $table->string('column_primarykey'); 
-            $table->tinyInteger('estado');
-            $table->date('fecha');
             $table->String('name_bd');
+            $table->String('type_db');
+            $table->tinyInteger('estado');
+            $table->string("user");
+            $table->string("url_doc")->nullable();
             $table->timestamps();
         });
     }

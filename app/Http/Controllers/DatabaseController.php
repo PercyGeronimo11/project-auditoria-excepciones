@@ -127,14 +127,16 @@ class DatabaseController extends Controller
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
-                $database = Database::latest()->first(); 
-                
+                $nombreColumna = DB::connection('dynamic')->getSchemaBuilder()->getColumnListing($tableName);
 
-                // $foreignKeys = DB::connection('dynamic')->select("
-                //     SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
-                //     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-                //     WHERE TABLE_NAME = '$tableName'
-                // ");
+                $database = Database::latest()->first(); 
+                $tipoColumna = $types = DB::connection('dynamic')
+                ->table('INFORMATION_SCHEMA.COLUMNS')
+                ->where('TABLE_SCHEMA', '=', $database->nombre_db)
+                ->where('TABLE_NAME', '=', $tableName)
+                ->pluck('COLUMN_TYPE');
+
+
                 $foreignKeys = DB::connection('dynamic')->select("
                     SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
                     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
@@ -159,9 +161,21 @@ class DatabaseController extends Controller
                             'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
                         ];
                     })->toArray();
+
+
+                    $tipoColumna = DB::connection('dynamic')
+                    ->table('INFORMATION_SCHEMA.COLUMNS')
+                    ->select('COLUMN_NAME', 'DATA_TYPE') 
+                    ->where('TABLE_NAME', '=', $tableName)
+                    ->pluck('COLUMN_TYPE');
+                    $nombreColumna = DB::connection('dynamic')
+                    ->table('INFORMATION_SCHEMA.COLUMNS')
+                    ->select('COLUMN_NAME', 'DATA_TYPE') 
+                    ->where('TABLE_NAME', '=', $tableName)
+                    ->pluck('COLUMN_NAME');
             }
 
-            $tableData = DB::connection('dynamic')->table($tableName)->get();
+            $tableData = DB::connection('dynamic')->table($tableName)->take(20000)->get();
 
             $tablesData[$tableName] = [
                 'columns' => $columns,

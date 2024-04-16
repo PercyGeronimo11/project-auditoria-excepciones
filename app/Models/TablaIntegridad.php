@@ -15,9 +15,11 @@ class TablaIntegridad extends Model
         'column_foreignkey',
         'table_refer',
         'column_primarykey',
+        'name_bd',
+        'type_db',
         'estado',
-        'fecha',
-        'name_bd'
+        'user',
+        'url_pdf'
     ];
 
 }
