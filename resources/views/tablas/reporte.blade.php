@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte de Integridad de Campos</title>
+    <title>Reporte </title>
     <style>
         body {
             font-family: sans-serif;
@@ -25,7 +25,7 @@
     </style>
 </head>
 <body>
-    <h1>Reporte de Integridad de Campos</h1>
+    <h1>Reporte de Integridad de Tablas</h1>
     <p>Fecha: {{ date('Y-m-d') }}</p>
 
     <h2>Resumen Ejecutivo</h2>
@@ -33,19 +33,6 @@
     <ul>
         <li>Se encontraron <strong>{{ count($tableData) }}</strong> errores en el campo <strong>{{ $TareaCampo->campo }} en la tabla {{ $TareaCampo->tabla }} </strong></li>
 
-
-        {{-- <li>Los tipos de errores más comunes son:</li>
-            <ul>
-                @foreach ($errores_por_tipo as $tipo => $cantidad)
-                    <li>{{ $tipo }} ({{ $cantidad }})</li>
-                @endforeach
-            </ul>
-        <li>Los campos con mayor cantidad de errores son:</li>
-            <ul>
-                @foreach ($campos_con_errores as $campo => $cantidad)
-                    <li>{{ $campo }} ({{ $cantidad }})</li>
-                @endforeach
-            </ul> --}}
     </ul>
 
     <div class="container mt-5">

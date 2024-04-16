@@ -60,6 +60,8 @@ class IntegridadTablasController extends Controller
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
     
+
+
     
     public function store(Request $request)
     {
@@ -122,6 +124,9 @@ class IntegridadTablasController extends Controller
             return $ex;
         }
     }
+
+    
+  
 
     // public function store(Request $request)
     // {

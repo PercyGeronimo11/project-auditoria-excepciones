@@ -9,16 +9,20 @@
 
     <div class="container mt-5">
         <h2 class="mb-4"> <b> INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
-        <a href="{{ route('integridadtablas.cancelar') }}">
-            <button type="button" class="btn btn-warning">
-                <=< /button>
-        </a>
-        <form action="" method="POST">
-            @csrf
-            <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
-            <button type="submit" class="btn btn-primary">Guardar Excepciones</button>
-        </form>
+        <div class="d-flex">
+            <a href="{{ route('integridadtablas.cancelar') }}">
+                <button type="button" class="btn btn-warning">
+                    Atrás
+                </button>
+            </a>
+            <form action="" method="POST">
+                @csrf
+                <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
+                <button type="submit" class="btn btn-danger">Exportar PDF</button>
+            </form>
+        </div>
 
+        <br>
         <div class="card">
             <div class="card-header">
                 <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
