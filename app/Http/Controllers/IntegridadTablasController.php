@@ -108,9 +108,10 @@ class IntegridadTablasController extends Controller
                 $table->table_refer = $nameTablaRef;
                 $table->column_primarykey = $nameKeyPrimary;
                 $table->estado = 1;
-                $table->fecha = date("Y-m-d");
                 $database = Database::latest()->first(); 
                 $table->name_bd=$database->nombre_db;
+                $table->name_bd=$database->nombre_db;
+
                 if($table->save()){
                     $mensaje = "Se guardo exitosamente";
                     return redirect()->route('integridadtablas.index')->with('success', $mensaje);
@@ -129,17 +130,17 @@ class IntegridadTablasController extends Controller
     public function exportarPdf(Request $request)
     {
         $database = Database::latest()->first();
-        $data= TablaIntegridad::create([
-            'bdManager' => $database->tipo,
-            'dbName' => $database->nombre_db,
-            'tableName' => $tabla, 
-            'field' => $campo, 
-            'sequenceType' => $tipo_secuencia,
-            'sequenceOrder' => $orden_secuencia, 
-            'increment' => $incremento,
-            'state' => 1,
-            'user' => Auth::user()->email
-        ]);
+        // $data= TablaIntegridad::create([
+        //     'bdManager' => $database->tipo,
+        //     'dbName' => $database->nombre_db,
+        //     'tableName' => $tabla, 
+        //     'field' => $campo, 
+        //     'sequenceType' => $tipo_secuencia,
+        //     'sequenceOrder' => $orden_secuencia, 
+        //     'increment' => $incremento,
+        //     'state' => 1,
+        //     'user' => Auth::user()->email
+        // ]);
 
         $listExceptions = json_decode($request->input('listExceptions'), true);
         $numExcepciones = $request->input('numExcepciones');

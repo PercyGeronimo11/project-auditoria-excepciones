@@ -14,7 +14,6 @@ return new class extends Migration
             $table->string('column_foreignkey');
             $table->string('table_refer');
             $table->string('column_primarykey'); 
-            $table->date('fecha');
             $table->String('name_bd');
             $table->String('type_db');
             $table->tinyInteger('estado');
