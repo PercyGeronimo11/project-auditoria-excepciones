@@ -30,21 +30,6 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.9.0/dist/fullcalendar.min.css" rel="stylesheet" />
 
    <style>
-    .content {
-    height: 100%;
-    overflow-y: auto; /* Para agregar una barra de desplazamiento vertical si el contenido es más largo que la pantalla */
-    }
-
-    html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    }
-
-    .right-panel{
-        height: calc(100% - 55px - 89.6px);
-    }
-
     #weatherWidget .currentDesc {
         color: #ffffff!important;
     }
@@ -81,7 +66,13 @@
 
     </style>
 
-
+<style>
+    /* Estilo para los enlaces deshabilitados */
+    .disabled {
+        pointer-events: none; /* Evita que los enlaces sean clicables */
+        color: #999; /* Cambia el color del texto para que parezca deshabilitado */
+    }
+</style>
 
 <title>@yield('title')</title>
 
@@ -100,10 +91,10 @@
                     <li class="menu-item-has">
                         <a href="{{ route('show.connection.form') }}"><i class="menu-icon fa fa-cogs"></i>Conexion </a>
                     </li>
-                    <li class="menu-item-has">
+                    <li class="menu-item-has disabled">
                         <a href="{{ route('show.tables') }}"><i class="menu-icon fa fa-table"></i>Tablas </a>
                     </li> 
-                    <li class="menu-item-has-children dropdown">
+                    <li class="menu-item-has-children dropdown disabled">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-th"></i>Excepciones</a>
                         <ul class="sub-menu children dropdown-menu">
                             <li><i class="menu-icon fa fa-paper-plane"></i><a href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
@@ -111,7 +102,7 @@
                             <li><i class="menu-icon fa fa-map-o"></i><a href="{{route('secuencialidad.index')}}">Secuencialidad</a></li>
                         </ul>
                     </li>        
-                    <li class="menu-item-has">
+                    <li class="menu-item-has disabled">
                         <a href="{{ route('show.connection.form') }}"><i class="menu-icon fa fa-glass"></i>Scripts</a>
                     </li>
                               
@@ -243,9 +234,14 @@
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-inner bg-white">
-                <center>
-                    Copyright &copy; 2024 - Grupo N° 5 de auditoría informática
-                </center>
+                <div class="row">
+                    <div class="col-sm-6">
+                        Copyright &copy; 2018 Ela Admin
+                    </div>
+                    <div class="col-sm-6 text-right">
+                        Designed by <a href="https://colorlib.com">Colorlib</a>
+                    </div>
+                </div>
             </div>
         </footer>
         <!-- /.site-footer -->

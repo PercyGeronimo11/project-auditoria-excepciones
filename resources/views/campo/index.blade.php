@@ -67,7 +67,9 @@
                   <td>{{ $row->condicion." ".$row->condicion_text}}</td>
                   <td>
                     @if ($row->estado == 1)
+                   
                     <a href="{{ route('tareacampo.edit',$row->id) }}" class="btn btn-info btn-sm"><i class="fas fa-edit"></i></a>
+                    
                     {{-- <a href="{{ route('tareacampo.confirmar',$row->idCargo) }}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i>Eliminar</a>  --}}
                     <button   class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{$row->id}}">
                         <i class="fas fa-trash"></i>
@@ -75,7 +77,8 @@
                       
                   
                         
-                    @endif     
+                    @endif    
+                    <a href="{{ route('tareacampo.show',$row->id) }}" class="btn btn-info btn-sm"><i class="fa fa-clone"></i></a> 
                     <a href="{{ route('analizar.campo', ['state' => 1, 'id' => $row->id]) }}" class="btn btn-info btn-sm">
                       <i class="fa-solid fa-magnifying-glass-chart"></i>
                   </a>

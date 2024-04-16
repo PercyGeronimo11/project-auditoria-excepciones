@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+// use App\Controllers\DatabaseController;
 use App\Models\TareaCampo;
 use App\Models\Database;
 use App\Http\Controllers\DatabaseController;
@@ -10,70 +11,31 @@ use Illuminate\Support\Facades\DB;
 // use App\Models\TareaCampo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+
 class TareaCampoController extends Controller
 {
+
     const PAGINATION=7;
+    // protected 
 
     public function index(Request $request){
+
+        // DatabaseController::configureDatabaseConnection1();
+        // $db = DB::connection('dynamic');
+        // $users = $db->select('SELECT * FROM acta');
+        // return $users;
+        
         $database = Database::latest()->first(); // Obtener el último registro de la tabla Database
         $nombre=$database->nombre_db;
-        // return $nombre;
+
         $busqueda=$request->get('buscarpor');
         $TareaCampos=TareaCampo::where('tabla','like','%'.$busqueda.'%')
         ->where('estado','<>','0')
         ->where('baseDatos','=',$nombre)
         ->paginate($this::PAGINATION);
 
-        // $datos="El campo ya esta registrado-puedes editarlo o eliminarlo";
-        // return session()->get('TareaCampos');
-        // return view('campo.index',compact('TareaCampos','busqueda'))->with('datos','Ya esta contratado!!');
         return view('campo.index', compact('TareaCampos', 'busqueda'));
         
-        // $tableNames = array_keys(session()->get('tablesName'));
-
-        // $contenido=session()->get('tablesName');
-        // // return  $contenido;
-        // $columnas = [];
-        // $columnas1 = [];
-        // $tipos = [];
-        // // return $contenido;
-        // // return $columns;
-        // // Recorrer cada tabla en el objeto
-        // foreach($contenido as $tableName => $tableData) {
-        //     // Crear un array para almacenar los nombres de los campos de esta tabla
-        //     $fields = [];
-        //     $fields1 = [];
-        //     $types=[];
-        //     // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
-        //     foreach($tableData["columns"] as $column) {
-        //         if (isset($column->Field)) {
-        //             $fields[] = $column->Field;
-        //         } elseif (isset($column->COLUMN_NAME)) {
-        //             $fields[] = $column->COLUMN_NAME;
-        //         }
-
-        //         $types[]= $column->Type;
-        //     }
-        //     foreach($tableData["data"] as $column2) {
-        //         // return $column2->idActa;
-        //         if (is_object($column2) && isset($column2->idActa)) {
-        //             $fields1[] = $column2->idActa;
-        //           }
-
-        //     }
-
-
-        //     // Agregar este array al array de resultados con el nombre de la tabla como clave
-        //     $columnas[$tableName] = $fields;
-        //     $columnas1[$tableName] = $fields1;
-        //     $tipos[$tableName] = $types;
-        // }
-        // return $columnas1;
-        // return  $tipos;
-        // return  array_column(session()->get('tablesName')[$tableNames[0]]["columns"], 'Field');
-
-        // @foreach($tablesData as $tableName => $table)
-        return view('campo.create',compact('tableNames','contenido','columnas','tipos'));
         
     }
 
@@ -81,195 +43,86 @@ class TareaCampoController extends Controller
     {
 
         $tableNames = array_keys(session()->get('tablesName'));
+        $columnas = session()->get('columnas');
+        $tipos = session()->get('tipos');
 
-        $contenido=session()->get('tablesName');
-        // return  $contenido;
-        $columnas = [];
-        $columnas1 = [];
-        $tipos = [];
-        // return $contenido;
-        // return $columns;
-        // Recorrer cada tabla en el objeto
-        foreach($contenido as $tableName => $tableData) {
-            // Crear un array para almacenar los nombres de los campos de esta tabla
-            $fields = [];
-            $fields1 = [];
-            $types=[];
-            // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
-            foreach($tableData["columns"] as $column) {
-                if (isset($column->Field)) {
-                    $fields[] = $column->Field;
-                } else {
-                    $fields[] = $column['name'];
-                }
-// return $column;
-                if (isset($column->Type)) {
-                    $types[]= $column->Type;
-                }
-                else{
-                    $types[]= $column["type"];
-                } 
-               
-            }
-            foreach($tableData["data"] as $column2) {
-                // return $column2->idActa;
-                if (is_object($column2) && isset($column2->idActa)) {
-                    $fields1[] = $column2->idActa;
-                  }
+        return view('campo.create',compact('tableNames','columnas','tipos'));
 
-            }
-
-
-            // Agregar este array al array de resultados con el nombre de la tabla como clave
-            $columnas[$tableName] = $fields;
-            $columnas1[$tableName] = $fields1;
-            $tipos[$tableName] = $types;
-        }
-        // return $columnas1;
-        // return  $tipos;
-        // return  array_column(session()->get('tablesName')[$tableNames[0]]["columns"], 'Field');
-
-        // @foreach($tablesData as $tableName => $table)
-        return view('campo.create',compact('tableNames','contenido','columnas','tipos'));
-
-
-
-        // if (Auth::user()->rol=='Administrativo'){   //boteon registrar
-
-        //     return view('TareaCampo.create');
-        // } else{
-        //     return redirect()->route('TareaCampo.index')->with('datos','..::No tiene Acceso ..::');
-        // }
     }
-    public function store(Request $request){
-        // return $request;
-        $database = Database::latest()->first();
-        $data = $request->validate([
-            'campo' => 'required',
-            'condicion' => '',
-            'tabla' => 'required',
-            'tipoValidar' => 'required',
-            'longitud' => ['nullable', 'numeric'],
-            'condicion_text' => [
-                function ($attribute, $value, $fail) use ($request) {
-                    $condicion = $request->condicion;
-                    // $fail("te falto llenar contenido en la condicion".$condicion);
-                    $valor=false;
-                    foreach ($request->condicion_text as $item ){
-                        if($item == null){
-                            $valor=true;
-                            break;
-                        }
-                    }
-                    // foreach( => intem)
-                    if ($valor && $condicion !="1") {
-                        $fail("te falto llenar contenido en la condicion");
-                    }
-                 
-                },
-            ],
-            'null' => '', 
-        ]);
-        // $data = $request->validate([
-        //     'campo' => 'required',
-        //     // 'condicion' => 'required',
-        //     'condicion' => '',
-        //     'tabla' => 'required',
-        //     'tipoValidar' => 'required',
-        //     'longitud' => ['nullable', 'numeric'],
-        //     'condicion_text'=>'',
-        //     // 'condicion_text[]' => 'required_unless:condicion,1',
-        //     // 'condicion_text[]' => 'required_if:condicion,between,==',
-            
-        //     'null' => '', 
-        //     'condicion_text' => [
-        //         function ($attribute, $value, $fail) use ($request) {
-        //             $condicion = $request->condicion;
-        //             // $fail("te falto llenar contenido en la condicion".$condicion);
-        //             $valor=false;
-        //             foreach ($request->condicion_text as $item ){
-        //                 if($item == null){
-        //                     $valor=true;
-        //                     break;
-        //                 }
-        //             }
-        //             // foreach( => intem)
-        //             if ($valor && $condicion !="1") {
-        //                 $fail("te falto llenar contenido en la condicion");
-        //             }
-                 
-        //         },
-        //     ],
-        // ]);
-        // $condicion_text = $request->condicion_text;
-        // return $condicion_text;
-        // $validator =  \Illuminate\Support\Facades\Validator::make([], []);
-        
-        // foreach($condicion_text as $key => $value) {
-        //     return "hola";
-        //     $validator =  \Illuminate\Support\Facades\Validator::make(
-        //         ['condicion_text.' . $key => $value],
-        //         ['condicion_text.' . $key => 'required_unless:condicion,1']
-        //     );
 
-        //     if ($validator->fails()) {
-        //         return $validator->fails();
-        //         return redirect()->back()
-        //             ->withErrors($validator)
-        //             ->withInput();
-        //     }
-        // }
+public function store(Request $request){
+    // return $request;
+    $database = Database::latest()->first();
+    $data = $request->validate([
+        'campo' => 'required',
+        'condicion' => '',
+        'tabla' => 'required',
+        'tipoValidar' => 'required',
+        'longitud' => ['nullable', 'numeric'],
+        'condicion_text' => [
+            function ($attribute, $value, $fail) use ($request) {
+                $condicion = $request->condicion;
+                // $fail("te falto llenar contenido en la condicion".$condicion);
+                $valor=false;
+                foreach ($request->condicion_text as $item ){
+                    if($item == null){
+                        $valor=true;
+                        break;
+                    }
+                }
+                // foreach( => intem)
+                if ($valor && $condicion !="1") {
+                    $fail("te falto llenar contenido en la condicion");
+                }
+             
+            },
+        ],
+        'null' => '', 
+    ]);
+    
 
-        if( $data['condicion'] == "1"){
-            $data['condicion']="";
+    if( $data['condicion'] == "1"){
+        $data['condicion']="";
+    }
+    if( $data['longitud'] = ""){
+        $data['longitud']="0";
+    }
+    $tareas =TareaCampo::where('estado','<>',0)
+    ->where('baseDatos','=',$database["nombre_db"])
+    ->where('campo','=',$data["campo"] )
+    ->where('tabla','=',$data["tabla"] )
+    ->get();
+    $data["aux"] = "";
+
+    if (isset($data["condicion_text"]) && is_array($data["condicion_text"])) {
+        foreach ($data["condicion_text"] as $key ) {
+            $data["aux"] = $data["aux"] . $key . ",";
         }
-        if( $data['longitud'] = ""){
-            $data['longitud']="0";
-        }
-        $tareas =TareaCampo::where('estado','<>',0)
-        ->where('baseDatos','=',$database["nombre_db"])
-        ->where('campo','=',$data["campo"] )
-        ->get();
-        // return  $tareas ;
-        // return $request;
-        $data["aux"] = "";
-        // return $data;
-        // Verifica si condicion_text es un array y no está vacío antes de intentar iterar sobre él
-        if (isset($data["condicion_text"]) && is_array($data["condicion_text"])) {
-            foreach ($data["condicion_text"] as $key ) {
-                $data["aux"] = $data["aux"] . $key . ",";
-            }
-        }
-        if(!isset($array['null'])){
-            $data["null"]= 1;
-        }
-        
-        // return  $tareas ;
-        if (!($tareas->isEmpty())) {
-            // return  $tareas ;
-          return redirect()->back()->with('datos', 'El campo ya esta registrado-puedes editarlo o eliminarlo');
-        }
-        else{
-            // return  "empty" ;
-            $data["condicion_text"] =  $data["aux"];
-            $data["estado"] = 1;
-            // $database = Database::latest()->first();
-            $nombre=$database->nombre_db;
-            $data["baseDatos"]=$nombre;
-            $data["fecha"] = date('Y-m-d H:i:s');
-            $TareaCampo = TareaCampo::create($data);
-            // return $data;
-            // $TareaCampo->update(['estado' => 1]);
-           
-            return redirect()->route('tareacampo.index');
-        }
+    }
+    if(!isset($array['null'])){
+        $data["null"]= 1;
+    }
+    
+
+        // return  "empty" ;
+        $data["condicion_text"] =  $data["aux"];
+        $data["estado"] = 1;
+
+        $nombre=$database->nombre_db;
+        $data["baseDatos"]=$nombre;
+        $data["fecha"] = date('Y-m-d H:i:s');
+        $TareaCampo = TareaCampo::create($data);
+
        
-    }
+        return redirect()->route('tareacampo.index');
+
+   
+}
 
     public function analizar($id, $state)
 {
     $TareaCampo = TareaCampo::findOrFail($id);
-    // $TareaCampo->update(['estado' => 2]);
+    $TareaCampo->update(['estado' => 2]);
     $contenido = session()->get('tablesName');
     $campo = $TareaCampo->campo;
     $condicion_text = array_filter(explode(',', $TareaCampo->condicion_text));
@@ -277,81 +130,74 @@ class TareaCampoController extends Controller
     $pruebas=[];
     $pruebas1=[];
     $condition =true;
-    foreach ($contenido[$TareaCampo->tabla]["data"] as $key) {
-        $valorCampo = $key->$campo;
-        $TareaCampo->longitud==0 ? $longitudValida =true : $longitudValida =strlen($valorCampo) == $TareaCampo->longitud;
-  
-        $condicion = $TareaCampo->condicion;
-        if (count($condicion_text) > 1) {
-            $min = min($condicion_text);
-            $max = max($condicion_text);
-            $condition = ($valorCampo >= $min && $valorCampo <= $max);
-        }
-     
-        $tipoValidar = $TareaCampo->tipoValidar;
-        // && $longitudValida
-        $validadores = [
-            "int" => is_int($valorCampo) && $longitudValida,
-            "decimal" => is_float($valorCampo),
-            "date" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:Y-m-d'])->passes(),
-            "time" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:H:i:s'])->passes(),
-            "DNI" => strlen($valorCampo)==8, 
-            "email" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'email'])->passes(), // Validate email format       
-        ];
-
-        $condiciones = [
-            "like" => strpos($valorCampo, $condicion_text[0]) === false ,
-            "in" => !in_array($valorCampo, $condicion_text) ,
-            "null" => $valorCampo == "",
-            "between" => !$condition,
+    try {
+        foreach ($contenido[$TareaCampo->tabla]["data"] as $key) {
+            $valorCampo = $key->$campo;
+            $TareaCampo->longitud==0 ? $longitudValida =true : $longitudValida =strlen($valorCampo) == $TareaCampo->longitud;
+      
+            $condicion = $TareaCampo->condicion;
+            if (count($condicion_text) > 1) {
+                $min = min($condicion_text);
+                $max = max($condicion_text);
+                $condition = ($valorCampo >= $min && $valorCampo <= $max);
+            }
+         
+            $tipoValidar = $TareaCampo->tipoValidar;
+            $validadores = [
+                "int" => is_int($valorCampo) && $longitudValida,
+                "decimal" => is_float($valorCampo),
+                "date" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:Y-m-d'])->passes(),
+                "time" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:H:i:s'])->passes(),
+                "DNI" => strlen($valorCampo)==8, 
+                "email" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'email'])->passes(), // Validate email format       
+            ];
+    
+            $condiciones = [
+                "like" => strpos($valorCampo, $condicion_text[0]) === false ,
+                "in" => !in_array($valorCampo, $condicion_text) ,
+                "null" => $valorCampo == "",
+                "between" => !$condition,
+                
+            ];
+            if(!array_key_exists($TareaCampo->condicion, $condiciones)){
+                $condiciones[$TareaCampo->condicion] = !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];');
+            }
             
-            // $TareaCampo->condicion =>!eval('return  $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];'),
-        ];
-        // $condiciones["between"] = count($condicion_text) > 1 ?($valorCampo >= $min && $valorCampo <= $max) :null; 
-        if(!array_key_exists($TareaCampo->condicion, $condiciones)){
-            $condiciones[$TareaCampo->condicion] = !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];');
+      
+            // if($condiciones[$condicion]){
+            //     $columnas[] = $key;
+            // }
+    
+            if ($valorCampo == "" && $TareaCampo->null == "0" || !$validadores[$tipoValidar] || $condiciones[$condicion]) {
+                $columnas[] = $key;
+    
+            }
+    
+            // $pruebas[]="condicion:".$condiciones[$condicion]."campo:".$valorCampo." tipo:".!$validadores[$tipoValidar];
         }
-        // $condiciones[$TareaCampo->condicion] = !array_key_exists($TareaCampo->condicion, $condiciones) ? !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];') : break;
-        // $condiciones[$TareaCampo->condicion] = $TareaCampo->condicion;
-        // array_set($condiciones, $TareaCampo->condicion, !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];'));
-
-
-  
-        if($condiciones[$condicion]){
-            $columnas[] = $key;
-        }
-             // if ($valorCampo == "" && $TareaCampo->null == "0" || !$validadores[$tipoValidar] || $condiciones[$condicion]) {
-        //     $columnas[] = $key;
-        //     // return "hola";
-        // }
-
-        
-        // return ($condicion2 ? '1' : '0');
-        // return $condiciones;
-        // return $condicion;
-        // $pruebas[]="condicion:".($condicion2 ? 'true' : 'false');
-        $pruebas[]="condicion:".$condiciones[$condicion]."campo:".$valorCampo." tipo:".!$validadores[$tipoValidar];
+        // return $pruebas;
+        $tableData = $columnas;
+        $columns = $contenido[$TareaCampo->tabla]["columns"];
+        $tableName = $TareaCampo->tabla;
+        $view = isset($columns[0]->Field) ? 'conexion.show_tableMysql' : 'conexion.show_tableSQL1';
+        $view = $state == 1 ? $view : 'campo.reporte';
+    
+        return view($view, compact('tableName', 'columns', 'tableData', 'TareaCampo'));
+    } catch (\Exception $e) {
+        // Manejo del error
+        $tableData = $columnas;
+        $columns = $contenido[$TareaCampo->tabla]["columns"];
+        $tableName = $TareaCampo->tabla;
+        $view = isset($columns[0]->Field) ? 'conexion.show_tableMysql' : 'conexion.show_tableSQL1';
+        $view = $state == 1 ? $view : 'campo.reporte';
+    
+        return view($view, compact('tableName', 'columns', 'tableData', 'TareaCampo'));
     }
-    // return $pruebas;
-    $tableData = $columnas;
-    $columns = $contenido[$TareaCampo->tabla]["columns"];
-    $tableName = $TareaCampo->tabla;
-    $view = isset($columns[0]->Field) ? 'conexion.show_tableMysql' : 'conexion.show_tableSQL1';
-    $view = $state == 1 ? $view : 'campo.reporte';
-
-    return view($view, compact('tableName', 'columns', 'tableData', 'TareaCampo'));
+    
+   
 }
 
 
-      
-        // return $condiciones;
-        // $condiciones = [
-        //     "like" => strpos($valorCampo, $condicion_text[0]) === false && $longitudValida,
-        //     "in" => !in_array($valorCampo, $condicion_text),
-        //     "null" => $valorCampo == "",
-        //     ">" => eval("return $valorCampo > $condicion_text[0];"),
-        //     "<" => eval("return $valorCampo < $condicion_text[0];"),
-        // ];
 
     public function pdf($id){
         // analizar($id,0);
@@ -361,58 +207,43 @@ class TareaCampoController extends Controller
         // return redirect()->route('tareacampo.index');
         // return view('campo.reporte', compact('tableName', 'columns', 'tableData','TareaCampo'));
     }
-
-    public function edit($id)
+    public function show($id)
     {
         $tableNames = array_keys(session()->get('tablesName'));
+        $columnas = session()->get('columnas');
+        $tipos = session()->get('tipos');
 
-        $contenido=session()->get('tablesName');
-        // return  $contenido;
-        $columnas = [];
-        $columnas1 = [];
-        $tipos = [];
-        // return $contenido;
-        // return $columns;
-        // Recorrer cada tabla en el objeto
-        foreach($contenido as $tableName => $tableData) {
-            // Crear un array para almacenar los nombres de los campos de esta tabla
-            $fields = [];
-            $fields1 = [];
-            $types=[];
-            // Recorrer las columnas de esta tabla y guardar los nombres de los campos en el array
-            foreach($tableData["columns"] as $column) {
-                if (isset($column->Field)) {
-                    $fields[] = $column->Field;
-                } elseif (isset($column->COLUMN_NAME)) {
-                    $fields[] = $column->COLUMN_NAME;
-                }
-
-                $types[]= $column->Type;
-            }
-            foreach($tableData["data"] as $column2) {
-                // return $column2->idActa;
-                if (is_object($column2) && isset($column2->idActa)) {
-                    $fields1[] = $column2->idActa;
-                  }
-
-            }
-
-
-            // Agregar este array al array de resultados con el nombre de la tabla como clave
-            $columnas[$tableName] = $fields;
-            $columnas1[$tableName] = $fields1;
-            $tipos[$tableName] = $types;
-        }
+        // $view = $condicion == 1 ? $view : 'campo.reporte';
 
         $TareaCampo=TareaCampo::findOrFail($id);
         $condicion_text=[];
         $condicion_text = explode(',', $TareaCampo["condicion_text"]);
         $condicion_text = array_filter($condicion_text);
+        $condicion=0;
+
+
+        return view('campo.edit',compact('tableNames','columnas','tipos','TareaCampo','condicion_text','condicion'));
+
+    }
+
+    public function edit($id)
+    {
+        $tableNames = array_keys(session()->get('tablesName'));
+        $columnas = session()->get('columnas');
+        $tipos = session()->get('tipos');
+
+        // $view = $condicion == 1 ? $view : 'campo.reporte';
+
+        $TareaCampo=TareaCampo::findOrFail($id);
+        $condicion_text=[];
+        $condicion_text = explode(',', $TareaCampo["condicion_text"]);
+        $condicion_text = array_filter($condicion_text);
+        $condicion=1;
         // $condicion_text = $TareaCampo.split(',');
 // return  $condicion_text;
         // return $TareaCampo;
 
-        return view('campo.edit',compact('tableNames','contenido','columnas','tipos','TareaCampo','condicion_text'));
+        return view('campo.edit',compact('tableNames','columnas','tipos','TareaCampo','condicion_text','condicion'));
 
 
 

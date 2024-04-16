@@ -45,7 +45,7 @@
                                 <select class="form-select  @error('tabla') is-invalid @enderror select2" aria-label="Default select example" id="firstSelect" name="tabla"> 
                                     <option selected disabled>Open this select menu</option>
                            
-                                    @foreach ($tableNames as $item)
+                                    @foreach (array_keys(session()->get('tablesName')) as $item)
                                    
                                     <option value="{{$item}}">{{$item}}</option>
                                     @endforeach
@@ -420,11 +420,17 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
       const option = selectElement.options[i];
         console.log(option.value)
       // Verificar si el valor de la opción coincide con el valor deseado
-       if(option.value ==="DNI"){
+       if(option.value ==="DNI" && (resultado=="date" || resultado=="decimal" )){
      
-          option.disabled = false;
+          option.disabled = true;
           // option.selected = true;
-        }else if (option.value !== resultado) {
+        }
+        else if (option.value ==="DNI"&& resultado=="int") {
+          // Deshabilitar la opción
+          option.disabled = false;
+          // option.style.display = "none";
+        }
+        else if (option.value !== resultado) {
           // Deshabilitar la opción
           option.disabled = true;
           // option.style.display = "none";

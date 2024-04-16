@@ -17,9 +17,7 @@ class TablaIntegridad extends Model
         'column_primarykey',
         'estado',
         'fecha',
+        'name_bd'
     ];
-    public function excepciones()
-    {
-        return $this->hasMany(TablaExcepcion::class, 'id_integridad');
-    }
+
 }
