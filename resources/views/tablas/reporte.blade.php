@@ -27,12 +27,10 @@
 <body>
     <h1>Reporte de Integridad de Tablas</h1>
     <p>Fecha: {{ date('Y-m-d') }}</p>
-
     <h2>Resumen Ejecutivo</h2>
 
     <ul>
         <li>Se encontraron <strong>{{ count($tableData) }}</strong> errores en el campo <strong>{{ $TareaCampo->campo }} en la tabla {{ $TareaCampo->tabla }} </strong></li>
-
     </ul>
 
     <div class="container mt-5">

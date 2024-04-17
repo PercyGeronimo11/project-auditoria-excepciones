@@ -32,10 +32,12 @@ class TareaCampoController extends Controller
 
         $busqueda=$request->get('buscarpor');
         $TareaCampos=TareaCampo::where('tabla','like','%'.$busqueda.'%')
-        ->where('estado','<>','0')
-        ->where('baseDatos','=',$nombre)
+        // ->where('estado','<>','0')
+        // ->where('baseDatos','=',$nombre)
+        // ->where('bdManager','=',$database->tipo)
         ->paginate($this::PAGINATION);
-
+        // return $TareaCampos->links();
+        // $TareaCampos->links("campo.index")
         return view('campo.index', compact('TareaCampos', 'busqueda'));
         
         
