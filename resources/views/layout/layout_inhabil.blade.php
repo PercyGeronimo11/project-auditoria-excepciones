@@ -99,9 +99,10 @@
                     <li class="menu-item-has-children dropdown disabled">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-th"></i>Excepciones</a>
                         <ul class="sub-menu children dropdown-menu">
-                            <li><i class="menu-icon fa fa-paper-plane"></i><a href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
+                           
                             <li><i class="fa fa-table"></i><a href="{{ route('integridadtablas.index') }}">Integridad de tablas</a></li>
                             <li><i class="menu-icon fa fa-map-o"></i><a href="{{route('secuencialidad.index')}}">Secuencialidad</a></li>
+                            <li><i class="menu-icon fa fa-paper-plane"></i><a href="{{ route('tareacampo.index') }}">Integridad de campos</a></li>
                         </ul>
                     </li>        
                     <li class="menu-item-has-children dropdown disabled">
