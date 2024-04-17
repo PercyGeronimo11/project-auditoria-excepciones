@@ -32,9 +32,10 @@ class TareaCampoController extends Controller
 
         $busqueda=$request->get('buscarpor');
         $TareaCampos=TareaCampo::where('tabla','like','%'.$busqueda.'%')
-        // ->where('estado','<>','0')
-        // ->where('baseDatos','=',$nombre)
-        // ->where('bdManager','=',$database->tipo)
+        ->where('estado','<>','0')
+        ->where('baseDatos','=',$nombre)
+        ->where('bdManager','=',$database->tipo)
+        ->where('user','=',Auth::user()->userName)
         ->paginate($this::PAGINATION);
         // return $TareaCampos->links();
         // $TareaCampos->links("campo.index")
@@ -46,39 +47,37 @@ class TareaCampoController extends Controller
     public function create()
     {
 
+       // $tableNames = array_keys(session()->get('tablesName'));
+      //  $columnas = session()->get('columnas');
+      //  $tipos = session()->get('tipos');
         $tableNames = array_keys(session()->get('tablesName'));
-        $columnas = session()->get('columnas');
-        $tipos = session()->get('tipos');
+        $contenido=session()->get('tablesName');
+        $columnas = [];
+        $tipos = [];
+        foreach($contenido as $tableName => $tableData) {
+            $fields = [];
+            $types=[];
+            foreach($tableData["columns"] as $column) {
+                if (isset($column->Field)) {
+                    $fields[] = $column->Field;
+                } else {
+                    $fields[] = $column['name'];
+                }
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
+               
+            }
+            // Agregar este array al array de resultados con el nombre de la tabla como clave
+            $columnas[$tableName] = $fields;
+            $tipos[$tableName] = $types;
+        }
 
         return view('campo.create',compact('tableNames','columnas','tipos'));
 
-
-
-        // $tableNames = array_keys(session()->get('tablesName'));
-        // $contenido=session()->get('tablesName');
-        // $columnas = [];
-        // $tipos = [];
-        // foreach($contenido as $tableName => $tableData) {
-        //     $fields = [];
-        //     $types=[];
-        //     foreach($tableData["columns"] as $column) {
-        //         if (isset($column->Field)) {
-        //             $fields[] = $column->Field;
-        //         } else {
-        //             $fields[] = $column['name'];
-        //         }
-        //         if (isset($column->Type)) {
-        //             $types[]= $column->Type;
-        //         }
-        //         else{
-        //             $types[]= $column["type"];
-        //         } 
-               
-        //     }
-        //     // Agregar este array al array de resultados con el nombre de la tabla como clave
-        //     $columnas[$tableName] = $fields;
-        //     $tipos[$tableName] = $types;
-        // }
 
     }
 
@@ -88,7 +87,16 @@ public function store(Request $request){
 
     $data = $request->validate([
         'campo' => 'required',
-        'condicion' => '',
+        'condicion' => [
+            function ($attribute, $value, $fail) use ($request) {
+                $condicion = $request->condicion;
+                
+                if ($request->condicion_text!=null && $condicion =="1") {
+                    $fail("te falto llenar la condicion");
+                }
+             
+            },
+        ],
         'tabla' => 'required',
         'tipoValidar' => 'required',
         'longitud' => ['nullable', 'numeric'],
@@ -117,7 +125,8 @@ public function store(Request $request){
     if( $data['condicion'] == "1"){
         $data['condicion']="";
     }
-    if( $data['longitud'] = ""){
+    if( $data['longitud'] == ""){
+        // return"hola"; 
         $data['longitud']="0";
     }
     $tareas =TareaCampo::where('estado','<>',0)
@@ -144,7 +153,7 @@ public function store(Request $request){
         $nombre=$database->nombre_db;
         $data["baseDatos"]=$nombre;
         $data["bdManager"]=$database->tipo;
-        $data["user"]= Auth::user()->email;
+        $data["user"]= Auth::user()->userName;
         $data["fecha"] = date('Y-m-d H:i:s');
         $TareaCampo = TareaCampo::create($data);
 
@@ -154,7 +163,7 @@ public function store(Request $request){
    
 }
 
-    public function analizar($id, $state)
+public function analizar($id, $state)
 {
     $TareaCampo = TareaCampo::findOrFail($id);
     $TareaCampo->update(['estado' => 2]);
@@ -170,6 +179,7 @@ public function store(Request $request){
 
         foreach ($contenido[$TareaCampo->tabla]["data"] as $key) {
             $valorCampo = $key->$campo;
+            // return  $TareaCampo->longitud;
             $TareaCampo->longitud==0 ? $longitudValida =true : $longitudValida =strlen($valorCampo) == $TareaCampo->longitud;
       
             $condicion = $TareaCampo->condicion;
@@ -181,6 +191,7 @@ public function store(Request $request){
          
             $tipoValidar = $TareaCampo->tipoValidar;
             $validadores = [
+                "varchar" => $longitudValida,
                 "int" => is_int($valorCampo) && $longitudValida,
                 "decimal" => is_float($valorCampo),
                 "date" => \Illuminate\Support\Facades\Validator::make([$campo => $valorCampo], ['campo' => 'date_format:Y-m-d'])->passes(),
@@ -196,11 +207,13 @@ public function store(Request $request){
                 "between" => !$condition,
                 
             ];
+           
             if(!array_key_exists($TareaCampo->condicion, $condiciones)){
                 $condiciones[$TareaCampo->condicion] = !eval('return $key->$campo '. $TareaCampo->condicion.' $condicion_text[0];');
             }
             
-      
+            // return $condiciones[$condicion];
+
             // if($condiciones[$condicion]){
             //     $columnas[] = $key;
             // }
@@ -302,11 +315,36 @@ public function generatepdf($id){
     }
     public function show($id)
     {
-        $tableNames = array_keys(session()->get('tablesName'));
-        $columnas = session()->get('columnas');
-        $tipos = session()->get('tipos');
+        // $tableNames = array_keys(session()->get('tablesName'));
+        // $columnas = session()->get('columnas');
+        // $tipos = session()->get('tipos');
 
         // $view = $condicion == 1 ? $view : 'campo.reporte';
+        $tableNames = array_keys(session()->get('tablesName'));
+        $contenido=session()->get('tablesName');
+        $columnas = [];
+        $tipos = [];
+        foreach($contenido as $tableName => $tableData) {
+            $fields = [];
+            $types=[];
+            foreach($tableData["columns"] as $column) {
+                if (isset($column->Field)) {
+                    $fields[] = $column->Field;
+                } else {
+                    $fields[] = $column['name'];
+                }
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
+               
+            }
+            // Agregar este array al array de resultados con el nombre de la tabla como clave
+            $columnas[$tableName] = $fields;
+            $tipos[$tableName] = $types;
+        }
 
         $TareaCampo=TareaCampo::findOrFail($id);
         $condicion_text=[];
@@ -321,9 +359,9 @@ public function generatepdf($id){
 
     public function edit($id)
     {
-        $tableNames = array_keys(session()->get('tablesName'));
-        $columnas = session()->get('columnas');
-        $tipos = session()->get('tipos');
+        // $tableNames = array_keys(session()->get('tablesName'));
+        // $columnas = session()->get('columnas');
+        // $tipos = session()->get('tipos');
 
         // $view = $condicion == 1 ? $view : 'campo.reporte';
 
@@ -333,55 +371,85 @@ public function generatepdf($id){
         $condicion_text = array_filter($condicion_text);
         $condicion=1;
 
+         $tableNames = array_keys(session()->get('tablesName'));
+        $contenido=session()->get('tablesName');
+        $columnas = [];
+        $tipos = [];
+        foreach($contenido as $tableName => $tableData) {
+            $fields = [];
+            $types=[];
+            foreach($tableData["columns"] as $column) {
+                if (isset($column->Field)) {
+                    $fields[] = $column->Field;
+                } else {
+                    $fields[] = $column['name'];
+                }
+                if (isset($column->Type)) {
+                    $types[]= $column->Type;
+                }
+                else{
+                    $types[]= $column["type"];
+                } 
+               
+            }
+            // Agregar este array al array de resultados con el nombre de la tabla como clave
+            $columnas[$tableName] = $fields;
+            $tipos[$tableName] = $types;
+        }
 
         return view('campo.edit',compact('tableNames','columnas','tipos','TareaCampo','condicion_text','condicion'));
 
-        // $tableNames = array_keys(session()->get('tablesName'));
-        // $contenido=session()->get('tablesName');
-        // $columnas = [];
-        // $tipos = [];
-        // foreach($contenido as $tableName => $tableData) {
-        //     $fields = [];
-        //     $types=[];
-        //     foreach($tableData["columns"] as $column) {
-        //         if (isset($column->Field)) {
-        //             $fields[] = $column->Field;
-        //         } else {
-        //             $fields[] = $column['name'];
-        //         }
-        //         if (isset($column->Type)) {
-        //             $types[]= $column->Type;
-        //         }
-        //         else{
-        //             $types[]= $column["type"];
-        //         } 
-               
-        //     }
-        //     // Agregar este array al array de resultados con el nombre de la tabla como clave
-        //     $columnas[$tableName] = $fields;
-        //     $tipos[$tableName] = $types;
-        // }
+       
     }
 
     public function update(Request $request, $id)
     {
+        $database = Database::latest()->first();
         $data = $request->validate([
             'campo' => 'required',
-            // 'condicion' => 'required',
-            'condicion' => '',
+            'condicion' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    $condicion = $request->condicion;
+                    
+                    if ($request->condicion_text!=null && $condicion =="1") {
+                        $fail("te falto llenar la condicion");
+                    }
+                 
+                },
+            ],
             'tabla' => 'required',
             'tipoValidar' => 'required',
-            // 'longitud' => 'numeric', 
-            'condicion_text' => '', 
+            'longitud' => ['nullable', 'numeric'],
+            'condicion_text' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    $condicion = $request->condicion;
+                    // $fail("te falto llenar contenido en la condicion".$condicion);
+                    $valor=false;
+                    foreach ($request->condicion_text as $item ){
+                        if($item == null){
+                            $valor=true;
+                            break;
+                        }
+                    }
+                    // foreach( => intem)
+                    if ($valor && $condicion !="1") {
+                        $fail("te falto llenar contenido en la condicion");
+                    }
+                 
+                },
+            ],
             'null' => '', 
         ]);
-        // return $data;
-
-        if( $data["longitud"] = ""){
-            $data["longitud"]="0";
+        
+    
+        if( $data['condicion'] == "1"){
+            $data['condicion']="";
         }
-        // return  $tareas ;
-        // return $request;
+        if( $data['longitud'] == ""){
+            // return"hola"; 
+            $data['longitud']="0";
+        }
+
         $data["aux"] = "";
         // return $data;
         // Verifica si condicion_text es un array y no está vacío antes de intentar iterar sobre él
@@ -395,10 +463,13 @@ public function generatepdf($id){
         }
         $data["condicion_text"] =  $data["aux"];
         $data["estado"] = 1;
-        // $database = Database::latest()->first();
-        // $nombre=$database->nombre_db;
-        // $data["baseDatos"]=$nombre;
+
+        $nombre=$database->nombre_db;
+        $data["baseDatos"]=$nombre;
+        $data["bdManager"]=$database->tipo;
+        $data["user"]= Auth::user()->email;
         $data["fecha"] = date('Y-m-d H:i:s');
+
         $TareaCampo=TareaCampo::findOrFail($id);
         $TareaCampo->update($data);
         
