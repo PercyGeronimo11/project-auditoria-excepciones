@@ -523,7 +523,7 @@ class SequenceController extends Controller
 
     public function index(){
         $database = Database::latest()->first();
-        if($database=="mysql"){
+        if($database->tipo=="mysql"){
             $sequence_results = Sequence_result::where('bdManager',"MySQL")->get();
         }else{
             $sequence_results = Sequence_result::where('bdManager',"SQL Server")->get();
