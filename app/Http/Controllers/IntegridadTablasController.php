@@ -41,14 +41,14 @@ class IntegridadTablasController extends Controller
 
             if ($database->tipo == "mysql") {
                 foreach ($tableData['columns'] as $column) {
-                    if (isset($column->Key)) {
+                    
                         if ($column->Key == 'PRI') {
                             $primaryKeys[] = $column->Field;
                         }
                         if ($column->Key == 'MUL') {
                             $foreignKeys[] = $column->Field;
                         }
-                    }
+                    
                 }
                 $colPrimaryKeys[$tableName] = $primaryKeys;
                 $colForeignKeys[$tableName] = $foreignKeys;
@@ -58,7 +58,7 @@ class IntegridadTablasController extends Controller
                 $colForeignKeys[$tableName] = $databaseAux->getKeyForaneas($tableName);
             }
         }
-
+     
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
 
@@ -98,7 +98,7 @@ class IntegridadTablasController extends Controller
         }
 
         if (!$this->isCompatible($tipoDato_FK, $tipoDato_PK)) {
-            dd("No se pudo evaluar", $tipoDato_FK, $tipoDato_PK);
+
             $message = "La selección que desea evaluar no se puede realizar por incompatibilidad de tipo de datos";
             return redirect()->route('integridadtablas.create')->with('message', $message);
         }
