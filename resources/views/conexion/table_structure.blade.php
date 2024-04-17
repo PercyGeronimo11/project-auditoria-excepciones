@@ -4,8 +4,20 @@
 
 @section('content')
 <div class="container mt-5">
+
+
     <div class="card" style="background-color: #f8f9fa;">
         <div class="card-body">
+            <div class="row mt-4">
+                <div class="col-md-12 text-right">
+                    <a href="{{ route('show.tables') }}" class="btn btn-secondary ml-2">
+                        <i class="fa fa-arrow-left"></i>
+                    </a>
+                    <a href="{{ route('disconnect.database') }}" class="btn btn-danger">
+                        <i class="fa fa-power-off"></i>
+                    </a>
+                </div>
+            </div>
             <div style="background-color: #ffffff; padding: 10px; margin-bottom: 20px;">
                 <h2 class="text-center mb-4" style="font-size: 32px; color: #6c757d;">Estructura de la tabla: {{ $tableName }}</h2>
             </div>

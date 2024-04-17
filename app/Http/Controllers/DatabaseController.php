@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Database;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Consulta;
+
+use Illuminate\Support\Facades\Hash;
+
 
 class DatabaseController extends Controller
 {
@@ -35,14 +39,15 @@ class DatabaseController extends Controller
     {
         $database = Database::latest()->first(); // Obtener el último registro de la tabla Database
 
-        if ($database) {
+        $password = session()->get('password');
+        if ($password) {
             config(['database.connections.' . $this->connectionName => [
                 'driver' => $database->tipo,
                 'host' => $database->host,
                 'port' => $database->puerto,
                 'database' => $database->nombre_db,
                 'username' => $database->usuario,
-                'password' => $database->contraseña,
+                'password' => $password,
                 'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
@@ -51,7 +56,10 @@ class DatabaseController extends Controller
                     \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
                 ]) : [],
             ]]);
+        } else {
+            return redirect()->route('show.connection.form');
         }
+        
     }
 
     public function connectDatabase(Request $request)
@@ -60,6 +68,8 @@ class DatabaseController extends Controller
         $driver = $request->input('driver');
 
         $databaseName = $request->input('database');
+
+        $password = $request->input('password');
 
         $existingDatabase = Database::where('nombre_db', $databaseName)->exists();
 
@@ -93,7 +103,7 @@ class DatabaseController extends Controller
                 $database->host = $request->input('host');
                 $database->nombre_db = $request->input('database');
                 $database->usuario = $request->input('username');
-                $database->contraseña = $request->input('password');
+                $database->contraseña = Hash::make($request->input('password')); 
                 $database->estado = '1';
                 $database->save();
             } else {
@@ -103,7 +113,7 @@ class DatabaseController extends Controller
                 $database->host = $request->input('host');
                 $database->nombre_db = $request->input('database');
                 $database->usuario = $request->input('username');
-                $database->contraseña = $request->input('password');
+                $database->contraseña = Hash::make($request->input('password')); // Encriptar la contraseña
                 $database->estado = '1';
                 $database->save();
             }
@@ -176,6 +186,7 @@ class DatabaseController extends Controller
 
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
+        session()->put('password', $password);
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
@@ -342,5 +353,129 @@ class DatabaseController extends Controller
         return view('conexion.table_structure', compact('tableName', 'columns', 'columnTypes', 'primaryKey', 'foreignKeys', 'driver'));
     }
     
+
+
+    public function executeQuery(Request $request)
+    {
+        $driver = $this->driver;
+        $query = $request->input('query');
+        $nombre = $request->input('nombre');
+        $errorMessage = null;
+        $results = null;
+        $showInput = false; 
+
+        if ($request->has('guardarConsulta')) {
+            if (Consulta::where('consulta', $query)->exists()) {
+                return response()->json(['message' => 'La consulta ya existe'], 200);
+            }
+
+            if (Consulta::where('nombre', $nombre)->exists()) {
+                return response()->json(['message' => 'El nombre de la consulta ya esta en uso'], 200);
+            }
+
+            try {
+                DB::connection('dynamic')->select($query);
+            
+                $consulta = new Consulta();
+                $consulta->consulta = $query;
+                $consulta->nombre = $nombre;
+                $consulta->nombre_db = Database::latest()->value('nombre_db');
+                $consulta->fecha = now();
+                $consulta->save();
+                
+                return response()->json(['message' => 'La consulta se guardó exitosamente'], 200);
+            } catch (\Illuminate\Database\QueryException $e) {
+                return response()->json(['message' => 'Consulta erronea'], 200);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error al ejecutar la consulta'], 200);
+            }
+        }
+    
+        try {
+            $results = DB::connection('dynamic')->select($query);
+        } catch (\Exception $e) {
+            $errorMessage = "Error al ejecutar la consulta: " . $e->getMessage();
+            $errorMessage = explode("(Connection:", $errorMessage)[0];
+            $errorMessage = rtrim($errorMessage, ',');
+        }
+    
+        return view('conexion.query_form', compact('query', 'results', 'errorMessage', 'driver'));
+    }
+    
+    
+    
+    
+
+    public function showConnectionQuery()
+    {
+        return view('conexion.query_form');
+    }
+
+
+    
+    public function listarConsultas()
+    {
+        $currentDatabaseName = Database::latest()->value('nombre_db');
+    
+        $consultas = Consulta::where('nombre_db', $currentDatabaseName)->get();
+    
+        return view('conexion.list_script', compact('consultas'));
+    }
+
+
+    public function showConsultaResult($id)
+{
+    $consulta = Consulta::findOrFail($id);
+    $results = DB::connection('dynamic')->select($consulta->consulta);
+    
+    return view('conexion.consulta_result', compact('results'));
+}
+    
+public function editConsulta($id)
+{
+    $consulta = Consulta::findOrFail($id);
+    return view('conexion.edit_consulta', compact('consulta'));
+}
+
+public function updateConsulta(Request $request, $id)
+{
+    $request->validate([
+        'nombre' => 'required',
+        'consulta' => 'required',
+    ]);
+
+    $consulta = Consulta::findOrFail($id);
+    $consulta->nombre = $request->input('nombre');
+    $consulta->consulta = $request->input('consulta');
+    $consulta->save();
+
+    try {
+        DB::connection('dynamic')->select($consulta->consulta);
+        return redirect()->route('consultas.listar')->with('success', 'Consulta actualizada correctamente');
+    } catch (\Illuminate\Database\QueryException $e) {
+        return back()->withErrors(['error' => 'Consulta modificada no válida: ' . $e->getMessage()])->withInput();
+    }
+}
+
+
+public function destroyConsulta($id)
+{
+    $consulta = Consulta::findOrFail($id);
+    $consulta->delete();
+
+    return redirect()->route('consultas.listar')->with('success', 'Consulta eliminada correctamente');
+}
+
+
+
+public function disconnectDatabase()
+{
+    // Eliminar la configuración de la conexión dinámica
+    config(['database.connections.dynamic' => null]);
+
+    // Redirigir al usuario a la vista de formulario de conexión
+    return redirect()->route('show.connection.form');
+}
+
 
 }

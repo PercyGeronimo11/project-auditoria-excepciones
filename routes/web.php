@@ -31,6 +31,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/eliminar-registro/{id}', [DatabaseController::class, 'eliminarRegistro']);
     Route::get('/showTables', [DatabaseController::class, 'showAllTables'])->name('show.tables');
     Route::get('/table/structure/{tableName}', [DatabaseController::class, 'showTableStructure'])->name('table.structure');
+    Route::get('/table/structure/{tableName}', [DatabaseController::class, 'showTableStructure'])->name('table.structure');
+    Route::post('/execute-query', [DatabaseController::class, 'executeQuery'])->name('execute.query');
+    Route::get('/query-form', [DatabaseController::class, 'showConnectionQuery'])->name('query.form');
+    Route::get('/consultas', [DatabaseController::class, 'listarConsultas'])->name('consultas.listar');
+    Route::get('consultas/{id}/resultados',[DatabaseController::class, 'showConsultaResult'])->name('consultas.resultados');
+    Route::get('consultas/{id}/editar',[DatabaseController::class, 'editConsulta'])->name('consultas.edit');
+    Route::put('consultas/{id}',[DatabaseController::class, 'updateConsulta'])->name('consultas.update');
+    Route::delete('/consultas/{id}', [DatabaseController::class, 'destroyConsulta'])->name('consultas.destroy');
+    Route::get('/disconnect-database', [DatabaseController::class, 'disconnectDatabase'])->name('disconnect.database');
+
 
 
 });

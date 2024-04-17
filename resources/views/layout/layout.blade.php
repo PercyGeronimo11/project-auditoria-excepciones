@@ -96,9 +96,13 @@
                             <li><i class="menu-icon fa fa-map-o"></i><a href="{{route('secuencialidad.index')}}">Secuencialidad</a></li>
                         </ul>
                     </li>        
-                    <li class="menu-item-has">
-                        <a href="{{ route('show.connection.form') }}"><i class="menu-icon fa fa-glass"></i>Scripts</a>
-                    </li>
+                    <li class="menu-item-has-children dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="menu-icon fa fa-glass"></i>Scripts</a>
+                        <ul class="sub-menu children dropdown-menu">
+                            <li><i class="menu-icon fa fa-glass"></i><a href="{{ route('query.form') }}">Consultas</a></li>
+                            <li><i class="menu-icon fa fa-map-o"></i><a href="{{route('consultas.listar')}}">Lista de consultas</a></li>
+                        </ul>
+                    </li> 
                               
                 </ul>
             </div><!-- /.navbar-collapse -->

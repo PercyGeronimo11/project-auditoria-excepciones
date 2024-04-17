@@ -4,6 +4,14 @@
 
 @section('content')
 <div class="container mt-5">
+    
+    <div class="row mt-4">
+        <div class="col-md-12 text-right">
+            <a href="{{ route('disconnect.database') }}" class="btn btn-danger">
+                <i class="fa fa-power-off"></i>
+            </a>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6 mb-4">
             <input type="text" id="searchInput" class="form-control" placeholder="Buscar tabla...">
@@ -49,7 +57,11 @@
         </div>
         @endforeach
     </div>
+
+    <!-- Botón para desconectar la base de datos en la esquina superior derecha -->
+    
 </div>
+
 <script>
     function filterTables() {
         var input, filter, divs, cardTitles, i, txtValue;
