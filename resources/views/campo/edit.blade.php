@@ -247,6 +247,9 @@
      
       }
     }
+
+
+    
     selectElement.dispatchEvent(new Event('change'));
      
   };
