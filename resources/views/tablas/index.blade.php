@@ -47,7 +47,7 @@
                             <td>{{ $integridad->column_foreignkey }}</td>
                             <td>{{ $integridad->table_refer }}</td>
                             <td>{{ $integridad->column_primarykey }}</td>
-                            <td>{{ $integridad->fecha }}</td>
+                            <td>{{ date('d-m-Y', strtotime($integridad['created_at'])) }}</td>
                             <td>
                                 <a href="{{ route('integridadtablas.analysis', $integridad->id) }}" class="btn btn-warning">
                                     Analizar

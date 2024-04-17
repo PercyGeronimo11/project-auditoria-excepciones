@@ -13,7 +13,7 @@ class TareaCampo extends Model
     protected $primaryKey = 'id';
     public $timestamps = false;
     protected $fillable = [
-        'campo', 'condicion', 'fecha', 'tabla','tipoValidar','longitud','condicion_text','tipo','null','estado','baseDatos'
+        'campo', 'condicion', 'fecha', 'tabla','tipoValidar','longitud','condicion_text','tipo','null','estado','baseDatos','url_doc','bdManager','user'
     ];
 
     // public function Acta(){

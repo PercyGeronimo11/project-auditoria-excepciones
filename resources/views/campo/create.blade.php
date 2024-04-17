@@ -45,7 +45,7 @@
                                 <select class="form-select  @error('tabla') is-invalid @enderror select2" aria-label="Default select example" id="firstSelect" name="tabla"> 
                                     <option selected disabled>Open this select menu</option>
                            
-                                    @foreach ($tableNames as $item)
+                                    @foreach (array_keys(session()->get('tablesName')) as $item)
                                    
                                     <option value="{{$item}}">{{$item}}</option>
                                     @endforeach
@@ -238,11 +238,7 @@
 
 {{-- <script src="path/to/select2.min.js"></script> --}}
 
-{{-- <script>
-  $(document).ready(function() {
-    $("#mySelect").select2();
-  });
-</script> --}}
+
 {{-- <script>
   function mensaje() {
  var $disabledResults = $(".select2");
@@ -252,6 +248,11 @@
   }
   setTimeout(mensaje,10000);
 </script> --}}
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+
 
 <script>
     
@@ -265,7 +266,28 @@
 <script>
 
 
+window.onload = function() {
 
+  // $(document).ready(function() {
+  //   $("#mySelect").select2();
+  // });
+
+  new TomSelect("#firstSelect",{
+	create: true,
+	sortField: {
+		field: "text",
+
+	}
+  });
+  // new TomSelect("#secondSelect",{
+	// create: true,
+	// sortField: {
+	// 	field: "text",
+	// 	direction: "asc"
+	// }
+  // });
+     
+  };
 document.getElementById("fiveselect").addEventListener("change", function(){
   const valor = this.value;
   const index = this.selectedIndex;
@@ -420,11 +442,17 @@ document.getElementById("thirdSelect").addEventListener("change", function(){
       const option = selectElement.options[i];
         console.log(option.value)
       // Verificar si el valor de la opción coincide con el valor deseado
-       if(option.value ==="DNI"){
+       if(option.value ==="DNI" && (resultado=="date" || resultado=="decimal" )){
      
-          option.disabled = false;
+          option.disabled = true;
           // option.selected = true;
-        }else if (option.value !== resultado) {
+        }
+        else if (option.value ==="DNI"&& resultado=="int") {
+          // Deshabilitar la opción
+          option.disabled = false;
+          // option.style.display = "none";
+        }
+        else if (option.value !== resultado) {
           // Deshabilitar la opción
           option.disabled = true;
           // option.style.display = "none";

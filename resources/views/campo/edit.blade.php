@@ -4,21 +4,31 @@
 @section('title', 'Formulario de Conexión')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-3.6.3.min.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+
 <div class="container mt-5">
     <div class="row">
        
         
                     {{-- <h5 class="card-title">{{ $tableName }}</h5> --}}
-                    <form action="
-                            {{ route('tareacampo.update', $TareaCampo->id)}}" method="POST" enctype="multipart/form-data">
-                                   {{-- <form method="POST" action="{{ route('HoraExtra.update', $HoraExtra->idHoraExtra) }}"> --}}
-                              @method('PUT')
-                              @csrf
+                    
+                    @if ($condicion==1)
+                    <form  action=" {{ route('tareacampo.update', $TareaCampo->id)}}" method="POST" enctype="multipart/form-data">
+                           {{-- <form method="POST" action="{{ route('HoraExtra.update', $HoraExtra->idHoraExtra) }}"> --}}
+                      @method('PUT')
+                      @csrf
+                    @else
+                    <form  action=" {{ route('tareacampo.store')}}" method="POST" enctype="multipart/form-data">
+                              
+                      @csrf
+                    @endif
+                 
+                   
                             {{-- " method="GET"> --}}
                             {{-- <div class="mb-3 row">
                                 <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
@@ -188,7 +198,6 @@
     </div>
 </div>
 
-
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
@@ -197,12 +206,8 @@
 
 {{-- <script src="path/to/select2.min.js"></script> --}}
 
+
 {{-- <script>
-  $(document).ready(function() {
-    $("#mySelect").select2();
-  });
-</script> --}}
-<script>
   function mensaje() {
  var $disabledResults = $(".select2");
   $disabledResults.select2();
@@ -210,9 +215,44 @@
   // $('#idFolio').select2();
   }
   setTimeout(mensaje,10000);
-</script>
+</script> --}}
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+{{-- <script src="path/to/select2.min.js"></script> --}}
+
+{{-- <script>
+  $(document).ready(function() {
+    $("#mySelect").select2();
+  });
+</script> --}}
+
 
 <script>
+  window.onload = function() {
+
+// $(document).ready(function() {
+//   $("#mySelect").select2();
+// });
+
+new TomSelect("#firstSelect",{
+create: true,
+sortField: {
+  field: "text",
+
+}
+});
+// new TomSelect("#secondSelect",{
+// create: true,
+// sortField: {
+// 	field: "text",
+// 	direction: "asc"
+// }
+// });
+   
+};
+
       const columnas = <?php echo json_encode($columnas); ?>;
     
     const tipos = <?php echo json_encode($tipos); ?>;
@@ -238,6 +278,9 @@
      
       }
     }
+
+
+    
     selectElement.dispatchEvent(new Event('change'));
      
   };

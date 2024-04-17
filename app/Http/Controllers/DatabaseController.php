@@ -14,12 +14,8 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseController extends Controller
 {
-
-
     protected $connectionName = 'dynamic';
     protected $driver; // Propiedad para almacenar el driver
-    
-
 
     public function __construct()
     {
@@ -143,17 +139,21 @@ class DatabaseController extends Controller
         foreach ($tableNames as $tableName) {
             if ($driver == 'mysql') {
                 $columns = DB::connection('dynamic')->select("SHOW COLUMNS FROM $tableName");
-                // $foreignKeys = DB::connection('dynamic')->select("
-                //     SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
-                //     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-                //     WHERE TABLE_NAME = '$tableName'
-                // ");
+             //   $nombreColumna = DB::connection('dynamic')->getSchemaBuilder()->getColumnListing($tableName);
+
+               // $database = Database::latest()->first(); 
+               // $tipoColumna = $types = DB::connection('dynamic')
+               // ->table('INFORMATION_SCHEMA.COLUMNS')
+               // ->where('TABLE_SCHEMA', '=', $database->nombre_db)
+               // ->where('TABLE_NAME', '=', $tableName)
+               // ->pluck('COLUMN_TYPE');
+
+
                 $foreignKeys = DB::connection('dynamic')->select("
                     SELECT COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME
                     FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
                     WHERE TABLE_NAME = '$tableName' AND CONSTRAINT_NAME <> 'PRIMARY'
                 ");
-
                 foreach ($columns as $column) {
                     $columnTypes[$column->Field] = $column->Type;
                     if ($column->Key == 'PRI') {
@@ -161,7 +161,6 @@ class DatabaseController extends Controller
                     }
                 }
 
-            
             } elseif ($driver == 'sqlsrv') {
                 $columns = DB::connection('dynamic')
                     ->table('INFORMATION_SCHEMA.COLUMNS')
@@ -174,16 +173,32 @@ class DatabaseController extends Controller
                             'type' => $column->DATA_TYPE // Agregar el tipo de dato al array resultante
                         ];
                     })->toArray();
+
+
+                 //   $tipoColumna = DB::connection('dynamic')
+                 //   ->table('INFORMATION_SCHEMA.COLUMNS')
+                 //   ->select('COLUMN_NAME', 'DATA_TYPE') 
+                 //   ->where('TABLE_NAME', '=', $tableName)
+                 //   ->pluck('COLUMN_TYPE');
+                //    $nombreColumna = DB::connection('dynamic')
+                 //   ->table('INFORMATION_SCHEMA.COLUMNS')
+                //    ->select('COLUMN_NAME', 'DATA_TYPE') 
+                  //  ->where('TABLE_NAME', '=', $tableName)
+                 //   ->pluck('COLUMN_NAME');
             }
 
-            $tableData = DB::connection('dynamic')->table($tableName)->get();
+            $tableData = DB::connection('dynamic')->table($tableName)->take(20000)->get();
 
             $tablesData[$tableName] = [
                 'columns' => $columns,
                 'data' => $tableData
             ];
+           // $columnas[$tableName] = $nombreColumna;
+           // $tipos[$tableName] = $tipoColumna;
+            
         }
-
+    //    session()->put('columnas', $columnas);
+    //    session()->put('tipos', $tipos);
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
         session()->put('password', $password);
@@ -213,15 +228,11 @@ class DatabaseController extends Controller
         return view('conexion.show_tableSQL', compact('tableName', 'columns', 'tableData', 'driver'));
     }
 
-
-
-
     public function listDatabases()
     {
         $databases = DB::table('database')->get();
         return view('conexion.connection_form', compact('databases'));
     }
-
 
     public function eliminarRegistro($id)
     {

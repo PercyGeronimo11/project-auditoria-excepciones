@@ -10,6 +10,11 @@
     <div class="container mt-5">
         <h1 class="mb-4">INTEGRIDAD DE TABLAS</h1>
         <br>
+        @if (session('message'))
+            <div class="alert alert-danger">
+                {{ session('message') }}
+            </div>
+        @endif
         <div class="container-fluid py-4">
             <div class="row justify-content-center">
                 <div class="col-md-9">
@@ -52,7 +57,7 @@
                                         <div class="mb-3">
                                             <label for="column2Select" class="form-label">Clave Primaria</label>
                                             <select class="form-select" id="column2Select" name="nameClavePrimary">
-                                            
+
                                                 <option selected disabled>Seleccionar</option>
                                                 @foreach ($colPrimaryKeys[$tableNames[0]] as $item)
                                                     <option value="{{ $item }}">{{ $item }}</option>

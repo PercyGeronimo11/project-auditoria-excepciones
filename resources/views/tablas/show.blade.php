@@ -9,53 +9,66 @@
 
     <div class="container mt-5">
         <h2 class="mb-4"> <b> INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
-        <a href="{{ route('integridadtablas.cancelar') }}">
-            <button type="button" class="btn btn-warning">
-                <=< /button>
-        </a>
-        <form action="" method="POST">
-            @csrf
-            <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
-            <button type="submit" class="btn btn-primary">Guardar Excepciones</button>
-        </form>
+        <div class="d-flex">
+            <a href="{{ route('integridadtablas.cancelar') }}">
+                <button type="button" class="btn btn-warning">
+                    Atrás
+                </button>
+            </a>
+            <form action="{{ route('integridadtablas.exportpdf',$integridad->id) }}" method="POST">
+                @csrf
+                <input type="hidden" name="listExceptions" value="{{ json_encode($listExceptions) }}">
+                <input type="hidden" name="numExcepciones" value="{{ $numExcepciones }}">
+                <input type="hidden" name="nameTable" value="{{ $nameTable }}">
+                <input type="hidden" name="nameTableRef" value="{{ $nameTableRef }}">
+                <button type="submit" class="btn btn-danger">Exportar PDF</button>
+            </form>
+        </div>
 
+        <br>
         <div class="card">
-            <div class="card-header">
-                <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+            <div class="card-header"  style="background-color: rgb(0, 247, 255); color: black;" >
+                <div class="text-center">
+                    <h2>RESULTADOS DEL ANALISIS</h2>
+                </div>
             </div>
-
+            @if (count($listExceptions) > 0)
+            <div class="card-body"  style="background-color: red; color: white;">
+                <div>
+                    <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+                </div>
+            </div>
             <table class="table table-striped table-danger">
                 <thead style="background-color: red; color: white;">
                     <tr>
-                        <th scope="col">N°</th>
-                        <th scope="col">Tabla</th>
-                        <th scope="col">Clave Foranea</th>
-                        <th scope="col">Tabla Referenciada</th>
-                        <th scope="col">Excepcion</th>
+                        <th scope="col" class="text-center">N°</th>
+                        <th scope="col" class="text-center">Tabla Evaluada</th>
+                        <th scope="col" class="text-center">Registro</th>
+                        <th scope="col" class="text-center">Clave Foranea [{{$integridad->column_foreignkey}}]</th>
+                        <th scope="col" class="text-center">Tabla Referenciada</th>
+                        <th scope="col" class="text-center">Resultado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (count($listExceptions) > 0)
                         @php $index = 1; @endphp
-                        @foreach ($listExceptions as $exceptionKey => $exceptionValue)
-                            <tr>
-                                <th scope="row">{{ $index }}</th>
-                                <td>{{ $tableNameSelect }}</td>
-                                <td>{{ $exceptionKey }}</td>
-                                <td>{{ $tableRefNameSelect }}</td>
-                                <td>{{ $exceptionValue }}</td>
-                            </tr>
-                            @php $index++; @endphp
-                        @endforeach
-                    @else
+                        @foreach($listExceptions as $item)
                         <tr>
-                            <td colspan="7"> No Se encontraron excepciones</td>
+                            <th scope="row">{{ $index }}</th>
+                            <td class="text-center">{{ $integridad->table }}</td>
+                            <td class="text-center">{{ $item['keyPrimaryTable'] }}</td>
+                            <td class="text-center">{{ $item['keyForeignTable'] }}</td>
+                            <td class="text-center" >{{ $integridad->table_refer }}</td>
+                            <td>{{ $item['message']  }}</td>
                         </tr>
-
-                    @endif
+                        @php $index++; @endphp
+                        @endforeach
                 </tbody>
             </table>
-
+            @else
+            <div class="card-body"style="background-color: aquamarine">
+                <h3> No Se encontraron excepciones</h3>
+            </div>
+        @endif
         </div>
 
     </div>

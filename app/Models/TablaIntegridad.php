@@ -15,11 +15,11 @@ class TablaIntegridad extends Model
         'column_foreignkey',
         'table_refer',
         'column_primarykey',
+        'name_bd',
+        'type_db',
         'estado',
-        'fecha',
+        'user',
+        'url_pdf'
     ];
-    public function excepciones()
-    {
-        return $this->hasMany(TablaExcepcion::class, 'id_integridad');
-    }
+
 }

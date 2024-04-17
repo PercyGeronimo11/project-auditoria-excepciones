@@ -11,13 +11,18 @@ class Sequence_result extends Model
     protected $table = 'sequence_results';
     protected $primaryKey = 'id';
     protected $fillable = [
+        'bdManager', 
+        'dbName', 
         'tableName', 
         'field', 
-        'sequenceType', 
+        'sequenceType',
+        'sequenceOrder', 
         'increment',
-        'result',
         'state',
         'user',
-        'observation'
+        'observation',
+        'url_doc',
+        'created_at',
+        'updated_at'
     ];
 }

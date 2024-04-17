@@ -14,6 +14,7 @@ return new class extends Migration
       
         Schema::create('TareaCampo', function (Blueprint $table) {
             $table->id();
+            $table->string("bdManager");
             $table->string('campo');
             $table->string('condicion');
             $table->string('baseDatos');
@@ -23,7 +24,8 @@ return new class extends Migration
             $table->string('condicion_text');
             $table->string('longitud');
             $table->string('tipoValidar');
-         
+            $table->string("url_doc")->nullable();
+            $table->string("user");
             $table->tinyInteger('null');
             $table->timestamps();
         });
