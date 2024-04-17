@@ -80,9 +80,8 @@
                                 <td>{{ $item->created_at }}</td>
                                 <td>
                                     <div style="display: flex; justify-content: flex-end; width: 100%;">
-
-                                    <a class="nav-link" href="./user/delete/{{ $item['id'] }}"><i class="fa  fa-minus-square"></i></a>
                                     <a class="nav-link" href="./user/edit/{{ $item['id'] }}"><i class="fa fa-edit"></i></a>
+                                    <a class="nav-link" href="./user/delete/{{ $item['id'] }}"><i class="fa  fa-minus-square"></i></a>
                                 </div>
                                 </td>
                             </tr>

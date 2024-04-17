@@ -51,8 +51,7 @@ class SequenceController extends Controller
             'tabla' => 'required',
             'campo' => 'required',
             'tipo_secuencia' => 'required',
-            'orden_secuencia' => 'required',
-            'incremento' => 'required|numeric'
+            'orden_secuencia' => 'required'
         ], [
             'tabla.required' => 'Seleccionar la tabla es obligatorio.',
             'campo.required' => 'Seleccionar el campo es obligatorio.',
@@ -62,12 +61,17 @@ class SequenceController extends Controller
         $campo = $request->input('campo');
         $tipo_secuencia = $request->input('tipo_secuencia');
         $orden_secuencia = $request->input('orden_secuencia');
-        $incremento = $request->input('incremento');
+        $incremento = 1;
         $rango_valores = $request->input('rango_valores');
         
         $database = Database::latest()->first();
+        if($database->tipo=="mysql"){
+            $bdManager="MySQL";
+        }else{
+            $bdManager="SQL Server";
+        }
         $data= Sequence_result::create([
-            'bdManager' => $database->tipo,
+            'bdManager' => $bdManager,
             'dbName' => $database->nombre_db,
             'tableName' => $tabla, 
             'field' => $campo, 
@@ -78,17 +82,25 @@ class SequenceController extends Controller
             'user' => Auth::user()->userName
         ]);
         $resultado_analisis = $this->analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores);
+        //dd($resultado_analisis);
+        if(!isset($resultado_analisis[0]['error']) && !is_string($resultado_analisis)){
+            $tablaResultado =  $this->generarResumen($resultado_analisis,$data);
+            $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data, 'tablaResultado'=>$tablaResultado]);
+        }else{
+            $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data]);
+        }
         
-        $tablaResultado =  $this->generarResumen($resultado_analisis,$data);
         //dd($tablaResultado);
         //dd($resultado_analisis['excepciones']);
-        $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data, 'tablaResultado'=>$tablaResultado]);
         $pdfPath = 'pdfs/' . uniqid() . '.pdf';
         Storage::disk('public')->put($pdfPath, $pdf->output());
         $data->update(['url_doc' => $pdfPath]);
-        //return $pdf->download();
-        // Guardar el resultado del análisis o mostrarlo en la interfaz de usuario
-        return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis['excepciones']);
+        if(!isset($resultado_analisis[0]['error']) && !is_string($resultado_analisis)){
+            return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis['excepciones']);
+        }else{
+            return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis);
+        }
+        
     }
 
     private function analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores)
@@ -105,6 +117,12 @@ class SequenceController extends Controller
         // Obtener los datos de la tabla seleccionada desde la sesión
         $datos = session()->get('tablesName.' . $tabla . '.data')->pluck($campo);
         
+        if ($datos->isEmpty()) {
+            $excepciones2[] = [
+                'error' => "No hay valores en la tabla.",
+            ];
+            return $excepciones2;
+        }
         $valor_anterior = null;
         for ($i = 0; $i < count($datos); $i++) {
             // Verificar el tipo de secuencia
@@ -153,7 +171,7 @@ class SequenceController extends Controller
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
                                     'anterior' => $valor_anterior,
-                                    'mensaje' => "Esta decreciendo con respecto al anterior"
+                                    'mensaje' => "No siguen el orden decreciente, esta aumentando"
                                 ];
                             }
                         }
@@ -443,7 +461,8 @@ class SequenceController extends Controller
         $condicion="";
         $causa="";
         $efecto="";
-        if(!is_string($result['excepciones']) && !isset($result['excepciones'][0]['error'])){
+        //dd($result);
+        if(!is_string($result['excepciones']) && !isset($result[0]['error'])){
             $n_excepciones=$result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'];
             if($n_excepciones>1){
                 $condicion="Se encontró ".($result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'])." excepciones:\n";
@@ -452,7 +471,7 @@ class SequenceController extends Controller
                 $condicion="Se encontró ".($result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'])." excepción:\n";
             }
         }
-        $criterio="ISO Anexo 8.2.3 MANEJO DE LOS ACTIVOS";
+        $criterio="El objetivo de gestión APO14 de COBIT 2019 incluye prácticas de gestión como definir la estrategia de gestión de datos enfocandose en garantizar que los datos se manejen de manera efectiva y eficiente, lo cual incluye la secuencialidad de los datos en una base de datos.";
         $efecto="Mayor riesgo de errores en la manipulación de datos, especialmente en sistemas donde el orden de los registros y la precisión de la información almacenada es importante.\n-Dificultad para realizar operaciones de búsqueda y recuperación de los datos en la tabla ".$data['tableName'];
         $causa.="Falta de control en la entrada de datos\n";
         $causa.="-Entrada desorganizada de los datos\n";
@@ -476,9 +495,9 @@ class SequenceController extends Controller
         }
         if($result['nv_mal_ordensecuencia']>0){
             if($result['nv_mal_ordensecuencia']>1){
-                $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." exepciones por valores que estaban en un orden ".$result['sequenceOrder'].".\n";
+                $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." exepciones por valores que estaban en un orden ".$data['sequenceOrder'].".\n";
             }else{
-                $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." excepción porque su valor estaba en un orden ".$result['sequenceOrder'].".\n";
+                $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." excepción porque su valor estaba en un orden ".$data['sequenceOrder'].".\n";
             }
         }
         
@@ -503,7 +522,12 @@ class SequenceController extends Controller
     }
 
     public function index(){
-        $sequence_results = Sequence_result::all();
+        $database = Database::latest()->first();
+        if($database->tipo=="mysql"){
+            $sequence_results = Sequence_result::where('bdManager',"MySQL")->get();
+        }else{
+            $sequence_results = Sequence_result::where('bdManager',"SQL Server")->get();
+        }
         return view("secuencialidad.index", compact('sequence_results'));
     }
 

@@ -98,8 +98,8 @@
               {{ $results }}, <b>NO SE ENCONTRARON EXCEPCIONES</b>
             </div>
     @else
-      @if (isset($results['excepciones'][0]['error']))
-        <h5 class="alert alert-danger text-center">{{ $results['excepciones'][0]['error'] }}</h5>
+      @if (isset($results[0]['error']))
+        <h5 class="alert alert-danger text-center">{{ $results[0]['error'] }}</h5>
       @else
         <table>
           <thead>
@@ -129,68 +129,71 @@
           </tbody>
         </table>
         <br>
-        <table>
-          <thead>
-            <tr>
-              <th colspan="2" style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">CUADRO RESUMEN</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-                <th scope="col">Condicion</th>
-                <td>
-                    @php
-                        $condicion = $tablaResultado['condicion'];
-                        $lineas = explode('-', "-".$condicion);
-                    @endphp
-                    
-                    @foreach ($lineas as $linea)
-                        {{ trim($linea) }} <br>
-                    @endforeach
-                </td>
-            </tr>
-            <tr>
-                <th scope="col">Criterio</th>
-                <td>
-                    @php
-                        $criterio = $tablaResultado['criterio'];
-                        $lineas = explode('-', "-".$criterio);
-                    @endphp
-                    
-                    @foreach ($lineas as $linea)
-                        {{ trim($linea) }} <br>
-                    @endforeach
-                </td>
-            </tr>
-            <tr>
-                <th scope="col">Efecto</th>
-                <td>
-                    @php
-                        $efecto = $tablaResultado['efecto'];
-                        $lineas = explode('-', "-".$efecto);
-                    @endphp
-                    
-                    @foreach ($lineas as $linea)
-                        {{ trim($linea) }} <br>
-                    @endforeach
-                </td>
-            </tr>
-            <tr>
-                <th scope="col">Causa</th>
-                <td>
-                    @php
-                        $causa = $tablaResultado['causa'];
-                        $lineas = explode('-', "-".$causa);
-                    @endphp
-                    
-                    @foreach ($lineas as $linea)
-                        {{ trim($linea) }} <br>
-                    @endforeach
-                </td>
-            </tr>
-        </tbody>
+        @if (isset($tablaResultado))
+          <table>
+            <thead>
+              <tr>
+                <th colspan="2" style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">CUADRO RESUMEN</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                  <th scope="col">Condicion</th>
+                  <td>
+                      @php
+                          $condicion = $tablaResultado['condicion'];
+                          $lineas = explode('-', "-".$condicion);
+                      @endphp
+                      
+                      @foreach ($lineas as $linea)
+                          {{ trim($linea) }} <br>
+                      @endforeach
+                  </td>
+              </tr>
+              <tr>
+                  <th scope="col">Criterio</th>
+                  <td>
+                      @php
+                          $criterio = $tablaResultado['criterio'];
+                          $lineas = explode('-', "-".$criterio);
+                      @endphp
+                      
+                      @foreach ($lineas as $linea)
+                          {{ trim($linea) }} <br>
+                      @endforeach
+                  </td>
+              </tr>
+              <tr>
+                  <th scope="col">Efecto</th>
+                  <td>
+                      @php
+                          $efecto = $tablaResultado['efecto'];
+                          $lineas = explode('-', "-".$efecto);
+                      @endphp
+                      
+                      @foreach ($lineas as $linea)
+                          {{ trim($linea) }} <br>
+                      @endforeach
+                  </td>
+              </tr>
+              <tr>
+                  <th scope="col">Causa</th>
+                  <td>
+                      @php
+                          $causa = $tablaResultado['causa'];
+                          $lineas = explode('-', "-".$causa);
+                      @endphp
+                      
+                      @foreach ($lineas as $linea)
+                          {{ trim($linea) }} <br>
+                      @endforeach
+                  </td>
+              </tr>
+            </tbody>
+          
+          </table>
+        @endif
         
-        </table>
       @endif
     @endif
     

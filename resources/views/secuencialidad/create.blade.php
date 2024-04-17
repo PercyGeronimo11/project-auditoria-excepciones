@@ -96,10 +96,10 @@
                             <option value="descendente">Descendente</option>
                         </select>
                     </div>
-                    <div class="mb-3 row" id="div-incremento">
+                    {{-- <div class="mb-3 row" id="div-incremento">
                         <label for="incremento" class="form-label">Incremento</label>
                         <input type="number" class="form-control" id="incremento" name="incremento" aria-describedby="emailHelp" value="1">
-                    </div>
+                    </div> --}}
                     <button type="submit" class="btn btn-success">ANALIZAR</button>
                 </form>
             </div>
@@ -113,7 +113,30 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script> 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
+    window.onload = function() {
+
+// $(document).ready(function() {
+//   $("#mySelect").select2();
+// });
+
+new TomSelect("#firstSelect",{
+  create: true,
+  sortField: {
+      field: "text",
+
+  }
+});
+/* new TomSelect("#secondSelect",{
+  create: true,
+  sortField: {
+  field: "text"
+  }
+}); */
+   
+};
     const columnas = <?php echo json_encode($columnas); ?>;
     const tipos = <?php echo json_encode($tipos); ?>;
     document.getElementById("firstSelect").addEventListener("change", function() {

@@ -9,6 +9,7 @@ use App\Models\Database;
 use Dompdf\Dompdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class IntegridadTablasController extends Controller
 {
@@ -31,41 +32,36 @@ class IntegridadTablasController extends Controller
         $colForeignKeys = [];
         $colPrimaryKeys = [];
 
+        $database = Database::latest()->first();
+
         foreach ($tableNames as $tableName) {
             $tableData = $tableDataArray[$tableName];
             $primaryKeys = [];
             $foreignKeys = [];
 
-            foreach ($tableData['columns'] as $column) {
-                // dd( $tableDataArray ,$tableNames,$tableDataArray[$tableName],$tableData['columns']);
-                if ($column->Key == 'PRI') {
-                    $primaryKeys[] = $column->Field;
+            if ($database->tipo == "mysql") {
+                foreach ($tableData['columns'] as $column) {
+                    if (isset($column->Key)) {
+                        if ($column->Key == 'PRI') {
+                            $primaryKeys[] = $column->Field;
+                        }
+                        if ($column->Key == 'MUL') {
+                            $foreignKeys[] = $column->Field;
+                        }
+                    }
                 }
-                // if ($column->Key == 'MUL') {
-                //     $foreignKeys[] = $column->Field; 
-                // }    
+                $colPrimaryKeys[$tableName] = $primaryKeys;
+                $colForeignKeys[$tableName] = $foreignKeys;
+            } else if($database->tipo=="sqlsrv"){
+                $databaseAux = new DatabaseController();
+                $colPrimaryKeys[$tableName] = $databaseAux->getKeyPrimarias($tableName);
+                $colForeignKeys[$tableName] = $databaseAux->getKeyForaneas($tableName);
             }
-
-            foreach ($tableData['columns'] as $column) {
-                // dd( $tableDataArray ,$tableNames,$tableDataArray[$tableName],$tableData['columns']);
-                // if ($column->Key == 'PRI') {
-                //     $primaryKeys[] = $column->Field; 
-                // }
-                if ($column->Key == 'MUL') {
-                    $foreignKeys[] = $column->Field;
-                }
-            }
-
-            $colPrimaryKeys[$tableName] = $primaryKeys;
-            $colForeignKeys[$tableName] = $foreignKeys;
         }
-        // dd("paso create",$request);
+
 
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
-
-
-
 
     public function store(Request $request)
     {
@@ -76,17 +72,30 @@ class IntegridadTablasController extends Controller
         $nameKeyPrimary = $request->input('nameClavePrimary');
 
         $tableDataArray = session()->get('tablesName');
-
         foreach ($tableDataArray[$nameTabla]['columns'] as $clave) {
-            if ($clave->Field == $nameKeyForanea) {
-                $tipoDato_FK = $clave->Type;
+            if(isset($clave->Field)){
+                if ($clave->Field == $nameKeyForanea) {
+                    $tipoDato_FK = $clave->Type;
+                }
+            }else{
+                if ($clave['name'] == $nameKeyForanea) {
+                    $tipoDato_FK = $clave['type'];
+                }
             }
+
         }
 
         foreach ($tableDataArray[$nameTablaRef]["columns"] as $clave) {
-            if ($clave->Field == $nameKeyPrimary) {
-                $tipoDato_PK = $clave->Type;
+            if(isset($claveField)){
+                if ($clave->Field == $nameKeyPrimary) {
+                    $tipoDato_PK = $clave->Type;
+                }
+            }else{
+                if ($clave['name'] == $nameKeyPrimary) {
+                    $tipoDato_PK = $clave['type'];
+                }
             }
+            
         }
 
         if (!$this->isCompatible($tipoDato_FK, $tipoDato_PK)) {
@@ -96,6 +105,8 @@ class IntegridadTablasController extends Controller
         }
 
         try {
+            $database = Database::latest()->first();
+        
             $tableFind = TablaIntegridad::where('table', $nameTabla)
                 ->where('column_foreignkey', $nameKeyForanea)
                 ->where('table_refer', $nameTablaRef)
@@ -107,7 +118,7 @@ class IntegridadTablasController extends Controller
                 $mensaje = "La Integridad que desa analizar, Ya existe en la lista";
                 return redirect()->route('integridadtablas.index')->with('warning', $mensaje);
             } else {
-                $database = Database::latest()->first();
+
                 $table = new TablaIntegridad([
                     'table' => $nameTabla,
                     'column_foreignkey' => $nameKeyForanea,
@@ -128,133 +139,12 @@ class IntegridadTablasController extends Controller
         }
     }
 
-    public function exportarPdf(Request $request, $id)
-    {
-        $integridad = TablaIntegridad::find($id);
-        $listExceptions = json_decode($request->input('listExceptions'), true);
-        $numExcepciones = $request->input('numExcepciones');
-
-        $tipoNotFound = "ExceptionNotFound";
-        $tipoNull = "ExceptionNull";
-
-        $resultadosExceptionNotFound = $this->getResultadosExceptionsNotFound($listExceptions, $integridad, $tipoNotFound);
-        $resultadosExceptionNull = $this->getResultadosExceptionsNull($listExceptions, $integridad, $tipoNull);
-
-        $countListExceptions = is_array($listExceptions) ? count($listExceptions) : 0;
-
-        if($countListExceptions>0){
-            $html = view('tablas.reportpdf', compact('listExceptions', 'resultadosExceptionNull', 'resultadosExceptionNotFound', 'numExcepciones',  'integridad'))->render();
-
-            $dompdf = new Dompdf();
-            $dompdf->loadHtml($html);
-            $dompdf->render();
-            return $dompdf->stream('report.pdf');
-        }else{
-            $mensaje = "No Hay ninguna excpeción que mostrar";
-            return redirect()->route('integridadtablas.index')->with('success', $mensaje);
-        }
-
-    }
-
-    private function getResultadosExceptionsNull($listExceptions, $integridad, $tipoNull)
-    {
-        $countExceptionsNull = 0;
-        $clavesPrimariasString = "";
-        $resultadosExceptionNull = [];
-        foreach ($listExceptions as $item) {
-            if ($item['type'] == $tipoNull) {
-                $countExceptionsNull++;
-                $clavesPrimariasString .= $item['keyPrimaryTable'] . ", ";
-            }
-        }
-
-        if ($countExceptionsNull > 0) {
-
-            $condicionException = "Se ha detectado que los registros " . $clavesPrimariasString . "  de la tabla " . Str::upper($integridad->table) . " tienen las claves foránea " . Str::upper($integridad->column_foreignkey) . " en valor NULL.  Esto significa que  " . Str::upper($integridad->table) . " no están asociados a ninguna  " . Str::upper($integridad->table_refer);
-
-            $criterioException = "La norma ISO/IEC 27001 exige que las organizaciones implementen controles para garantizar la integridad de los datos, incluyendo la integridad referencial de las bases de datos.
-
-            La integridad referencial se refiere a la relación entre dos tablas en una base de datos, donde una tabla (tabla hija) contiene una clave foránea que debe coincidir con una clave primaria en otra tabla (tabla padre).
-
-            En este caso, la tabla " . Str::upper($integridad->table) . " es la tabla hija y la tabla " . Str::upper($integridad->table_refer) . " es la tabla padre. La clave foránea " . Str::upper($integridad->column_foreignkey) . " en la tabla " . Str::upper($integridad->table) . " debe coincidir con la clave primaria " . Str::upper($integridad->column_primarykey) . "en la tabla  " . Str::upper($integridad->table_refer);
-
-            $efectoException = "Incoherencias en los datos: Los registros " . $clavesPrimariasString . " de la tabla " . Str::upper($integridad->table) . ". Esto significa que la información sobre  " . Str::upper($integridad->table_refer) . " de " . Str::upper($integridad->table) . " es incompleta o incorrecta. 
-
-            Errores en consultas y aplicaciones: Al realizar consultas tanto en la tabla " . Str::upper($integridad->table) . " como la tabla " . Str::upper($integridad->table_refer) . " es posible que se obtengan resultados incorrectos.";
-
-            $causaException = "Errores en la inserción o actualización de datos: Es posible que se hayan ingresado valores NULL en la clave foránea " . Str::upper($integridad->column_foreignkey) . " de la tabla  " . Str::upper($integridad->table) . " durante la inserción o actualización de registros. Esto puede deberse a errores humanos o a fallos en el software de aplicación.
-            Errores en el diseño de la base de datos: Es posible que la definición de la clave foránea " . Str::upper($integridad->column_foreignkey) . "  en la tabla " . Str::upper($integridad->table) . " permita valores NULL";
-
-            $recomendacionException= "Revisar el diseño de la base de datos: Verificar si la definición de la clave foránea " . Str::upper($integridad->column_foreignkey) . " en la tabla " . Str::upper($integridad->table) . "permite valores NULL. Si es así, modificar la definición para que no se permita este tipo de valores. \n 
-            Identificar y corregir los errores en los datos: Revisar los registros ". $clavesPrimariasString." de la tabla " . Str::upper($integridad->table) . " y determinar " . Str::upper($integridad->table_refer) . "  correcta para cada " . Str::upper($integridad->table);
-
-            $resultadosExceptionNull = [
-                'Condicion' => $condicionException,
-                'Criterio' => $criterioException,
-                'Efecto' => $efectoException,
-                'Causa' => $causaException,
-                'Recomendacion' => $recomendacionException
-            ];
-        }
-        return $resultadosExceptionNull;
-    }
-
-
-    private function getResultadosExceptionsNotFound($listExceptions, $integridad, $tipoNotFound)
-    {
-        $countExceptionsNotFound = 0;
-        $clavesForaneasString = "";
-        $clavesPrimariasString = "";
-        $resultadosExceptionNotFound = [];
-        foreach ($listExceptions as $item) {
-            if ($item['type'] == $tipoNotFound) {
-                $countExceptionsNotFound++;
-                $clavesPrimariasString .= $item['keyPrimaryTable'] . ", ";
-                $clavesForaneasString .= $item['keyForeignTable'] . ", ";
-            }
-        }
-
-        if ($countExceptionsNotFound > 0) {
-            $condicionExceptionNotFound = "Luego de analizar la tabla " . Str::upper($integridad->table) . "se a detectado anomalias en siguientes registros: " . $clavesPrimariasString . " juntos con sus claves foraneas: " . $clavesForaneasString . " respectivamente .Todas estas claves Foraneas no fueron encontrados en la tabla referencial " . Str::upper($integridad->table_refer);
-
-            $criterioExceptionNotFound = "La norma ISO/IEC 27001 exige que las organizaciones implementen controles para garantizar la integridad de los datos, incluyendo la integridad referencial de las bases de datos.
-
-            La integridad referencial se refiere a la relación entre dos tablas en una base de datos, donde una tabla (tabla hija) contiene una clave foránea que debe coincidir con una clave primaria en otra tabla (tabla padre).
-            
-            En este caso, la tabla " . Str::upper($integridad->table) . " es la tabla hija y la tabla " . Str::upper($integridad->table_refer) . " es la tabla padre. La clave foránea " . Str::upper($integridad->column_foreignkey) . " en la tabla " . Str::upper($integridad->table) . " debe coincidir con la clave primaria " . Str::upper($integridad->column_primarykey) . "en la tabla  " . Str::upper($integridad->table_refer);
-
-
-            $efectoExceptionNotFound = "Incoherencias en los datos: Los registros " . $clavesPrimariasString . " de la tabla " . Str::upper($integridad->table) . " hacen referencia a datos que no existen en la tabla " . Str::upper($integridad->table_refer) . ". 
-            Errores en consultas y aplicaciones: Al realizar consultas tanto en la tabla " . Str::upper($integridad->table) . " como la tabla " . Str::upper($integridad->table_refer) . " o utilizar aplicaciones que dependen de la base de datos, es posible que se obtengan resultados incorrectos.";
-
-            $causaExceptionNotFound = "Errores en el diseño de la base de datos: Es posible que la relación entre las tablas " . Str::upper($integridad->table) . " y " . Str::upper($integridad->table_refer) . " no esté correctamente definida. 
-            Eliminación incorrecta de registros: Es posible que se hayan eliminado registros de la tabla " . Str::upper($integridad->table_refer) . " sin actualizar las referencias en la tabla " . Str::upper($integridad->table);
-
-            $recomendacionExceptionNotFound = "Revisar cuidadosamente la definición de las relaciones entre las tablas " . Str::upper($integridad->table) . " y " . Str::upper($integridad->table_refer) . ", y corregir cualquier error en la definición de las claves foráneas. \n 
-            Actualizar los registros afectados: Para cada registro afectado en la tabla " . Str::upper($integridad->table) . ", verificar la validez de la clave foránea y actualizarla si es necesario. Si un registro referenciado no existe, crear un nuevo registro en la tabla " . Str::upper($integridad->table_refer) . " de tal manera que sea valida.";
-
-            $resultadosExceptionNotFound = [
-                'Condicion' => $condicionExceptionNotFound,
-                'Criterio' => $criterioExceptionNotFound,
-                'Efecto' => $efectoExceptionNotFound,
-                'Causa' => $causaExceptionNotFound,
-                'Recomendacion' => $recomendacionExceptionNotFound
-            ];
-        }
-
-        return $resultadosExceptionNotFound;
-    }
-
-
-
-
-
-
+    
     private function isCompatible($tipoDatoFK, $tipoDatoPK)
     {
         $listaTipos = [
             "numerico" => ["SMALLINT", "smallint", "INT", "int", "MEDIUMINT", "mediumint", "BIGINT", "bigint", "TINYINT", "tinyint"],
-            "letras" => ["CHAR", "char", "VARCHAR", "char", "TEXT", "text", "MEDIUMTEXT", "mediumtext", "TINYTEXT", "tinyint"],
+            "letras" => ["CHAR", "char", "NCHAR", "nchar","VARCHAR", "varchar", "TEXT", "text", "MEDIUMTEXT", "mediumtext", "TINYTEXT", "tinytext"],
             "fechas" => ["DATE", "date", "DATETIME", "datetime"]
         ];
 
@@ -266,14 +156,12 @@ class IntegridadTablasController extends Controller
     private function getGrupoTipoDato($tipoDato, $listaTipos)
     {
         foreach ($listaTipos as $grupo => $listTipos) {
-            //dd($listaTipos,$tipoDato);
             if (in_array($tipoDato, $listTipos)) {
                 return $grupo;
             }
         }
         return null;
     }
-
 
     public function analysis(Request $request, $id)
     {
@@ -290,9 +178,22 @@ class IntegridadTablasController extends Controller
         $tableDataRefer = $tableDataArray[$nameTableRef];
 
         foreach ($tableDataSelect['columns'] as $column) {
-            if ($column->Key == 'PRI') {
-                $keyPrimaryTable = $column->Field;
-                break;
+            if($integridad->type_db=="mysql"){
+                if ($column->Key == 'PRI') {
+                    $keyPrimaryTable = $column->Field;
+                    break;
+                }
+            }else if($integridad->type_db=="sqlsrv"){
+                $databaseAux=new DatabaseController();
+                $listaKeyPrimarias=$databaseAux->getKeyPrimarias($nameTable);
+                //dd($tableDataSelect['columns'], $column);
+                foreach($listaKeyPrimarias as $nameKeyPrimary){
+                    if ($column['name'] == $nameKeyPrimary) {
+                        $keyPrimaryTable = $column['name'];
+                        break;
+                    }
+                }
+
             }
         }
 
@@ -365,6 +266,123 @@ class IntegridadTablasController extends Controller
         $integridad->save();
         return redirect()->route('integridadtablas.index');
     }
+    public function exportarPdf(Request $request, $id)
+    {
+        $integridad = TablaIntegridad::find($id);
+        $listExceptions = json_decode($request->input('listExceptions'), true);
+        $numExcepciones = $request->input('numExcepciones');
+
+        $tipoNotFound = "ExceptionNotFound";
+        $tipoNull = "ExceptionNull";
+
+        $resultadosExceptionNotFound = $this->getResultadosExceptionsNotFound($listExceptions, $integridad, $tipoNotFound);
+        $resultadosExceptionNull = $this->getResultadosExceptionsNull($listExceptions, $integridad, $tipoNull);
+
+        $countListExceptions = is_array($listExceptions) ? count($listExceptions) : 0;
+
+        if ($countListExceptions > 0) {
+            $html = view('tablas.reportpdf', compact('listExceptions', 'resultadosExceptionNull', 'resultadosExceptionNotFound', 'numExcepciones',  'integridad'))->render();
+
+            $dompdf = new Dompdf();
+            $dompdf->loadHtml($html);
+            $dompdf->render();
+            return $dompdf->stream('report.pdf');
+        } else {
+            $mensaje = "No Hay ninguna excpeción que mostrar";
+            return redirect()->route('integridadtablas.index')->with('success', $mensaje);
+        }
+    }
+
+
+    private function getResultadosExceptionsNull($listExceptions, $integridad, $tipoNull)
+    {
+        $countExceptionsNull = 0;
+        $clavesPrimariasString = "";
+        $resultadosExceptionNull = [];
+        foreach ($listExceptions as $item) {
+            if ($item['type'] == $tipoNull) {
+                $countExceptionsNull++;
+                $clavesPrimariasString .= $item['keyPrimaryTable'] . ", ";
+            }
+        }
+
+        if ($countExceptionsNull > 0) {
+
+            $condicionException = "Se ha detectado que los registros " . $clavesPrimariasString . "  de la tabla " . Str::upper($integridad->table) . " tienen las claves foránea " . Str::upper($integridad->column_foreignkey) . " en valor NULL.  Esto significa que  " . Str::upper($integridad->table) . " no están asociados a ninguna  " . Str::upper($integridad->table_refer);
+
+            $criterioException = "La norma ISO/IEC 27001 exige que las organizaciones implementen controles para garantizar la integridad de los datos, incluyendo la integridad referencial de las bases de datos.
+
+            La integridad referencial se refiere a la relación entre dos tablas en una base de datos, donde una tabla (tabla hija) contiene una clave foránea que debe coincidir con una clave primaria en otra tabla (tabla padre).
+
+            En este caso, la tabla " . Str::upper($integridad->table) . " es la tabla hija y la tabla " . Str::upper($integridad->table_refer) . " es la tabla padre. La clave foránea " . Str::upper($integridad->column_foreignkey) . " en la tabla " . Str::upper($integridad->table) . " debe coincidir con la clave primaria " . Str::upper($integridad->column_primarykey) . "en la tabla  " . Str::upper($integridad->table_refer);
+
+            $efectoException = "Incoherencias en los datos: Los registros " . $clavesPrimariasString . " de la tabla " . Str::upper($integridad->table) . ". Esto significa que la información sobre  " . Str::upper($integridad->table_refer) . " de " . Str::upper($integridad->table) . " es incompleta o incorrecta. 
+
+            Errores en consultas y aplicaciones: Al realizar consultas tanto en la tabla " . Str::upper($integridad->table) . " como la tabla " . Str::upper($integridad->table_refer) . " es posible que se obtengan resultados incorrectos.";
+
+            $causaException = "Errores en la inserción o actualización de datos: Es posible que se hayan ingresado valores NULL en la clave foránea " . Str::upper($integridad->column_foreignkey) . " de la tabla  " . Str::upper($integridad->table) . " durante la inserción o actualización de registros. Esto puede deberse a errores humanos o a fallos en el software de aplicación.
+            Errores en el diseño de la base de datos: Es posible que la definición de la clave foránea " . Str::upper($integridad->column_foreignkey) . "  en la tabla " . Str::upper($integridad->table) . " permita valores NULL";
+
+            $recomendacionException = "Revisar el diseño de la base de datos: Verificar si la definición de la clave foránea " . Str::upper($integridad->column_foreignkey) . " en la tabla " . Str::upper($integridad->table) . "permite valores NULL. Si es así, modificar la definición para que no se permita este tipo de valores. \n 
+            Identificar y corregir los errores en los datos: Revisar los registros " . $clavesPrimariasString . " de la tabla " . Str::upper($integridad->table) . " y determinar " . Str::upper($integridad->table_refer) . "  correcta para cada " . Str::upper($integridad->table);
+
+            $resultadosExceptionNull = [
+                'Condicion' => $condicionException,
+                'Criterio' => $criterioException,
+                'Efecto' => $efectoException,
+                'Causa' => $causaException,
+                'Recomendacion' => $recomendacionException
+            ];
+        }
+        return $resultadosExceptionNull;
+    }
+
+
+    private function getResultadosExceptionsNotFound($listExceptions, $integridad, $tipoNotFound)
+    {
+        $countExceptionsNotFound = 0;
+        $clavesForaneasString = "";
+        $clavesPrimariasString = "";
+        $resultadosExceptionNotFound = [];
+        foreach ($listExceptions as $item) {
+            if ($item['type'] == $tipoNotFound) {
+                $countExceptionsNotFound++;
+                $clavesPrimariasString .= $item['keyPrimaryTable'] . ", ";
+                $clavesForaneasString .= $item['keyForeignTable'] . ", ";
+            }
+        }
+
+        if ($countExceptionsNotFound > 0) {
+            $condicionExceptionNotFound = "Luego de analizar la tabla " . Str::upper($integridad->table) . "se a detectado anomalias en siguientes registros: " . $clavesPrimariasString . " juntos con sus claves foraneas: " . $clavesForaneasString . " respectivamente .Todas estas claves Foraneas no fueron encontrados en la tabla referencial " . Str::upper($integridad->table_refer);
+
+            $criterioExceptionNotFound = "La norma ISO/IEC 27001 exige que las organizaciones implementen controles para garantizar la integridad de los datos, incluyendo la integridad referencial de las bases de datos.
+
+            La integridad referencial se refiere a la relación entre dos tablas en una base de datos, donde una tabla (tabla hija) contiene una clave foránea que debe coincidir con una clave primaria en otra tabla (tabla padre).
+            
+            En este caso, la tabla " . Str::upper($integridad->table) . " es la tabla hija y la tabla " . Str::upper($integridad->table_refer) . " es la tabla padre. La clave foránea " . Str::upper($integridad->column_foreignkey) . " en la tabla " . Str::upper($integridad->table) . " debe coincidir con la clave primaria " . Str::upper($integridad->column_primarykey) . "en la tabla  " . Str::upper($integridad->table_refer);
+
+
+            $efectoExceptionNotFound = "Incoherencias en los datos: Los registros " . $clavesPrimariasString . " de la tabla " . Str::upper($integridad->table) . " hacen referencia a datos que no existen en la tabla " . Str::upper($integridad->table_refer) . ". 
+            Errores en consultas y aplicaciones: Al realizar consultas tanto en la tabla " . Str::upper($integridad->table) . " como la tabla " . Str::upper($integridad->table_refer) . " o utilizar aplicaciones que dependen de la base de datos, es posible que se obtengan resultados incorrectos.";
+
+            $causaExceptionNotFound = "Errores en el diseño de la base de datos: Es posible que la relación entre las tablas " . Str::upper($integridad->table) . " y " . Str::upper($integridad->table_refer) . " no esté correctamente definida. 
+            Eliminación incorrecta de registros: Es posible que se hayan eliminado registros de la tabla " . Str::upper($integridad->table_refer) . " sin actualizar las referencias en la tabla " . Str::upper($integridad->table);
+
+            $recomendacionExceptionNotFound = "Revisar cuidadosamente la definición de las relaciones entre las tablas " . Str::upper($integridad->table) . " y " . Str::upper($integridad->table_refer) . ", y corregir cualquier error en la definición de las claves foráneas. \n 
+            Actualizar los registros afectados: Para cada registro afectado en la tabla " . Str::upper($integridad->table) . ", verificar la validez de la clave foránea y actualizarla si es necesario. Si un registro referenciado no existe, crear un nuevo registro en la tabla " . Str::upper($integridad->table_refer) . " de tal manera que sea valida.";
+
+            $resultadosExceptionNotFound = [
+                'Condicion' => $condicionExceptionNotFound,
+                'Criterio' => $criterioExceptionNotFound,
+                'Efecto' => $efectoExceptionNotFound,
+                'Causa' => $causaExceptionNotFound,
+                'Recomendacion' => $recomendacionExceptionNotFound
+            ];
+        }
+
+        return $resultadosExceptionNotFound;
+    }
+
 }
 
 
