@@ -35,15 +35,15 @@ class DatabaseController extends Controller
     {
         $database = Database::latest()->first(); // Obtener el último registro de la tabla Database
 
-        $password = session()->get('password');
-        if ($password) {
+       
+    
             config(['database.connections.' . $this->connectionName => [
                 'driver' => $database->tipo,
                 'host' => $database->host,
                 'port' => $database->puerto,
                 'database' => $database->nombre_db,
                 'username' => $database->usuario,
-                'password' => $password,
+                'password' => $database->password,
                 'charset' => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
                 'prefix' => '',
@@ -52,10 +52,7 @@ class DatabaseController extends Controller
                     \PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
                 ]) : [],
             ]]);
-        } else {
-            return redirect()->route('show.connection.form');
-        }
-        
+      
     }
 
     public function connectDatabase(Request $request)
@@ -109,7 +106,7 @@ class DatabaseController extends Controller
                 $database->host = $request->input('host');
                 $database->nombre_db = $request->input('database');
                 $database->usuario = $request->input('username');
-                $database->contraseña = Hash::make($request->input('password')); // Encriptar la contraseña
+                $database->contraseña = $request->input('password'); // Encriptar la contraseña
                 $database->estado = '1';
                 $database->save();
             }
@@ -201,7 +198,7 @@ class DatabaseController extends Controller
     //    session()->put('tipos', $tipos);
         session()->put('driverBD', $driver);
         session()->put('tablesName', $tablesData);
-        session()->put('password', $password);
+        //session()->put('password', $password);
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
