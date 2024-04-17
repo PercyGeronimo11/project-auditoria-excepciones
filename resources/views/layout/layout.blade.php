@@ -97,6 +97,11 @@
                         <a href="index.html"><i class="menu-icon fa fa-laptop"></i>Dashboard </a>
                     </li>
                     <li class="menu-title">Elementos</li><!-- /.menu-title -->
+                    @if(auth()->user()->is_admin == 1)
+                        <li class="menu-item-has">
+                            <a href="{{ route('listUsers') }}"><i class="menu-icon fa fa-users"></i>Usuarios </a>
+                        </li>
+                    @endif
                     <li class="menu-item-has">
                         <a href="{{ route('show.connection.form') }}"><i class="menu-icon fa fa-cogs"></i>Conexion </a>
                     </li>

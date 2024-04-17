@@ -14,15 +14,9 @@
     </hgroup>
     <form method="POST" action="/login">
         @csrf
-        @if(Session::has('success1'))
-            <div class="alert alert-success">
-                {{ Session::get('success1') }} <br>
-                {{ Session::get('success2') }}
-            </div>
-        @endif
-        @if(Session::has('correo'))
+        @if(Session::has('userName'))
             <div class="alert alert-danger">
-                {{ Session::get('correo') }}
+                {{ Session::get('userName') }}
             </div>
         @endif
 
@@ -32,11 +26,11 @@
             </div>
         @endif
         <div class="group">
-            <input type="email" name="email" value="{{ old('email') }}">
+            <input type="text" name="userName" value="{{ old('userName') }}">
             <span class="highlight"></span>
             <span class="bar"></span>
-            <label class="{{ old('email') ? 'used' : '' }}">Correo</label>
-            @error('email')
+            <label class="{{ old('userName') ? 'used' : '' }}">Nombre de usuario</label>
+            @error('userName')
                 <span class="error-message">{{ $message }}</span>
             @enderror
         </div>
@@ -49,9 +43,9 @@
                 <span class="error-message">{{ $message }}</span>
             @enderror
         </div>
-        <div>
+        {{-- <div>
             <span>No estás registrado? <a href="/register">Registrarse</a></span>
-        </div><br>
+        </div><br> --}}
         <button type="submit" class="button buttonBlue">INICIAR SESIÓN
             <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
         </button>

@@ -14,21 +14,21 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email', // Validar que el campo email esté presente y sea un correo electrónico válido
-            'password' => 'required|min:8', // Validar que el campo password esté presente y tenga al menos 8 caracteres
+            'userName' => 'required|string',
+            'password' => 'required|min:8',
         ], [
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'El correo electrónico debe tener un formato válido.',
+            'userName.required' => 'El nombre de usuario es obligatorio.',
+            'userName.email' => 'El nombre de usuario debe tener un formato válido.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
         ]);
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only('userName', 'password');
         if (Auth::attempt($credentials)) {
             return redirect('/connect');
         }
-        if (!User::where('email', $request->email)->exists()) {
+        if (!User::where('userName', $request->userName)->exists()) {
             return redirect('/')->with(
-                'correo' , 'El correo electrónico ingresado es incorrecto.'
+                'userName' , 'El nombre de usuario ingresado es incorrecto.'
             );
         }else{
             return redirect('/')->with(
@@ -38,48 +38,33 @@ class LoginController extends Controller
         
         //return redirect('/')->with('success', 'Error de inicio de sesion');
     }
+
     public function register(Request $request)
     {
-        $data="";
         $email_full="";
         
         $request->validate([
             'name' => 'required|string|max:50',
-            'email_domain' => 'required|in:@gmail.com,@hotmail.com',
-            'email' => [
-                'required',
-                'string',
-                'max:50',
-                function ($attribute, $value, $fail) use ($request, $email_full) {
-                    $email_full = $value . $request->input('email_domain');
-                    if (strpos($value, '@') !== false) {
-                        $fail('El formato del correo electrónico es inválido .');
-                    }else{
-                        if (User::where('email', $email_full)->exists()) {
-                            $fail('Este correo electrónico ya está registrado.');
-                        }
-                    }
-                },
-            ],
+            'userName' => 'required|unique:users',
             'password' => 'required|string|min:8',
         ], [
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de caracteres.',
             'name.max' => 'El nombre no puede tener más de 50 caracteres.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.string' => 'El correo electrónico debe ser una cadena de caracteres.',
-            'email.max' => 'El nombre del correo electrónico no puede tener más de 50 caracteres.',
+            'userName.required' => 'El nombre de usuario es obligatorio.',
+            'userName.string' => 'El nombre de usuario debe ser una cadena de caracteres.',
+            'userName.max' => 'El nombre de usuario no puede tener más de 50 caracteres.',
+            'userName.unique' => 'El nombre de usuario ya está en uso.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.string' => 'La contraseña debe ser una cadena de caracteres.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
         ]);
-        $email_full = $request->input('email') . $request->input('email_domain');
         User::create([
             'name' => $request->name,
-            'email' => $email_full,
+            'userName' => $request->userName,
             'password' => Hash::make($request->password),
         ]);
-        return redirect('/')->with('success1', '¡Registro exitoso!')->with('success2', 'Ya puedes iniciar sesión.');
+        return redirect('/users')->with('success1', '¡Registro exitoso!');
     }
 
     public function logout(Request $request)
@@ -91,50 +76,67 @@ class LoginController extends Controller
         return redirect('/');
     }
 
-    /* public function register(Request $request)
+    public function list(){
+        $users = User::where('is_admin',0)->get();
+        return view('usuarios.listUsers', compact('users'));
+    }
+
+    public function list2(){
+        $users = User::where('is_admin',0)->get();
+        return view('usuarios.listUsers_inhabil', compact('users'));
+    }
+    
+    public function create(){
+        return view('usuarios.register');
+    }
+
+    public function delete($id){
+        $user = User::findOrFail($id);
+        $user->delete();
+        return redirect('/users');
+    }
+
+    public function edit($id)
     {
-        $data="";
-        
+        $user = User::findOrFail($id);
+        return view('usuarios.editUser', compact('user'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Valida los datos del formulario
         $request->validate([
             'name' => 'required|string|max:50',
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:50',
-                Rule::unique('users', 'email')->ignore($request->user()),
-                function ($attribute, $value, $fail) use (&$data) {
-                    $value = trim($value);
-                    $access_key = '016431d472b998d83725c8df2ffc92f39d036b35';
-                    $dominio = substr(strrchr($value, "@"), 1);
-                    $response = Http::get("https://api.hunter.io/v2/email-count?domain=$dominio&api_key=$access_key");
-                    $data = $response->json();
-                    $data2 = dns_get_record($dominio, DNS_MX);
-                    if($data['data']['total']==0 && count($data2)==0){
-                        $fail('El dominio del correo electrónico no es válido.');
-                    }
-                },
-            ],
-            'password' => 'required|string|min:8',
+            'userName' => 'required|string|max:50|unique:users,userName,'.$id, // Asegúrate de que el nombre de usuario sea único, excluyendo el usuario actual
+            'password' => 'nullable|string|min:8', // La contraseña es opcional
         ], [
             'name.required' => 'El nombre es obligatorio.',
             'name.string' => 'El nombre debe ser una cadena de caracteres.',
             'name.max' => 'El nombre no puede tener más de 50 caracteres.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.string' => 'El correo electrónico debe ser una cadena de caracteres.',
-            'email.email' => 'El correo electrónico debe tener un formato válido.',
-            'email.max' => 'El correo electrónico no puede tener más de 50 caracteres.',
-            'email.unique' => 'Este correo electrónico ya está registrado.',
-            'password.required' => 'La contraseña es obligatoria.',
+            'userName.required' => 'El nombre de usuario es obligatorio.',
+            'userName.string' => 'El nombre de usuario debe ser una cadena de caracteres.',
+            'userName.max' => 'El nombre de usuario no puede tener más de 50 caracteres.',
+            'userName.unique' => 'El nombre de usuario ya está en uso.',
             'password.string' => 'La contraseña debe ser una cadena de caracteres.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.'
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-        return redirect('/')->with('success1', '¡Registro exitoso!')->with('success2', 'Ya puedes iniciar sesión.');
-    } */
+        // Encuentra al usuario que se va a actualizar
+        $user = User::find($id);
+
+        // Verifica si el usuario existe
+        if (!$user) {
+            return redirect()->back()->with('error', 'Usuario no encontrado');
+        }
+
+        // Actualiza los datos del usuario
+        $user->name = $request->name;
+        $user->userName = $request->userName;
+        if ($request->password) {
+            $user->password = bcrypt($request->password); // Solo actualiza la contraseña si se proporciona
+        }
+        $user->save();
+
+        return redirect('/users')->with('success', 'Usuario actualizado correctamente');
+    }
 }

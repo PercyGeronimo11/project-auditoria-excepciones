@@ -1,6 +1,6 @@
-@extends('layout.layout')
+@extends('layout.layout_inhabil')
 
-@section('title', 'Secuencialidad')
+@section('title', 'Usuarios')
 
 @section('content')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -16,14 +16,18 @@
     }
 </style>
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Análisis de Secuencialidad</h1>
+        <h1 class="text-center mb-4">Lista de usuarios</h1>
         <div>
-            <a class="btn btn-primary" href="./excepcion/create">Nuevo</a>
+            <a class="btn btn-primary" href="./users/create">Nuevo</a>
         </div><br>
-        
-        @if (count($sequence_results)==0)
+        @if(Session::has('success1'))
+            <div class="alert alert-success">
+                {{ Session::get('success1') }}
+            </div>
+        @endif
+        @if (count($users)==0)
             <div class="alert alert-success" role="alert">
-                No hay resultados
+                No hay usuarios
             </div>
         @else
             <div role="alert">
@@ -31,27 +35,22 @@
                     <thead>
                         <tr>
                             <th scope="col">N°</th>
-                            <th scope="col">Gestor</th>
-                            <th scope="col">Base de datos</th>
-                            <th scope="col">Tabla</th>
-                            <th scope="col">Campo</th>
-                            <th scope="col">Fecha y hora</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Nombre de usuario</th>
+                            <th scope="col">Fecha de creación</th>
                             <th scope="col">Opciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($sequence_results as $item)
+                        @foreach ($users as $item)
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item['bdManager'] }}</td>
-                                <td>{{ $item['dbName'] }}</td>
-                                <td>{{ $item['tableName'] }}</td>
-                                <td>{{ $item['field'] }}</td>
-                                <td>{{ $item['created_at'] }}</td>
+                                <td>{{ $item-> id }}</td>
+                                <td>{{ $item-> name }}</td>
+                                <td>{{ $item->userName }}</td>
+                                <td>{{ $item->created_at }}</td>
                                 <td>
-                                    <a class="btn btn-danger" href="./excepcion/delete/{{ $item['id'] }}">Eliminar</a>
-                                    <a class="btn btn-warning" href="./excepcion/secuencialidad/pdf/{{ $item['id'] }}">PDF</a>
-                                    <a class="btn btn-success" href="./excepcion/secuencialidad/use/{{ $item['id'] }}">Analizar</a>
+                                    <a class="btn btn-danger" href="./user/delete/{{ $item['id'] }}">Eliminar</a>
+                                    <a class="btn btn-warning" href="./user/edit/{{ $item['id'] }}">Editar</a>
                                 </td>
                             </tr>
                         @endforeach

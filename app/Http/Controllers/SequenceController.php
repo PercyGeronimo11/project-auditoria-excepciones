@@ -58,16 +58,13 @@ class SequenceController extends Controller
             'campo.required' => 'Seleccionar el campo es obligatorio.',
         ]);
 
-        // Capturar los datos del formulario
         $tabla = $request->input('tabla');
         $campo = $request->input('campo');
         $tipo_secuencia = $request->input('tipo_secuencia');
         $orden_secuencia = $request->input('orden_secuencia');
         $incremento = $request->input('incremento');
         $rango_valores = $request->input('rango_valores');
-        //return Database::latest()->first();
-        //return session()->get('tablesName');
-        // Realizar el análisis de secuencialidad
+        
         $database = Database::latest()->first();
         $data= Sequence_result::create([
             'bdManager' => $database->tipo,
@@ -78,30 +75,36 @@ class SequenceController extends Controller
             'sequenceOrder' => $orden_secuencia, 
             'increment' => $incremento,
             'state' => 1,
-            'user' => Auth::user()->email
+            'user' => Auth::user()->userName
         ]);
         $resultado_analisis = $this->analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores);
-        //dd($resultado_analisis);
-        $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data]);
+        
+        $tablaResultado =  $this->generarResumen($resultado_analisis,$data);
+        //dd($tablaResultado);
+        //dd($resultado_analisis['excepciones']);
+        $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data, 'tablaResultado'=>$tablaResultado]);
         $pdfPath = 'pdfs/' . uniqid() . '.pdf';
         Storage::disk('public')->put($pdfPath, $pdf->output());
         $data->update(['url_doc' => $pdfPath]);
         //return $pdf->download();
         // Guardar el resultado del análisis o mostrarlo en la interfaz de usuario
-        return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis);
+        return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis['excepciones']);
     }
 
     private function analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores)
     {
+        //varibles nuevas
+        $nv_sincambios=0;
+        $nv_omitidos=0;
+        $nv_mal_ordensecuencia=0;
+
         // Inicializar variables para el seguimiento del análisis
         $secuencia_correcta = true;
         $excepciones = [];
 
         // Obtener los datos de la tabla seleccionada desde la sesión
         $datos = session()->get('tablesName.' . $tabla . '.data')->pluck($campo);
-        //return $datos;
-        /* return session()->get('tablesName'); */
-        // Verificar si se detectan excepciones en la secuencia
+        
         $valor_anterior = null;
         for ($i = 0; $i < count($datos); $i++) {
             // Verificar el tipo de secuencia
@@ -110,6 +113,7 @@ class SequenceController extends Controller
                     // Verificar la secuencia numérica
                     if ($valor_anterior !== null) {
                         if($datos[$i] == $valor_anterior){
+                            $nv_sincambios++;
                             $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -128,6 +132,7 @@ class SequenceController extends Controller
                                 }else{
                                     $mensaje= "Se omitieron los valores del ".($valor_anterior+1)." al ".($datos[$i]-1);
                                 }
+                                $nv_omitidos++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -140,6 +145,7 @@ class SequenceController extends Controller
                             }
                         } else {
                             if ($valor_anterior - $datos[$i] != $incremento) {
+                                $nv_mal_ordensecuencia++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -154,6 +160,7 @@ class SequenceController extends Controller
                     }
                     elseif($datos[$i] != null){
                         if($datos[$i]>1 && $orden_secuencia === 'ascendente'){
+                            $nv_omitidos++;
                             $secuencia_correcta = false;
                             $excepciones[]=[
                                 'id' => $i+1,
@@ -181,6 +188,7 @@ class SequenceController extends Controller
                                     // Si el orden es ascendenteendente, verificar que la letra actual sea mayor o igual a la letra anterior
                                     if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) < 0) {
                                         // Si no sigue el orden alfabético, agregar una excepción
+                                        $nv_mal_ordensecuencia++;
                                         $secuencia_correcta = false;
                                         $excepciones[] = [
                                             'id' => $i+1,
@@ -195,6 +203,7 @@ class SequenceController extends Controller
                                     // Si el orden es descendenteendente, verificar que la letra actual sea menor o igual a la letra anterior
                                     if (strcmp($valor_alfabetico, $valor_anterior_alfabetico) > 0) {
                                         // Si no sigue el orden alfabético, agregar una excepción
+                                        $nv_mal_ordensecuencia++;
                                         $secuencia_correcta = false;
                                         $excepciones[] = [
                                             'id' => $i+1,
@@ -215,12 +224,19 @@ class SequenceController extends Controller
                             if (($orden_secuencia === 'ascendente' && $num_cmp != $incremento)) {
                                 $mensaje="";
                                 if($num_cmp>$incremento){
-                                    $mensaje="No existen los valores desde el ".($valor_anterior_numerico+$incremento)." hasta el ".($valor_numerico-$incremento);
+                                    $nv_omitidos++;
+                                    if($valor_anterior_numerico+$incremento==$valor_numerico-$incremento){
+                                        $mensaje="Se omitio el valor ".($valor_anterior_numerico+$incremento);
+                                    }else{
+                                        $mensaje="Se omitieron los valores desde el ".($valor_anterior_numerico+$incremento)." hasta el ".($valor_numerico-$incremento);
+                                    }
                                 }
                                 elseif($num_cmp==0){
+                                    $nv_sincambios++;
                                     $mensaje="El valor no ha incrementado";
                                 }
                                 elseif($num_cmp<0){
+                                    $nv_mal_ordensecuencia++;
                                     $mensaje="Esta decreciendo";
                                 }
                                 // Si los componentes numéricos no siguen el orden esperado, agregar una excepción
@@ -235,6 +251,7 @@ class SequenceController extends Controller
                                 ];
                             }
                             elseif(($orden_secuencia === 'descendente' && $num_cmp != -1)){
+                                $nv_mal_ordensecuencia++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -250,6 +267,7 @@ class SequenceController extends Controller
                             //return $datos[$i];
                             $valor_numerico = intval(preg_replace('/[^0-9]/', '', $datos[$i]));
                             if($valor_numerico>1 && $orden_secuencia === 'ascendente'){
+                                $nv_omitidos++;
                                 $secuencia_correcta = false;
                                 $excepciones[]=[
                                     'id' => $i+1,
@@ -288,6 +306,7 @@ class SequenceController extends Controller
                                     $hora_actual = strtotime($datos[$i]);
                                     $hora_anterior = strtotime($valor_anterior);
                                     if ($hora_actual < $hora_anterior && $orden_secuencia === 'ascendente') {
+                                        $nv_mal_ordensecuencia++;
                                         $secuencia_correcta = false;
                                         $excepciones[] = [
                                             'id' => $i+1,
@@ -298,6 +317,7 @@ class SequenceController extends Controller
                                             'mensaje' => "La hora actual es menor que la anterior en la misma fecha",
                                         ];
                                     } elseif ($hora_actual > $hora_anterior && $orden_secuencia === 'descendente') {
+                                        $nv_mal_ordensecuencia++;
                                         $secuencia_correcta = false;
                                         $excepciones[] = [
                                             'id' => $i+1,
@@ -310,6 +330,7 @@ class SequenceController extends Controller
                                     }
                                 }
                             } elseif ($fecha_actual < $fecha_anterior && $orden_secuencia === 'ascendente') {
+                                $nv_mal_ordensecuencia++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -320,6 +341,7 @@ class SequenceController extends Controller
                                     'mensaje' => "Es una fecha menor que la anterior",
                                 ];
                             } elseif ($fecha_actual > $fecha_anterior && $orden_secuencia === 'descendente') {
+                                $nv_mal_ordensecuencia++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
                                     'id' => $i+1,
@@ -348,6 +370,7 @@ class SequenceController extends Controller
                     // Suponiendo que $datos[$i] es una cadena de hora en formato 'H:i:s'
                     if ($valor_anterior !== null) {
                         if (($orden_secuencia === 'ascendente' && strtotime($datos[$i]) < strtotime($valor_anterior))) {
+                            $nv_mal_ordensecuencia++;
                             $secuencia_correcta = false;
                             $excepciones[] = [
                                 'id' => $i+1,
@@ -359,6 +382,7 @@ class SequenceController extends Controller
                             ];
                         }
                         elseif(($orden_secuencia === 'descendente' && strtotime($datos[$i]) > strtotime($valor_anterior))){
+                            $nv_mal_ordensecuencia++;
                             $secuencia_correcta = false;
                             $excepciones[] = [
                                 'id' => $i+1,
@@ -379,7 +403,7 @@ class SequenceController extends Controller
             }
 
             // Verificar el rango de valores esperado
-            if ($rango_valores !== null) {
+            /* if ($rango_valores !== null) {
                 // descendenteomponer el rango de valores
                 list($minimo, $maximo) = explode('-', $rango_valores);
                 // Verificar si el valor está dentro del rango esperado
@@ -394,7 +418,7 @@ class SequenceController extends Controller
                         'mensaje' => "Valor '{$datos[$i]}' está fuera del rango de valores esperado '{$rango_valores}'.",
                     ];
                 }
-            }
+            } */
 
             // Actualizar el valor anterior para la próxima iteración
             $valor_anterior = $datos[$i];
@@ -404,9 +428,68 @@ class SequenceController extends Controller
         if ($secuencia_correcta) {
             return "La secuencia en el campo '{$campo}' de la tabla '{$tabla}' es correcta";
         } else {
-            // Si se detectan excepciones, retornar un arreglo de excepciones
-            return $excepciones;
+            $resultado=[
+                'nv_mal_ordensecuencia'=>$nv_mal_ordensecuencia,
+                'nv_omitidos'=>$nv_omitidos,
+                'nv_sincambios'=>$nv_sincambios,
+                'excepciones'=>$excepciones
+            ];
+            return $resultado;
         }
+    }
+
+    private function generarResumen($result, $data){
+        //tablafinal
+        $condicion="";
+        $causa="";
+        $efecto="";
+        if(!is_string($result['excepciones']) && !isset($results['excepciones'][0]['error'])){
+            $n_excepciones=$result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'];
+            if($n_excepciones>1){
+                $condicion="Se encontró ".($result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'])." excepciones:\n";
+            }
+            else{
+                $condicion="Se encontró ".($result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'])." excepción:\n";
+            }
+        }
+        $criterio="ISO Anexo 8.2.3 MANEJO DE LOS ACTIVOS";
+        $efecto="Mayor riesgo de errores en la manipulación de datos, especialmente en sistemas donde el orden de los registros y la precisión de la información almacenada es importante.\n-Dificultad para realizar operaciones de búsqueda y recuperación de los datos en la tabla ".$data['tableName'];
+        $causa.="Falta de control en la entrada de datos\n";
+        $causa.="-Entrada desorganizada de los datos\n";
+        if($result['nv_omitidos']>0){
+            if($result['nv_omitidos']>1){
+                $condicion.="-Hay ".$result['nv_omitidos']." exepciones por valores omitidos en la secuencia.\n";
+            }else{
+                $condicion.="-Hay ".$result['nv_omitidos']." exepción por valores omitidos en la secuencia.\n";
+            }
+            
+            $causa.="-Eliminación incorrecta de los registros en la tabla ".$data['tableName'].".\n";
+        }
+        if($result['nv_sincambios']>0){
+            if($result['nv_sincambios']>1){
+                $condicion.="-Hay ".$result['nv_sincambios']." exepciones por valores que no cambiaron en la secuencia.\n";
+            }else{
+                $condicion.="-Hay ".$result['nv_sincambios']." excepción porque su valor no cambio en la secuencia.\n";
+            }
+            
+            
+        }
+        if($result['nv_mal_ordensecuencia']>0){
+            if($result['nv_mal_ordensecuencia']>1){
+                $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." exepciones por valores que estaban en un orden ".$result['sequenceOrder'].".\n";
+            }else{
+                $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." excepción porque su valor estaba en un orden ".$result['sequenceOrder'].".\n";
+            }
+        }
+        
+        $tablaResultado = [
+            'condicion'=>$condicion,
+            'criterio'=>$criterio,
+            'efecto'=>$efecto,
+            'causa'=>$causa,
+        ];
+
+        return $tablaResultado;
     }
 
     public function generatepdf($id){

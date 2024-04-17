@@ -13,12 +13,12 @@ Route::get('/', function () {
     return view('login');
 });
 
-Route::get('/register', function () {
+/* Route::get('/register', function () {
     return view('register');
-});
+}); */
 
 Route::post('/login', [LoginController::class, 'login'])->name("login");
-Route::post('/register/user', [LoginController::class, 'register'])->name("register");
+
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); 
 
 
@@ -57,3 +57,10 @@ Route::get('excepcion/secuencialidad/pdf/{id}',[SequenceController::class,'gener
 Route::get('excepcion/secuencialidad/use/{id}',[SequenceController::class,'useRegister'])->name('useRegister');
 Route::get('excepcion/create',[SequenceController::class,'create'])->name('createSecuencialidad');
 Route::get('excepcion/delete/{id}',[SequenceController::class,'eliminar'])->name('deleteSecuencialidad');
+Route::get('users',[LoginController::class,'list'])->name('listUsers');
+Route::get('Users',[LoginController::class,'list2'])->name('listUsers_inhabil');
+Route::get('users/create',[LoginController::class,'create'])->name('createUser');
+Route::post('/register/user', [LoginController::class, 'register'])->name("register");
+Route::get('user/delete/{id}',[LoginController::class,'delete'])->name('deleteUser');
+Route::get('user/edit/{id}',[LoginController::class,'edit'])->name('editUser');
+Route::put('user/update/{id}',[LoginController::class,'update'])->name('updateUser');
