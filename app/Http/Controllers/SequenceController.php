@@ -65,8 +65,13 @@ class SequenceController extends Controller
         $rango_valores = $request->input('rango_valores');
         
         $database = Database::latest()->first();
+        if($database->tipo=="mysql"){
+            $bdManager="MySQL";
+        }else{
+            $bdManager="SQL Server";
+        }
         $data= Sequence_result::create([
-            'bdManager' => $database->tipo,
+            'bdManager' => $bdManager,
             'dbName' => $database->nombre_db,
             'tableName' => $tabla, 
             'field' => $campo, 
@@ -517,9 +522,12 @@ class SequenceController extends Controller
     }
 
     public function index(){
-        /* $database = Database::latest()->first();
-        dd($database->tipo); */
-        $sequence_results = Sequence_result::all();
+        $database = Database::latest()->first();
+        if($database=="mysql"){
+            $sequence_results = Sequence_result::where('bdManager',"MySQL")->get();
+        }else{
+            $sequence_results = Sequence_result::where('bdManager',"SQL Server")->get();
+        }
         return view("secuencialidad.index", compact('sequence_results'));
     }
 
