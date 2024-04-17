@@ -233,6 +233,7 @@ public function analizar($id, $state)
         $columns = $contenido[$TareaCampo->tabla]["columns"];
         $tableName = $TareaCampo->tabla;
         $view = isset($columns[0]->Field) ? 'conexion.show_tableMysql' : 'conexion.show_tableSQL1';
+        // return $tableData-;
         $view = $state == 1 ? $view : 'campo.reporte';
 
         if( $state == 0){

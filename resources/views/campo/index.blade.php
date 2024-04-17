@@ -90,7 +90,7 @@
                             <h1 class="modal-title fs-5" id="staticBackdropLabel">Reporte</h1>
                             </div>
                             <div class="modal-body">
-                                <iframe src="{{$row->url_doc}}" class="object-cover mt-2" height="500vh" width="450vh" frameborder="0" scrolling=""> </iframe>
+                                <iframe src="{{asset($row->url_doc)}})" class="object-cover mt-2" height="500vh" width="450vh" frameborder="0" scrolling=""> </iframe>
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

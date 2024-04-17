@@ -137,8 +137,61 @@
             </ul> --}}
     </ul>
 
+
+
+    <table>
+        <thead>
+          <tr>
+            <th colspan="2" style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">CUADRO RESUMEN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+              <th scope="col">Condicion</th>
+              <td>
+                Hay {{ count($tableData) }} exepciones  el campo <strong>{{ $TareaCampo->campo }} en la tabla {{ $TareaCampo->tabla }} 
+                 
+            
+              </td>
+          </tr>
+          <tr>
+              <th scope="col">Criterio</th>
+              <td>
+                ISO 27001 A.7.1.6 - Gestión de la configuración de la base de datos,Este control exige la implementación de un proceso formal para controlar los cambios en la configuración de la base de datos, incluyendo la definición de valores segun las necesidades. 
+              </td>
+          </tr>
+         <tr>
+              <th scope="col">Efecto</th>
+              <td>
+                Mayor riesgo de errores en la manipulación de datos, especialmente en sistemas donde el tipo de dato sea importante como los documentos de identidad,etc.
+              </td>
+          </tr>
+          <tr>
+              <th scope="col">Causa</th>
+              <td>
+                  Mala definicion de los datos en la base de datos , y falta de validez de inserción de datos en el campo {{ $TareaCampo->campo }}
+              </td>
+          </tr> 
+          <tr>
+            <th scope="col">Recomendacion</th>
+            <td>
+                - Revisar y corregir la definición de los datos en el campo {{ $TareaCampo->campo }} de la tabla {{ $TareaCampo->tabla }} para garantizar que cumple con el tipo de dato esperado y las restricciones necesarias.<br>- Implementar mecanismos de validación de datos en la aplicación para evitar que se ingrese información incorrecta en el campo {{ $TareaCampo->campo }}.
+                Verificar que los valores del campo {{$TareaCampo->campo }} debe de ser de tipo {{$TareaCampo->tipoValidar}} además {{ $TareaCampo->condicion }}.{{$TareaCampo->condicion_text }} 
+                @if ($TareaCampo->null==0)
+                y no debe ser nulo
+                    
+                @endif
+            </td>
+        </tr> 
+
+
+      </tbody>
+      
+      </table>
+
+
     <div class="container mt-5">
-        <h1 class="mb-4">Tabla: {{ $tableName }}</h1>
+        <h1 class="mb-4">Exepciones en la tabla: {{ $tableName }}</h1>
     
         @if(count($tableData) > 0)
         <div class="table-responsive">
@@ -178,53 +231,7 @@
         @endif
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Campo</th>
-                <th>Tipo de Dato</th>
-                <th>Reglas de Validación</th>
-                {{-- <th>Errores Encontrados</th> --}}
-                {{-- <th>Causas Raíz</th> --}}
-                <th>Recomendaciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{-- @foreach ($errores_por_campo as $campo => $errores) --}}
-                <tr>
-                    <td>{{ $TareaCampo->campo }}</td>
-                    <td>{{ $TareaCampo->tipoValidar}}</td>
-                    <td>{{ $TareaCampo->condicion }}.{{$TareaCampo->condicion_text }}</td>
-                    {{-- <td>
-                        <ul>
-                            @foreach ($errores as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </td> --}}
-                    {{-- <td>
-                        <ul>
-                            @foreach ($causas_raiz[$campo] as $causa)
-                                <li>{{ $causa }}</li>
-                            @endforeach
-                        </ul>
-                    </td> --}}
-                    <td>
-                        <ul>
-                            {{-- @foreach ($recomendaciones[$campo] as $recomendacion)
-                                <li>{{ $recomendacion }}</li>
-                            @endforeach --}}
-                            El campo {{$TareaCampo->campo }} debe de ser {{$TareaCampo->tipoValidar}} además {{ $TareaCampo->condicion }}.{{$TareaCampo->condicion_text }} 
-                            @if ($TareaCampo->null==0)
-                            y no debe ser nulo
-                                
-                            @endif
-                        </ul>
-                    </td>
-                </tr>
-            {{-- @endforeach --}}
-        </tbody>
-    </table>
+
 
     {{-- <h2>Análisis Detallado</h2>
 
