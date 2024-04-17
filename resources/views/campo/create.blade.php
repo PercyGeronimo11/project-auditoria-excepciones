@@ -20,36 +20,32 @@
    
      @endif 
 </div>
+
+<div class="card">
+  <div class="card-header">
+      <strong class="card-title">Formulario de Conexión</strong>
+  </div>
+  <div class="card-body">
     <div class="row">
        
 
 
 
-                    {{-- <h5 class="card-title">{{ $tableName }}</h5> --}}
                     <form action="
                             {{ route('tareacampo.store')}}" method="POST" enctype="multipart/form-data">
                             
                               @csrf
-                            {{-- " method="GET"> --}}
-                            {{-- <div class="mb-3 row">
-                                <label for="staticEmail" class="col-sm-2 col-form-label">Email</label>
-                                <div class="col-sm-10">
-                                  <input type="text" readonly class="form-control-plaintext" id="staticEmail" value="email@example.com">
-                                </div>
-                            </div> --}}
                             
                             <div class="mb-3 row">
 
-                                <label for="inputPassword" class="col-sm-2 col-form-label">Tabla</label>
+                              <label for="inputPassword" class="col-sm-2 col-form-label" style="font-weight: bold; font-family: 'Arial', sans-serif;">Tabla</label>
                                 
-                                <select class="form-select  @error('tabla') is-invalid @enderror select2" aria-label="Default select example" id="firstSelect" name="tabla"> 
-                                    <option selected disabled>Open this select menu</option>
-                           
-                                    @foreach (array_keys(session()->get('tablesName')) as $item)
-                                   
-                                    <option value="{{$item}}">{{$item}}</option>
-                                    @endforeach
-                                </select>
+                                <select class="form-select select2" aria-label="Default select example" id="firstSelect" name="tabla" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff; color: #333; font-size: 16px;">
+                                  <option selected disabled>Selecciona una tabla</option>
+                                  @foreach (array_keys(session()->get('tablesName')) as $item)
+                                  <option value="{{$item}}" style="padding: 5px 10px; background-color: #f8f9fa; color: #333;">{{$item}}</option>
+                                  @endforeach
+                              </select>                              
                                 @error('tabla')
                             <span class="invalid feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -57,21 +53,20 @@
                         @enderror
                             </div>
                             <div class="mb-3 row">
-                                <label for="inputPassword" class="col-sm-2 col-form-label">Campo</label>
-                                <select class="form-select @error('campo') is-invalid @enderror  select2" aria-label="Default select example" id="secondSelect" name="campo">
-                                    <option selected disabled>Open this select menu</option>
-                                    @foreach ($columnas[$tableNames[0]] as $item)
-                                        <option value={{$item}}>{{$item}}</option>
-                                    @endforeach
-                                </select>
-                                @error('campo')
-                                <span class="invalid feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                            </div>
+                              <label for="inputPassword" class="col-sm-2 col-form-label" style="font-weight: bold; font-family: 'Arial', sans-serif;">Campo</label>
+                              <select class="form-select @error('campo') is-invalid @enderror select2" aria-label="Default select example" id="secondSelect" name="campo" style="width: 200px; padding: 8px; border-radius: 5px; border: 1px solid #ccc; background-color: #fff; font-size: 14px; font-family: 'Arial', sans-serif;">
+                                  <option selected disabled>Selecciona un campo</option>
+                                  @foreach ($columnas[$tableNames[0]] as $item)
+                                      <option value="{{$item}}" style="background-color: #f8f9fa; color: #333;">{{$item}}</option>
+                                  @endforeach
+                              </select>
+                              @error('campo')
+                                  <span class="invalid-feedback" role="alert" style="color: red;">{{ $message }}</span>
+                              @enderror
+                          </div>
+                          
                             <div class="mb-3 row" style="display: none">
-                              <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
+                              <label for="inputPassword" class="col-sm-2 col-form-label" style="font-weight: bold; font-family: 'Arial', sans-serif;">Tipo</label>
                               <select class="form-select @error('tipo') is-invalid @enderror" aria-label="Default select example" id="thirdSelect" name="tipo">
                                   <option selected disabled>Open this select menu</option>
                                   @foreach ($tipos[$tableNames[0]] as $item)
@@ -85,7 +80,7 @@
                           @enderror
                             </div>
                             <div class="mb-3 row">
-                              <label for="inputPassword" class="col-sm-2 col-form-label">Tipo</label>
+                              <label for="inputPassword" class="col-sm-2 col-form-label" style="font-weight: bold; font-family: 'Arial', sans-serif;">Tipo</label>
                               
                               <div class="input-group mb-3 " >
                                 <select class="form-select @error('tipoValidar') is-invalid @enderror" aria-label="Default select example" id="fourthSelect" name="tipoValidar">
@@ -152,7 +147,7 @@
                             <div class=" row mb-3 condiciones d-flex">
                               
                               {{-- <label for="inputPassword" class="col-sm-2 col-form-label " id="condition-group">Condición</label> --}}
-                              <label for="inputPassword" class="col-sm-2 col-form-label">Condición</label>
+                              <label for="inputPassword" class="col-sm-2 col-form-label" style="font-weight: bold; font-family: 'Arial', sans-serif;">Condicion</label>
                               <div class="input-group mb-3 " >
                          
                                 <select class="form-select @error('condicion') is-invalid @enderror" aria-label="Default select example" id="fiveselect" name="condicion">
@@ -221,13 +216,10 @@
                             <br>
                         <button type="submit" class="btn btn-primary">analizar</button>
                         <a href="{{ route('campo.cancelar')}}" class="btn btn-danger">Cancelar</a>
-                    </form>
-                 
-                   
-                   
-                     
-                 
+                    </form>    
     </div>
+  </div>
+</div>
 </div>
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

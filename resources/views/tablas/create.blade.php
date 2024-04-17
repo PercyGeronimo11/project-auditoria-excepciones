@@ -7,8 +7,15 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://kit.fontawesome.com/7920972db5.js" crossorigin="anonymous"></script>
 
+    <style>
+        .bold-label {
+            font-weight: bold;
+            font-family: 'Arial', sans-serif; /* Cambiar a la fuente deseada */
+        }
+    </style>
+
     <div class="container mt-5">
-        <h1 class="mb-4">INTEGRIDAD DE TABLAS</h1>
+
         <br>
         @if (session('message'))
             <div class="alert alert-danger">
@@ -19,58 +26,67 @@
             <div class="row justify-content-center">
                 <div class="col-md-9">
                     <div class="card">
-                        <form action="{{ route('integridadtablas.store') }}" method="POST">
-                            @csrf
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="tabla1select" class="form-label">Tabla a Evaluar</label>
-                                            <select class="form-select" id="tabla1select" name="nameTabla">
-                                                <option selected disabled>Seleccionar</option>
-                                                @foreach ($tableNames as $item)
-                                                    <option value="{{ $item }}">{{ $item }}</option>
-                                                @endforeach
-                                            </select>
+                        <div class="card-header bg-light">
+                            <h4 class="text-muted">Integridad de tablas</h4>
+                        </div>
+                        <div class="body">
+                            <form action="{{ route('integridadtablas.store') }}" method="POST">
+                                @csrf
+                                <div class="card-body">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="tabla1select" class="form-label bold-label">Tabla a Evaluar</label>
+                                                <select class="form-select" id="tabla1select" name="nameTabla">
+                                                    <option selected disabled>Seleccionar</option>
+                                                    @foreach ($tableNames as $item)
+                                                        <option value="{{ $item }}">{{ $item }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="column1select" class="form-label">Clave Foranea</label>
-                                            <select class="form-select" id="column1select" name="nameClaveForanea">
-                                                <option selected disabled>Seleccionar</option>
-                                                @foreach ($colForeignKeys[$tableNames[0]] as $item)
-                                                    <option value="{{ $item }}">{{ $item }}</option>
-                                                @endforeach
-                                            </select>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="tabla2Select" class="form-label bold-label">Tabla Referenciada</label>
+                                                <select class="form-select" id="tabla2Select" name="nameTablaRef">
+                                                    <option selected disabled>Seleccionar</option>
+                                                    @foreach ($tableNames as $item)
+                                                        <option value="{{ $item }}">{{ $item }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="tabla2Select" class="form-label">Tabla Referenciada</label>
-                                            <select class="form-select" id="tabla2Select" name="nameTablaRef">
-                                                <option selected disabled>Seleccionar</option>
-                                                @foreach ($tableNames as $item)
-                                                    <option value="{{ $item }}">{{ $item }}</option>
-                                                @endforeach
-                                            </select>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="column1select" class="form-label bold-label">Clave Foranea</label>
+                                                <select class="form-select" id="column1select" name="nameClaveForanea">
+                                                    <option selected disabled>Seleccionar</option>
+                                                    @foreach ($colForeignKeys[$tableNames[0]] as $item)
+                                                        <option value="{{ $item }}">{{ $item }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="column2Select" class="form-label">Clave Primaria</label>
-                                            <select class="form-select" id="column2Select" name="nameClavePrimary">
-
-                                                <option selected disabled>Seleccionar</option>
-                                                @foreach ($colPrimaryKeys[$tableNames[0]] as $item)
-                                                    <option value="{{ $item }}">{{ $item }}</option>
-                                                @endforeach
-                                            </select>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="column2Select" class="form-label bold-label">Clave Primaria</label>
+                                                <select class="form-select" id="column2Select" name="nameClavePrimary">
+                                                    <option selected disabled>Seleccionar</option>
+                                                    @foreach ($colPrimaryKeys[$tableNames[0]] as $item)
+                                                        <option value="{{ $item }}">{{ $item }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="card-footer d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary">Guardar</button>
-                            </div>
-                        </form>
+                                <div class="card-footer bg-primary d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary btn-lg">Guardar <i class="fas fa-save ms-2"></i></button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -79,7 +95,6 @@
 
     <script>
         const colForeignKeys = <?php echo json_encode($colForeignKeys); ?>;
-
 
         document.getElementById("tabla1select").addEventListener("change", function() {
             // Get the selected value from the first select
