@@ -49,8 +49,8 @@
                                 <td>{{ $item->userName }}</td>
                                 <td>{{ $item->created_at }}</td>
                                 <td>
-                                    <a class="btn btn-danger" href="./user/delete/{{ $item['id'] }}">Eliminar</a>
                                     <a class="btn btn-warning" href="./user/edit/{{ $item['id'] }}">Editar</a>
+                                    <a class="btn btn-danger" href="./user/delete/{{ $item['id'] }}">Eliminar</a>
                                 </td>
                             </tr>
                         @endforeach
