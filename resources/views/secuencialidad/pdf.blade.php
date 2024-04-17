@@ -189,6 +189,19 @@
                       @endforeach
                   </td>
               </tr>
+              <tr>
+                <th scope="col">Recomendación</th>
+                <td>
+                    @php
+                        $recomendacion = $tablaResultado['recomendacion'];
+                        $lineas = explode('-', "-".$recomendacion);
+                    @endphp
+                    
+                    @foreach ($lineas as $linea)
+                        {{ trim($linea) }} <br>
+                    @endforeach
+                </td>
+            </tr>
             </tbody>
           
           </table>

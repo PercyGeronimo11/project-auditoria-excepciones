@@ -134,7 +134,7 @@ class SequenceController extends Controller
                             $nv_sincambios++;
                             $secuencia_correcta = false;
                                 $excepciones[] = [
-                                    'id' => $i+1,
+                                    'id' => $datos[$i],
                                     'tabla' => $tabla,
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
@@ -153,7 +153,7 @@ class SequenceController extends Controller
                                 $nv_omitidos++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
-                                    'id' => $i+1,
+                                    'id' => $datos[$i],
                                     'tabla' => $tabla,
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
@@ -166,7 +166,7 @@ class SequenceController extends Controller
                                 $nv_mal_ordensecuencia++;
                                 $secuencia_correcta = false;
                                 $excepciones[] = [
-                                    'id' => $i+1,
+                                    'id' => $datos[$i],
                                     'tabla' => $tabla,
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
@@ -181,7 +181,7 @@ class SequenceController extends Controller
                             $nv_omitidos++;
                             $secuencia_correcta = false;
                             $excepciones[]=[
-                                'id' => $i+1,
+                                'id' => $datos[$i],
                                     'tabla' => $tabla,
                                     'campo' => $campo,
                                     'actual' => $datos[$i],
@@ -500,12 +500,14 @@ class SequenceController extends Controller
                 $condicion.="-Hay ".$result['nv_mal_ordensecuencia']." excepción porque su valor estaba en un orden ".$data['sequenceOrder'].".\n";
             }
         }
+        $recomendacion="Se sugiere establecer medidas de control para la gestión de datos, enfocándose en garantizar la entrada correcta de datos secuenciales y proteger contra la eliminación de datos intermedios. Esto garantizará la integridad y la secuencialidad de los datos almacenados en la base de datos, contribuyendo así a una gestión de datos eficaz y segura.";
         
         $tablaResultado = [
             'condicion'=>$condicion,
             'criterio'=>$criterio,
             'efecto'=>$efecto,
             'causa'=>$causa,
+            'recomendacion'=>$recomendacion
         ];
 
         return $tablaResultado;
