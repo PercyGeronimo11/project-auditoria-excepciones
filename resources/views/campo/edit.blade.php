@@ -230,39 +230,19 @@
 
 
 <script>
-  window.onload = function() {
+  
 
-// $(document).ready(function() {
-//   $("#mySelect").select2();
-// });
-
-new TomSelect("#firstSelect",{
-create: true,
-sortField: {
-  field: "text",
-
-}
-});
-// new TomSelect("#secondSelect",{
-// create: true,
-// sortField: {
-// 	field: "text",
-// 	direction: "asc"
-// }
-// });
-   
-};
 
       const columnas = <?php echo json_encode($columnas); ?>;
     
     const tipos = <?php echo json_encode($tipos); ?>;
     // const campo = <?php echo json_encode($TareaCampo["campo"]); ?>;
     const TareaCampo = <?php echo json_encode($TareaCampo); ?>;
-
+    var primera;
   window.onload = function() {
     // Selecciona el elemento <select> por su ID o clase, por ejemplo:
     var selectElement = document.getElementById("firstSelect"); // Cambia "miSelect" por el ID de tu <select>
-      console.log("nada cargio");
+  
     
     // Agrega el evento 'change' al elemento <select>
       selectElement.dispatchEvent(new Event('change'));
@@ -278,7 +258,7 @@ sortField: {
      
       }
     }
-
+    primera=true;
 
     
     selectElement.dispatchEvent(new Event('change'));
@@ -286,34 +266,40 @@ sortField: {
   };
 
 
-document.getElementById("fiveselect").addEventListener("change", function(){
-  const valor = this.value;
-  console.log("gola");
-  const index = this.selectedIndex;
-  const boton = document.getElementById("boton-ad");
-  const fourth = document.getElementById("fourthSelect");
-  var elements = document.getElementsByName("condicion_text[0]");
-  elements[0].type = fourth.value;
-if(fourth.selectedIndex <= 2) {
-  elements[0].type = "number";
-}
-var elements = document.getElementsByName("condicion_text[]");
-    for (var i = elements.length - 1; i >= 0; i--) {
-      elements[i].parentNode.removeChild(elements[i]);
+  document.getElementById("fiveselect").addEventListener("change", function(){
+  if(primera==false){
+      const valor = this.value;
+      const index = this.selectedIndex;
+      const boton = document.getElementById("boton-ad");
+      const fourth = document.getElementById("fourthSelect");
+      var elements = document.getElementsByName("condicion_text[0]");
+      elements[0].type = fourth.value;
+    if(fourth.selectedIndex <= 2) {
+      elements[0].type = "number";
     }
-  if(valor=="between"){
-    boton.click();
-  }
-  else if(valor=="in"){
-    boton.style.display="block";
+
+      var elements = document.getElementsByName("condicion_text[]");
+        for (var i = elements.length - 1; i >= 0; i--) {
+          elements[i].parentNode.removeChild(elements[i]);
+        }
+      if(valor=="between"){
+        boton.click();
+      }
+      else if(valor=="in"){
+        boton.style.display="block";
+      }
+      else{
+        var elements = document.getElementsByName("condicion_text[]");
+        for (var i = elements.length - 1; i >= 0; i--) {
+          elements[i].parentNode.removeChild(elements[i]);
+        }
+        boton.style.display="none";
+      }
   }
   else{
-    var elements = document.getElementsByName("condicion_text[]");
-    for (var i = elements.length - 1; i >= 0; i--) {
-      elements[i].parentNode.removeChild(elements[i]);
-    }
-    boton.style.display="none";
+    primera=false;
   }
+
 });
 
 

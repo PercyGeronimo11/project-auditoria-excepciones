@@ -443,7 +443,7 @@ class SequenceController extends Controller
         $condicion="";
         $causa="";
         $efecto="";
-        if(!is_string($result['excepciones']) && !isset($results['excepciones'][0]['error'])){
+        if(!is_string($result['excepciones']) && !isset($result['excepciones'][0]['error'])){
             $n_excepciones=$result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'];
             if($n_excepciones>1){
                 $condicion="Se encontró ".($result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'])." excepciones:\n";

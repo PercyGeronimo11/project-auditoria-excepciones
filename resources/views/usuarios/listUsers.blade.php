@@ -15,24 +15,54 @@
         text-align: center; /* Centra el contenido de las celdas */
     }
 </style>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Lista de usuarios</h1>
-        <div>
-            <a class="btn btn-primary" href="./users/create">Nuevo</a>
-        </div><br>
-        @if(Session::has('success1'))
-            <div class="alert alert-success">
-                {{ Session::get('success1') }}
+<div class="container mt-5">
+
+
+    <div class="container mt-3">
+        <div class="row justify-content-between">
+            <div class="col-md-6 mb-4">
+                <div class="input-group">
+                    <input  type="text" class="form-control" id="searchInput" placeholder="Buscar usuario por nombre">
+                    <div class="input-group-append">
+                            <button class="btn btn-secondary" type="button" onclick="searchUsers()">
+                            <i class="fa fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
             </div>
-        @endif
-        @if (count($users)==0)
-            <div class="alert alert-success" role="alert">
-                No hay usuarios
+            <div class="col-md-6 mb-4">
+                <a href="./users/create" method="GET">
+                    <button class="btn btn-success">
+                        <i class="fa  fa-plus-square"></i>
+                    </button>
+                </a>
             </div>
-        @else
-            <div role="alert">
-                <table class="table table-striped">
-                    <thead>
+        </div>
+    </div>
+
+
+
+
+
+
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h4 class="text-muted">Lista de Usuarios</h4>
+        </div>
+        <div class="card-body">
+            @if(Session::has('success1'))
+                <div class="alert alert-success">
+                    {{ Session::get('success1') }}
+                </div>
+            @endif
+            @if (count($users)==0)
+                <div class="alert alert-success" role="alert">
+                    No hay usuarios
+                </div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="userTable">
+                        <thead class="thead-pastel-yellow">
                         <tr>
                             <th scope="col">N°</th>
                             <th scope="col">Nombre</th>
@@ -40,8 +70,8 @@
                             <th scope="col">Fecha de creación</th>
                             <th scope="col">Opciones</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         @foreach ($users as $item)
                             <tr>
                                 <td>{{ $item-> id }}</td>
@@ -49,16 +79,44 @@
                                 <td>{{ $item->userName }}</td>
                                 <td>{{ $item->created_at }}</td>
                                 <td>
-                                    <a class="btn btn-danger" href="./user/delete/{{ $item['id'] }}">Eliminar</a>
-                                    <a class="btn btn-warning" href="./user/edit/{{ $item['id'] }}">Editar</a>
+                                    <div style="display: flex; justify-content: flex-end; width: 100%;">
+
+                                    <a class="nav-link" href="./user/delete/{{ $item['id'] }}"><i class="fa  fa-minus-square"></i></a>
+                                    <a class="nav-link" href="./user/edit/{{ $item['id'] }}"><i class="fa fa-edit"></i></a>
+                                </div>
                                 </td>
                             </tr>
                         @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</div>
+<script>
+    function searchUsers() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("userTable");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1]; // Cambia el número si necesitas buscar en otra columna
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .thead-pastel-yellow {
+        background-color: #fff7bd;
+    }
+</style>
 @endsection
