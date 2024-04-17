@@ -59,7 +59,6 @@ class IntegridadTablasController extends Controller
             }
         }
 
-
         return view('tablas.create', compact('tableNames', 'colForeignKeys', 'colPrimaryKeys'));
     }
 
@@ -86,7 +85,7 @@ class IntegridadTablasController extends Controller
         }
 
         foreach ($tableDataArray[$nameTablaRef]["columns"] as $clave) {
-            if(isset($claveField)){
+            if(isset($clave->Field)){
                 if ($clave->Field == $nameKeyPrimary) {
                     $tipoDato_PK = $clave->Type;
                 }

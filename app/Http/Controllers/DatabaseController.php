@@ -58,7 +58,6 @@ class DatabaseController extends Controller
         
     }
 
-
     public function connectDatabase(Request $request)
     {
 
@@ -207,43 +206,6 @@ class DatabaseController extends Controller
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
 
-
-    public function getKeyForaneas($tableName){
-        $foreignKeys = DB::connection('dynamic')
-        ->table('INFORMATION_SCHEMA.TABLE_CONSTRAINTS')
-        ->join('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE', function ($join) use ($tableName) {
-            $join->on('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME', '=', 'INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME')
-                ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME', '=', $tableName)
-                ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE', '=', 'FOREIGN KEY');
-        })
-        ->select('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME')
-        ->get()
-        ->pluck('COLUMN_NAME')
-        ->toArray();
-    
-        return $foreignKeys;
-    }
-
-
-    public function getKeyPrimarias($tableName){
-        $primaryKeys = DB::connection('dynamic')
-        ->table('INFORMATION_SCHEMA.TABLE_CONSTRAINTS')
-        ->join('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE', function ($join) use ($tableName) {
-            $join->on('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME', '=', 'INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME')
-                ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME', '=', $tableName)
-                ->where('INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE', '=', 'PRIMARY KEY');
-        })
-        ->select('INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME')
-        ->get();
-
-        foreach ($primaryKeys as $primaryKeyColumn) {
-            $primaryKey[] = $primaryKeyColumn->COLUMN_NAME;
-        }
-
-        return $primaryKey;
-    }
-
-
     public function showTableMysql(Request $request, $tableName)
     {
         $driver = $this->driver;
@@ -338,6 +300,7 @@ class DatabaseController extends Controller
 
         return view('conexion.database_info', compact('tablesData', 'driver'));
     }
+    
     
     public function showTableStructure($tableName)
     {
