@@ -83,7 +83,7 @@ class SequenceController extends Controller
         ]);
         $resultado_analisis = $this->analizarSecuencialidad($tabla, $campo, $tipo_secuencia, $orden_secuencia, $incremento, $rango_valores);
         //dd($resultado_analisis);
-        if(!isset($resultado_analisis[0]['error'])){
+        if(!isset($resultado_analisis[0]['error']) && !is_string($resultado_analisis)){
             $tablaResultado =  $this->generarResumen($resultado_analisis,$data);
             $pdf = pdf::loadView('secuencialidad.pdf',['results' => $resultado_analisis, 'dataGeneral' => $data, 'tablaResultado'=>$tablaResultado]);
         }else{
@@ -92,11 +92,10 @@ class SequenceController extends Controller
         
         //dd($tablaResultado);
         //dd($resultado_analisis['excepciones']);
-        
-        if(!isset($resultado_analisis[0]['error'])){
-            $pdfPath = 'pdfs/' . uniqid() . '.pdf';
-            Storage::disk('public')->put($pdfPath, $pdf->output());
-            $data->update(['url_doc' => $pdfPath]);
+        $pdfPath = 'pdfs/' . uniqid() . '.pdf';
+        Storage::disk('public')->put($pdfPath, $pdf->output());
+        $data->update(['url_doc' => $pdfPath]);
+        if(!isset($resultado_analisis[0]['error']) && !is_string($resultado_analisis)){
             return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis['excepciones']);
         }else{
             return view('secuencialidad.resultado_analisis')->with('resultado', $resultado_analisis);
@@ -462,6 +461,7 @@ class SequenceController extends Controller
         $condicion="";
         $causa="";
         $efecto="";
+        //dd($result);
         if(!is_string($result['excepciones']) && !isset($result[0]['error'])){
             $n_excepciones=$result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'];
             if($n_excepciones>1){
@@ -471,7 +471,7 @@ class SequenceController extends Controller
                 $condicion="Se encontró ".($result['nv_mal_ordensecuencia']+$result['nv_omitidos']+$result['nv_sincambios'])." excepción:\n";
             }
         }
-        $criterio="ISO Anexo 8.2.3 MANEJO DE LOS ACTIVOS";
+        $criterio="El objetivo de gestión APO14 de COBIT 2019 incluye prácticas de gestión como definir la estrategia de gestión de datos enfocandose en garantizar que los datos se manejen de manera efectiva y eficiente, lo cual incluye la secuencialidad de los datos en una base de datos.";
         $efecto="Mayor riesgo de errores en la manipulación de datos, especialmente en sistemas donde el orden de los registros y la precisión de la información almacenada es importante.\n-Dificultad para realizar operaciones de búsqueda y recuperación de los datos en la tabla ".$data['tableName'];
         $causa.="Falta de control en la entrada de datos\n";
         $causa.="-Entrada desorganizada de los datos\n";

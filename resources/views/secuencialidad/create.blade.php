@@ -96,10 +96,10 @@
                             <option value="descendente">Descendente</option>
                         </select>
                     </div>
-                    <div class="mb-3 row" id="div-incremento">
+                    {{-- <div class="mb-3 row" id="div-incremento">
                         <label for="incremento" class="form-label">Incremento</label>
                         <input type="number" class="form-control" id="incremento" name="incremento" aria-describedby="emailHelp" value="1">
-                    </div>
+                    </div> --}}
                     <button type="submit" class="btn btn-success">ANALIZAR</button>
                 </form>
             </div>
