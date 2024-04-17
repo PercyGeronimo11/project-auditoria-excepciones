@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe de Secuencialidad</title>
+    <title>Informe de Integridad de Tablas</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         body {
@@ -63,14 +63,14 @@
 
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4"> <b> INTEGRIDAD DE TABLAS: EXCEPCIONES ENCONTRADAS </b></h2>
+        <h2 class="mb-4"> <b> INFORME DE AUDITORÍA: INTEGRIDAD DE TABLAS </b></h2>
         <br>
         <table>
             <thead>
                 <tr>
                     <th colspan="4"
                         style="text-align: center; background-color: #dcdcdc; color: #333; font-size: 18px;">INFORMACIÓN
-                        GENERAL DE ANÁLISIS</th>
+                        GENERAL DEL ANÁLISIS</th>
                 </tr>
             </thead>
             <tbody>
@@ -103,7 +103,7 @@
 
         <div class="card">
             <div class="card-header">
-                <h2>Se encontro {{ $numExcepciones }} excepciones</h2>
+                <h2>RESULTADOS: EXCEPCIONES ENCONTRADAS</h2>
             </div>
 
             @if (count($listExceptions) > 0)
@@ -113,36 +113,35 @@
                             <th colspan="col"
                                 style="text-align: center; background-color: red; color: white; font-size: 18px;">
                                 Excepcion</th>
-                            <th scope="col">Control de </th>
+                            <th scope="col">Control de Claves Foraneas Nulas</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($resultadosExceptionNotFound as $key => $valor)
-                            <tr>
-                                <td>{{$key}}</td>
-                                <td>{{ $valor }}</td>
-                            </tr>
-                        @endforeach
-                       
-
-                        {{-- @foreach ($listExceptions as $exceptionKey => $exceptionValue)
-                            <tr>
-                                <td>{{ $messageExceptionsNull }}</td>
-                                <td>{{ $messageExceptionsNotFound }}</td>
-                            </tr>
-                        @endforeach --}}
+                        @if ($resultadosExceptionNotFound > 0)
+                            @foreach ($resultadosExceptionNotFound as $key => $valor)
+                                <tr>
+                                    <td>{{ $key }}</td>
+                                    <td>{{ $valor }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
+                        @if ($resultadosExceptionNull > 0)
+                            @foreach ($resultadosExceptionNull as $key => $valor)
+                                <tr>
+                                    <td>{{ $key }}</td>
+                                    <td>{{ $valor }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
                     </tbody>
                 </table>
             @else
                 <tr>
-                    <td colspan="7"> No Se encontraron excepciones</td>
+                    <td colspan="7"> NO SE ENCONTRARIÓN EXCEPCIONES</td>
                 </tr>
             @endif
-
         </div>
-
     </div>
-
 </body>
 
 </html>
